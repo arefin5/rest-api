@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken")
 const mongoose = require('mongoose');
 const { generateOTP, sendOTP } = require("../helper/otp");
 const logger = require("../utils/logger"); // Import the logger
+const sendOTPEmail = require("../helper/email"); // Import the sendOTPEmail function
 
 const cloudinary = require("cloudinary")
 cloudinary.config({
@@ -52,45 +53,84 @@ exports.register = async (req, res) => {
     return res.status(400).send("Error. Try again.");
   }
 };
-
 exports.generateOtp = async (req, res) => {
   const { email } = req.body;
   const ipAddress = req.ip;
- 
+
   logger.info(`OTP generation requested by ${email} from IP ${ipAddress}`);
 
   try {
-    // Use let to allow reassignment
+    // Try to find the user by email
     let user = await User.findOne({ email });
 
-    // If user does not exist, create a new user
+    // If the user does not exist, create a new user
     if (!user) {
       logger.info(`User not found. Creating new user with email ${email}`);
       user = new User({
         email,
-        name: "New User", // Default or placeholder name
-        password: null,   // Handle password setting separately if needed
       });
-      await user.save();
+      await user.save(); // Save the new user in the database
       logger.info(`New user created with email ${email}`);
     }
-
     // Generate OTP
     const otp = generateOTP();
     user.otp = otp;
     user.otpExpires = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
+
+    // Save the OTP and expiry time to the user record
     await user.save();
 
     // Send OTP to user email
-    await sendOTP(email, otp);
+    await sendOTPEmail(email, otp); // Make sure this function sends the email
 
     logger.info(`OTP generated and sent to ${email}`);
-    res.json({ message: "OTP sent successfully" });
+    res.json({ message: "OTP sent successfully"});
+    console.log(otp)
   } catch (err) {
     logger.error(`Error during OTP generation: ${err.message}`);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
+// exports.generateOtp = async (req, res) => {
+//   const { email } = req.body;
+//   const ipAddress = req.ip;
+ 
+//   logger.info(`OTP generation requested by ${email} from IP ${ipAddress}`);
+
+//   try {
+//     // Use let to allow reassignment
+//     let user = await User.findOne({ email });
+
+//     // If user does not exist, create a new user
+//     if (!user) {
+//       logger.info(`User not found. Creating new user with email ${email}`);
+//       user = new User({
+//         email,
+//         password: null,   // Handle password setting separately if needed
+//       });
+//       await user.save();
+//       await sendOTPEmail(email, otp);
+//       logger.info(`New user created with email ${email}`);
+//     }
+
+//     // Generate OTP
+//     const otp = generateOTP();
+//     user.otp = otp;
+//     user.otpExpires = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
+//     await user.save();
+
+//     // Send OTP to user email
+//     await sendOTP(email, otp);
+
+//     logger.info(`OTP generated and sent to ${email}`);
+//     res.json({ message: "OTP sent successfully" });
+//   } catch (err) {
+//     logger.error(`Error during OTP generation: ${err.message}`);
+//     return res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
 
 exports.verifyOtp = async (req, res) => {
   const { email, otp } = req.body;
