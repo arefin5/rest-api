@@ -12,8 +12,9 @@ cloudinary.config({
   api_key: "622592679337996",
   api_secret: "lQqwTTsKLLgm0F3_yasknj-jefg",
 });
+
 exports.register = async (req, res) => {
-  const { name, password, email } = req.body;
+  const { name, password, email,birth,} = req.body;
   // validation
   if (!name) {
     return res.json({
@@ -25,28 +26,24 @@ exports.register = async (req, res) => {
       error: "Password is required and should be 6 characters long",
     });
   }
-
-  const exist = await User.findOne({ email });
-  if (exist) {
-    return res.json({
-      error: "email is taken",
-    });
-  }
-  // id
- 
-  // hash password
-  const hashedPassword = await hashPassword(password);
-
-  const user = new User({
-    name,
-    password: hashedPassword,
-    phone: phone,
-  });
   try {
+    const userId = req.body.id;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    const hashedPassword = await hashPassword(password);
+    }
+    user.password = hashedPassword,
+    user.name=name,
+    user.birth=birth
     await user.save();
-    // console.log("REGISTERED USE => ", user);
-    return res.json({
-      ok: true,
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+    user.password = undefined;
+    res.json({
+      token,
+      user,
     });
   } catch (err) {
     console.log("REGISTER FAILED => ", err);
@@ -91,47 +88,6 @@ exports.generateOtp = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
-
-// exports.generateOtp = async (req, res) => {
-//   const { email } = req.body;
-//   const ipAddress = req.ip;
- 
-//   logger.info(`OTP generation requested by ${email} from IP ${ipAddress}`);
-
-//   try {
-//     // Use let to allow reassignment
-//     let user = await User.findOne({ email });
-
-//     // If user does not exist, create a new user
-//     if (!user) {
-//       logger.info(`User not found. Creating new user with email ${email}`);
-//       user = new User({
-//         email,
-//         password: null,   // Handle password setting separately if needed
-//       });
-//       await user.save();
-//       await sendOTPEmail(email, otp);
-//       logger.info(`New user created with email ${email}`);
-//     }
-
-//     // Generate OTP
-//     const otp = generateOTP();
-//     user.otp = otp;
-//     user.otpExpires = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
-//     await user.save();
-
-//     // Send OTP to user email
-//     await sendOTP(email, otp);
-
-//     logger.info(`OTP generated and sent to ${email}`);
-//     res.json({ message: "OTP sent successfully" });
-//   } catch (err) {
-//     logger.error(`Error during OTP generation: ${err.message}`);
-//     return res.status(500).json({ error: "Internal Server Error" });
-//   }
-// };
-
 exports.verifyOtp = async (req, res) => {
   const { email, otp } = req.body;
   const ipAddress = req.ip;
@@ -147,13 +103,26 @@ exports.verifyOtp = async (req, res) => {
     logger.warn(`OTP verification failed: Invalid or expired OTP for email ${email}`);
     return res.status(400).json({ error: "Invalid or expired OTP" });
   }
+  
   user.otp = undefined;
+  user.isOtpVerified = true;
+  user.status = "active";
   user.otpExpires = undefined;
   await user.save();
+  
   logger.info(`OTP verified successfully for ${email}`);
-  res.json({ message: "OTP verified successfully" });
+  
+  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
+  
+  // Send a single response
+  res.json({
+    message: "OTP verified successfully",
+    token,
+    user,
+  });
 };
-
 exports.login = async (req, res) => {
   try {
     const { phone, password } = req.body;
@@ -197,14 +166,11 @@ exports.currentUser = async (req, res) => {
 };
 exports.upDateProfile = async (req, res) => {
   const userId = req.params.id;
-const rool=210
   try {
     const user = await User.findById(userId); // Fix: Remove the curly braces around userId
-
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-
     // Update user information
     user.name = req.body.name;
     user.email = req.body.email;
@@ -215,7 +181,7 @@ const rool=210
     user.parent = req.body.permanent;
     user.education = req.body.education;
     user.image = req.body.image;
-   user.classrool=rool+1 
+ 
     // Save the updated user document
     await user.save();
 

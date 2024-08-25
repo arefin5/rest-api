@@ -3,14 +3,14 @@ const bodyParser = require('body-parser');
 const pool = require('./pg-connection');
 const db = require('./mongodb-connection');
 const cors = require('cors');
+const yaml = require('yamljs');
+const swaggerUI = require('swagger-ui-express');
 
 const app = express();
 var Fingerprint = require("express-fingerprint");
 
 app.use(bodyParser.json());
 
-const swaggerJsDoc = require('swagger-jsdoc');
-const swaggerUI = require('swagger-ui-express');
 
 app.use(
   Fingerprint({
@@ -43,19 +43,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const helmet = require('helmet');
 app.use(helmet());
-const swaggerOptions = {
-  swaggerDefinition: {
-    info: {
-      title: "Library API",
-      version: '1.0.0',
-    },
-  },
-  apis: ["server.js"],
-};
 
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
+// Load Swagger documentation from YAML file
+const swaggerDocument = yaml.load('./swagger.yaml');
+// Set up Swagger UI to serve the Swagger documentation
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 app.use('/api',require("./router/authRouter"));
 

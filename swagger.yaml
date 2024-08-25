@@ -1,0 +1,335 @@
+openapi: 3.0.3
+info:
+  title: User Authentication API
+  description: API for user registration, authentication, OTP verification, profile management, and more.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:5000/api
+    description: Local server
+
+tags:
+  - name: Users
+    description: User-related operations
+
+paths:
+  /generate-otp:
+    post:
+      tags:
+        - Users
+      summary: Generate OTP
+      description: Generates an OTP and sends it to the user's email.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+      responses:
+        '200':
+          description: OTP sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: OTP sent successfully
+        '500':
+          description: Internal Server Error
+
+  /verify-otp:
+    post:
+      tags:
+        - Users
+      summary: Verify OTP
+      description: Verifies the OTP sent to the user's email.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                otp:
+                  type: string
+                  example: '123456'
+      responses:
+        '200':
+          description: OTP verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: OTP verified successfully
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid or expired OTP
+        '500':
+          description: Internal Server Error
+
+  /register:
+    post:
+      tags:
+        - Users
+      summary: Register a new user
+      description: Registers a new user with email, name, and password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: John Doe
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  example: strongpassword123
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User registered successfully
+        '400':
+          description: Email is already taken
+        '500':
+          description: Internal Server Error
+
+  /login:
+    post:
+      tags:
+        - Users
+      summary: User login
+      description: Logs in a user with email and password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  example: strongpassword123
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Incorrect password
+        '404':
+          description: No user found
+        '500':
+          description: Internal Server Error
+
+  /profile:
+    get:
+      tags:
+        - Users
+      summary: Get current user profile
+      description: Retrieves the current authenticated user's profile.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+
+  /profile/{id}:
+    put:
+      tags:
+        - Users
+      summary: Update user profile
+      description: Updates the profile information for the user with the given ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: User ID
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: John Doe
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                phone:
+                  type: string
+                  example: '+1234567890'
+                father:
+                  type: string
+                  example: Father Name
+                mother:
+                  type: string
+                  example: Mother Name
+                paddress:
+                  type: string
+                  example: Permanent Address
+                permanent:
+                  type: string
+                  example: Yes/No
+                education:
+                  type: string
+                  example: Bachelor's Degree
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Profile updated successfully
+                  user:
+                    $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+        '500':
+          description: Internal Server Error
+
+  /upload-image:
+    post:
+      tags:
+        - Users
+      summary: Upload user image
+      description: Uploads a profile image for the authenticated user.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Image uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    example: http://res.cloudinary.com/demo/image/upload/v1234567890/sample.jpg
+                  public_id:
+                    type: string
+                    example: abc123xyz
+        '500':
+          description: Internal Server Error
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 60d0fe4f5311236168a109ca
+        name:
+          type: string
+          example: John Doe
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        phone:
+          type: string
+          example: '+1234567890'
+        father:
+          type: string
+          example: Father Name
+        mother:
+          type: string
+          example: Mother Name
+        paddress:
+          type: string
+          example: Permanent Address
+        permanent:
+          type: string
+          example: Yes/No
+        education:
+          type: string
+          example: Bachelor's Degree
+        role:
+          type: string
+          example: user
+        branch:
+          type: string
+          example: Main Branch
