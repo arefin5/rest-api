@@ -248,6 +248,7 @@ exports.googleFacebookLogin = async (req, res) => {
         isVerified: true
       });
     }
+    await user.save();
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });

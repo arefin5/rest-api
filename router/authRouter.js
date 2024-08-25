@@ -27,8 +27,9 @@ router.post("/generate-otp", generateOtp);
 // Route to verify OTP
 router.post("/verify-otp", verifyOtp);
 router.post("/register", requireAuth,register);
-router.post("/gogle-facebook-login",googleFacebookLogin)
 router.post("/login", login);
+
+router.post("/gogle-facebook-login",googleFacebookLogin)
 router.post("/forget-password", forgotPassword);
 router.post("/verify-forget-pass", verifyForgotPasswordOtp);
 router.post("/reset-password", resetPassword);
