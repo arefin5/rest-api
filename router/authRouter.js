@@ -12,7 +12,8 @@ const { register, login, currentUser,
   generateOtp,
   googleFacebookLogin,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  verifyForgotPasswordOtp
 } = require("../controlar/userAuth.js");
 // router.post(
 //   "/upload-image-file",
