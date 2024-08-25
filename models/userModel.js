@@ -30,17 +30,12 @@ const userSchema = new Schema(
     birth:{
       type:String,
     },
-    Oto:{
-      type:Number,
-    },
     FatherName:{
         type:String,
-
     },
     MotherName:{
       type:String
     },
-
     pressentAddress:{
       type:String
     },

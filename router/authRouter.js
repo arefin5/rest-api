@@ -9,7 +9,10 @@ const { register, login, currentUser,
   upDateProfile, uploadImage
   , userRole, 
   verifyOtp,
-  generateOtp
+  generateOtp,
+  googleFacebookLogin,
+  forgotPassword,
+  resetPassword
 } = require("../controlar/userAuth.js");
 // router.post(
 //   "/upload-image-file",
@@ -22,9 +25,16 @@ router.post("/generate-otp", generateOtp);
 
 // Route to verify OTP
 router.post("/verify-otp", verifyOtp);
-router.post("/register", register);
-
+router.post("/register", requireAuth,register);
+router.post("/gogle-facebook-login",googleFacebookLogin)
 router.post("/login", login);
+router.post("/forget-password", forgotPassword);
+router.post("/verify-forget-pass", verifyForgotPasswordOtp);
+router.post("/reset-password", resetPassword);
+
+
+
 router.get('/profile', requireAuth, currentUser);
+
 
 module.exports = router;
