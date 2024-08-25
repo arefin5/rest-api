@@ -232,9 +232,6 @@ paths:
                 permanent:
                   type: string
                   example: Yes/No
-                education:
-                  type: string
-                  example: Bachelor's Degree
       responses:
         '200':
           description: Profile updated successfully
@@ -324,12 +321,3 @@ components:
         permanent:
           type: string
           example: Yes/No
-        education:
-          type: string
-          example: Bachelor's Degree
-        role:
-          type: string
-          example: user
-        branch:
-          type: string
-          example: Main Branch
