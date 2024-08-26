@@ -6,6 +6,8 @@ info:
 servers:
   - url: http://localhost:5000/api
     description: Local server
+  - url: http://203.161.60.224:5000/api
+    description: Local server  
 tags:
   - name: Users
     description: User-related operations
@@ -355,7 +357,7 @@ paths:
           description: Internal Server Error
 
   /verify-forget-pass:
-    post:
+    put:
       tags:
         - Users
       summary: Verify Forgot Password OTP
@@ -431,7 +433,7 @@ paths:
           description: User not found
         "500":
           description: Internal Server Error
-  /generate-otp-phone:
+  /generete-otp-phone:
     post:
       tags:
         - Users
@@ -468,6 +470,62 @@ paths:
                   error:
                     type: string
                     example: Internal Server Error
+  /verify-otp-phone:
+      post:
+        tags:
+          - Users
+        summary: Verify OTP for phone number
+        description: Verifies the OTP sent to the user's phone number.
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  phone:
+                    type: string
+                    example: "+1234567890"
+                  otp:
+                    type: string
+                    example: "123456"
+        responses:
+          "200":
+            description: OTP verified successfully
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: OTP verified successfully
+                    token:
+                      type: string
+                      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                    user:
+                      $ref: "#/components/schemas/User"
+          "400":
+            description: Invalid or expired OTP
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string
+                      example: Invalid or expired OTP
+          "500":
+            description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string
+                      example: Internal Server Error
+
 components:
   securitySchemes:
     bearerAuth:
