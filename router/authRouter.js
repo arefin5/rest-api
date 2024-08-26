@@ -13,7 +13,9 @@ const { register, login, currentUser,
   googleFacebookLogin,
   forgotPassword,
   resetPassword,
-  verifyForgotPasswordOtp
+  verifyForgotPasswordOtp,
+  generateOtpPhone,
+  verifyOtpPhone
 } = require("../controlar/userAuth.js");
 // router.post(
 //   "/upload-image-file",
@@ -32,10 +34,10 @@ router.post("/login", login);
 router.post("/gogle-facebook-login",googleFacebookLogin)
 router.post("/forget-password", forgotPassword);
 router.post("/verify-forget-pass", verifyForgotPasswordOtp);
-router.post("/reset-password", resetPassword);
-
-
-
+router.put("/reset-password", requireAuth,resetPassword);
+//phone auth and loging
+router.post("/generete-otp-phone", generateOtpPhone);
+router.post("/verify-otp-phone",verifyOtpPhone)
 router.get('/profile', requireAuth, currentUser);
 
 

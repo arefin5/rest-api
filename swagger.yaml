@@ -1,17 +1,14 @@
 openapi: 3.0.3
 info:
-  title: User Authentication API
-  description: API for user registration, authentication, OTP verification, profile management, and more.
+  title: Bed Bd Rest Api
+  description: API for Bed Bd Rest api.
   version: 1.0.0
-
 servers:
   - url: http://localhost:5000/api
     description: Local server
-
 tags:
   - name: Users
     description: User-related operations
-
 paths:
   /generate-otp:
     post:
@@ -401,6 +398,8 @@ paths:
         - Users
       summary: Reset Password
       description: Resets the user's password after OTP verification.
+      security:
+      - bearerAuth: []
       requestBody:
         required: true
         content:

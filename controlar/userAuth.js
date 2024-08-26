@@ -273,7 +273,7 @@ exports.forgotPassword = async (req, res) => {
     // Generate OTP
     const otp = generateOTP();
     user.otp = otp;
-    user.otpExpires = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
+    user.otpExpires = Date.now() + 10 * 60 * 10000; // OTP valid for 10 minutes
     // Save OTP to user record
     await user.save();
 
@@ -305,8 +305,14 @@ exports.verifyForgotPasswordOtp = async (req, res) => {
     user.isOtpVerified = true;
 
     await user.save();
-
-    res.json({ message: "OTP verified successfully" });
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+    res.json({
+      message: "OTP verified successfully",
+      token,
+      user,
+    });
   } catch (err) {
     console.error("Error in OTP verification:", err);
     res.status(500).json({ error: "Internal Server Error" });
@@ -314,6 +320,9 @@ exports.verifyForgotPasswordOtp = async (req, res) => {
 };
 exports.resetPassword = async (req, res) => {
   const { email, newPassword } = req.body;
+
+   const {userID}=req.user._id ;
+   console.log("test id",userID,req.user);
 
   try {
     const user = await User.findOne({ email });
@@ -339,4 +348,76 @@ exports.resetPassword = async (req, res) => {
     console.error("Error in password reset:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
+};
+// otp for mobile and mobile singup and singin
+exports.generateOtpPhone = async (req, res) => {
+  const { phone } = req.body;
+  const ipAddress = req.ip;
+
+  logger.info(`OTP generation requested by ${phone} from IP ${ipAddress}`);
+
+  try {
+    // Try to find the user by phone
+    let user = await User.findOne({ phone });
+
+    // If the user does not exist, create a new user
+    if (!user) {
+      logger.info(`User not found. Creating new user with email ${phone}`);
+      user = new User({
+        phone,
+      });
+      await user.save(); // Save the new user in the database
+      logger.info(`New user created with phone ${phone}`);
+    }
+    // Generate OTP
+    const otp = generateOTP();
+    user.otp = otp;
+    user.otpExpires = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
+
+    // Save the OTP and expiry time to the user record
+    await user.save();
+
+    // Send OTP to user phone
+    // await sendOTPEmail(email, otp); // Make sure this function sends the phone
+
+    logger.info(`OTP generated and sent to ${phone}`);
+    res.json({ message: "OTP sent successfully" });
+    console.log(otp)
+  } catch (err) {
+    logger.error(`Error during OTP generation: ${err.message}`);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+exports.verifyOtpPhone = async (req, res) => {
+  const { phone, otp } = req.body;
+  const ipAddress = req.ip;
+
+  logger.info(`OTP verification attempted by ${phone} from IP ${ipAddress}`);
+
+  const user = await User.findOne({ phone });
+  if (!user) {
+    logger.warn(`OTP verification failed: User not found with phone ${email}`);
+    return res.status(400).json({ error: "User not found with this phone" });
+  }
+  if (user.otp !== otp || user.otpExpires < Date.now()) {
+    logger.warn(`OTP verification failed: Invalid or expired OTP for phone ${phone}`);
+    return res.status(400).json({ error: "Invalid or expired OTP" });
+  }
+
+  user.otp = undefined;
+  user.isOtpVerified = true;
+  user.status = "active";
+  user.otpExpires = undefined;
+  await user.save();
+
+  logger.info(`OTP verified successfully for ${phone}`);
+
+  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
+  res.json({
+    message: "OTP verified successfully",
+    token,
+    user,
+  });
 };
