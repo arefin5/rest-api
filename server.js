@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const pool = require('./pg-connection');
+// const pool = require('./pg-connection');
 const db = require('./mongodb-connection');
 const cors = require('cors');
 const yaml = require('yamljs');
