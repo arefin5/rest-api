@@ -62,6 +62,9 @@ app.get('/postgresql-data', async (req, res) => {
   }
 });
 
+app.get("/test-server",async(req,res)=>{
+  res.send("test")
+})
 // MongoDB route example
 app.get('/mongodb-data', async (req, res) => {
   try {
