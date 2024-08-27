@@ -6,8 +6,8 @@ info:
 servers:
   - url: http://localhost:5000/api
     description: Local server
-  - url: http://203.161.60.224:5000/api
-    description: Local server  
+  - url: http://203.161.60.224/:5000/api
+    description: Public Server   
 tags:
   - name: Users
     description: User-related operations
