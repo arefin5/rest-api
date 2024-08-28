@@ -491,6 +491,73 @@ paths:
                     error:
                       type: string
                       example: Internal Server Error
+  /login-with-phone:
+    post:
+      summary: Login using phone number and password
+      description: Allows users to login using their phone number and password.
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                  example: "+1234567890"
+                password:
+                  type: string
+                  example: "yourpassword"
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: OTP not verified or wrong password
+        '404':
+          description: No user found
+
+  /update-password-phone:
+    put:
+      summary: Reset password using phone number
+      description: Allows users to reset their password using their phone number.
+      tags:
+        - User Authentication
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                  example: "+1234567890"
+                newPassword:
+                  type: string
+                  example: "newpassword"
+      responses:
+        '200':
+          description: Password updated successfully
+        '400':
+          description: OTP not verified
+        '404':
+          description: User not found
+        '500':
+          description: Internal Server Error
+                    
   /upload-image-file:
     post:
       summary: Upload multiple images
