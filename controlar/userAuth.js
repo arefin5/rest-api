@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const { generateOTP, sendOTP } = require("../helper/otp");
 const logger = require("../utils/logger"); // Import the logger
 const sendOTPEmail = require("../helper/email"); // Import the sendOTPEmail function
+const formidable = require("express-formidable")
 
 const cloudinary = require("cloudinary")
 cloudinary.config({
@@ -421,3 +422,84 @@ exports.verifyOtpPhone = async (req, res) => {
     user,
   });
 };
+// exports.uploadImagesMultiple = async (req, res) => {
+//   try {
+//     // Check if files were uploaded
+//     if (!req.files || req.files.length === 0) {
+//       return res.status(400).json({ message: "No files were uploaded." });
+//     }
+
+//     // Assume req.files is an array of files, handle each file
+//     const uploadPromises = req.files.map(file =>
+//       cloudinary.uploader.upload(file.path)
+//     );
+
+//     // Wait for all uploads to complete
+//     const results = await Promise.all(uploadPromises);
+
+//     // Map results to get URLs and public IDs
+//     const images = results.map(result => ({
+//       url: result.secure_url,
+//       public_id: result.public_id,
+//     }));
+
+//     res.json(images);
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({ message: "Error uploading images", error: err });
+//   }
+// };
+// Define your route handler
+// controlar/imageController.js
+
+// Exporting the uploadImagesMultiple function
+exports.uploadImagesMultiple = async (req, res) => {
+  try {
+    // Check if files were uploaded
+    if (!req.files || Object.keys(req.files).length === 0) {
+      return res.status(400).json({ message: "No files were uploaded." });
+    }
+ // Check if files were uploaded
+    if (!req.files || Object.keys(req.files).length === 0) {
+      return res.status(400).json({ message: "No files were uploaded." });
+    }
+    // Normalize files to an array
+    let filesArray = [];
+    for (const key in req.files) {
+      if (Array.isArray(req.files[key])) {
+        filesArray.push(...req.files[key]); // If it's already an array, add all files
+      } else {
+        filesArray.push(req.files[key]); // If it's a single file, add to the array
+      }
+    }
+   
+    // Check if files array is empty
+    if (filesArray.length === 0) {
+      return res.status(400).json({ message: "No files were uploaded." });
+    }
+ // Check if files array is empty or contains less than 5 images
+    if (filesArray.length < 5) {
+      return res.status(400).json({ message: "A minimum of 5 files is required." });
+    }
+    // Upload each file to Cloudinary
+    const uploadPromises = filesArray.map(file =>
+      cloudinary.uploader.upload(file.path)
+    );
+
+    // Wait for all uploads to complete
+    const results = await Promise.all(uploadPromises);
+
+    // Map results to get URLs and public IDs
+    const images = results.map(result => ({
+      url: result.secure_url,
+      public_id: result.public_id,
+    }));
+
+    res.json(images);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error uploading images", error: err });
+  }
+};
+
+

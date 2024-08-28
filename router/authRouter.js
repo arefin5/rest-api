@@ -1,9 +1,5 @@
-const express = require("express")
+// const express = require("express")
 const { requireAuth } = require("../midleware/auth")
-const router = express.Router();
-// const { checkAdmin } = require("../midleware/admin");
-// const { checkStudent } = require("../midleware/student.js")
-// controllers
 const formidable = require("express-formidable")
 const { register, login, currentUser, 
   upDateProfile, uploadImage
@@ -15,30 +11,30 @@ const { register, login, currentUser,
   resetPassword,
   verifyForgotPasswordOtp,
   generateOtpPhone,
-  verifyOtpPhone
+  verifyOtpPhone,
+  uploadImagesMultiple
 } = require("../controlar/userAuth.js");
-// router.post(
-//   "/upload-image-file",
-//   formidable({ maxFileSize: 5 * 1024 * 1024 }),
-//   uploadImage
-// );
 
-// Route to generate OTP
+// File upload route
+ router.post(
+   "/upload-image-file",
+   uploadImagesMultiple
+);
+// Other routes
 router.post("/generate-otp", generateOtp);
-
-// Route to verify OTP
 router.post("/verify-otp", verifyOtp);
-router.post("/register", requireAuth,register);
+router.post("/register", requireAuth, register);
 router.post("/login", login);
-
-router.post("/gogle-facebook-login",googleFacebookLogin)
+router.post("/google-facebook-login", googleFacebookLogin);
 router.post("/forget-password", forgotPassword);
 router.post("/verify-forget-pass", verifyForgotPasswordOtp);
-router.put("/reset-password", requireAuth,resetPassword);
-//phone auth and loging
-router.post("/generete-otp-phone", generateOtpPhone);
-router.post("/verify-otp-phone",verifyOtpPhone)
-router.get('/profile', requireAuth, currentUser);
+router.put("/reset-password", requireAuth, resetPassword);
 
+// Phone authentication and login
+router.post("/generate-otp-phone", generateOtpPhone);
+router.post("/verify-otp-phone", verifyOtpPhone);
+
+// Profile route
+router.get('/profile', requireAuth, currentUser);
 
 module.exports = router;
