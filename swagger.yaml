@@ -583,7 +583,60 @@ paths:
                     type: string
                   error:
                     type: string
-
+  /single-image-upload:
+    post:
+      summary: Upload a single image
+      description: Uploads a single image to the server and processes it using Cloudinary.
+      tags:
+        - Image Upload
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+              required:
+                - image
+      responses:
+        '200':
+          description: Image uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    description: URL of the uploaded image
+                  public_id:
+                    type: string
+                    description: Public ID of the uploaded image in Cloudinary
+        '400':
+          description: No file was uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Error uploading image
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  error:
+                    type: string
 components:
   securitySchemes:
     bearerAuth:
