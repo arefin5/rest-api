@@ -33,6 +33,7 @@ app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 // Define API routes
 app.use('/api', require('./router/authRouter'));
+app.use('/api', require('./router/imageRouter'));
 
 // Example routes
 app.get('/fingerprint', (req, res) => {

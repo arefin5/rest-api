@@ -1,6 +1,8 @@
 // const express = require("express")
-const { requireAuth } = require("../midleware/auth")
-const formidable = require("express-formidable")
+const { requireAuth } = require("../midleware/auth");
+const express = require("express");
+const router = express.Router();
+
 const { register, login, currentUser, 
   upDateProfile, uploadImage
   , userRole, 
@@ -12,14 +14,10 @@ const { register, login, currentUser,
   verifyForgotPasswordOtp,
   generateOtpPhone,
   verifyOtpPhone,
-  uploadImagesMultiple
 } = require("../controlar/userAuth.js");
 
-// File upload route
- router.post(
-   "/upload-image-file",
-   uploadImagesMultiple
-);
+
+
 // Other routes
 router.post("/generate-otp", generateOtp);
 router.post("/verify-otp", verifyOtp);
