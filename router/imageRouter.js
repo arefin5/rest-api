@@ -18,5 +18,4 @@ router.post("/single-image-upload",
   requireAuth,
   uploadImage)
 
-
 module.exports = router;
