@@ -403,3 +403,69 @@ exports.verifyOtpPhone = async (req, res) => {
     user,
   });
 };
+exports.resetPasswordPhone = async (req, res) => {
+  const { phone, newPassword } = req.body;
+
+   const {userID}=req.user._id ;
+  //  console.log("test id",userID,req.user);
+
+  try {
+    const user = await User.findOne({ phone });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Ensure OTP was verified
+    if (!user.isOtpVerified) {
+      return res.status(400).json({ error: "OTP not verified" });
+    }
+
+    // Hash the new password
+    const hashedPassword = await hashPassword(newPassword);
+
+    // Update user password
+    user.password = hashedPassword;
+    user.isOtpVerified = false; // Reset OTP verification status
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    console.error("Error in password reset:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+exports.loginByphone= async (req, res) => {
+  try {
+    const { phone, password } = req.body;
+    const user = await User.findOne({ phone });
+    if (!user) {
+      return res.json({
+        error: "no user found",
+      });
+    }
+    if (!user.isOtpVerified) {
+      return res.status(400).json({ error: "OTP not verified" });
+    }
+    // check password
+    const match = await comparePassword(password, user.password);
+    if (!match) {
+      return res.json({
+        error: "Wrong password",
+      });
+    }
+    // create signed token
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+    user.password = undefined;
+    res.json({
+      token,
+      user,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(400).send("Error. Try again.");
+  }
+};
+
+

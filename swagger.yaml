@@ -249,40 +249,6 @@ paths:
         "500":
           description: Internal Server Error
 
-  /upload-image:
-    post:
-      tags:
-        - Users
-      summary: Upload user image
-      description: Uploads a profile image for the authenticated user.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                image:
-                  type: string
-                  format: binary
-      responses:
-        "200":
-          description: Image uploaded successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  url:
-                    type: string
-                    example: http://res.cloudinary.com/demo/image/upload/v1234567890/sample.jpg
-                  public_id:
-                    type: string
-                    example: abc123xyz
-        "500":
-          description: Internal Server Error
   /gogle-facebook-login:
     post:
       tags:
