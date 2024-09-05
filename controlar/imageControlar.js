@@ -1,4 +1,8 @@
-const cloudinary = require("cloudinary")
+const Image=require("../models/Image")
+const cloudinary = require("cloudinary");
+const shortid = require('shortid');
+const fs = require('fs');
+
 cloudinary.config({
   cloud_name: "arefintalukder5",
   api_key: "622592679337996",
@@ -66,3 +70,100 @@ exports.uploadImage = async (req, res) => {
       console.log(err);
     }
   };
+
+
+
+// exports.UplodadSinglePrivete =async (req, res) => {
+//   try {
+//     const newImage = new Image({
+//       url: '',
+//       public_id: shortid.generate(), // Generate a unique public_id
+//     });
+
+//     // Save the uploaded file to the database
+//     newImage.url = 'data:image/png;base64,' + req.file.buffer.toString('base64');
+//     await newImage.save();
+
+//     res.status(201).json({ message: 'File uploaded successfully',public_id: newImage.public_id  });
+//     console.log("success");
+//   } catch (error) {
+//     res.status(500).json({ message: 'Internal Server Error' });
+//   }
+// }
+
+
+// exports.UplodadSinglePrivete =async (req, res) => {
+//   try {
+//     const newImage = new Image({
+//       url: '',
+//       public_id: shortid.generate(), // Generate a unique public_id
+//     });
+//      console.log(req.files)
+//     // // Save the uploaded file to the database
+//     newImage.url = 'data:image/png;base64,' + req.file.buffer.toString('base64');
+//     // await newImage.save();
+
+//     // res.status(201).json({ message: 'File uploaded successfully',public_id: newImage.public_id  });
+//         res.status(201).json({ message: 'File uploaded successfully',newImage  });
+
+    
+//      console.log("success");
+//   } catch (error) {
+//     res.status(500).json({ message: 'Internal Server Error' });
+//   }
+// }
+
+
+// exports.UplodadSinglePrivete = async (req, res) => {
+//   try {
+//     const images = req.files.image; // Get the array of images
+
+//     // Check if there's only one file (it might not be an array in that case)
+//     const imageFiles = Array.isArray(images) ? images : [images];
+
+//     const savedImages = [];
+
+//     for (const image of imageFiles) {
+//       // Read the file into a buffer
+//       const fileBuffer = fs.readFileSync(image.path);
+      
+//       const newImage = new Image({
+//         url: 'data:' + image.type + ';base64,' + fileBuffer.toString('base64'),
+//         public_id: shortid.generate(),
+//       });
+
+//       await newImage.save(); // Save to the database
+//       savedImages.push(newImage);
+//     }
+
+//     res.status(201).json({ message: 'Files uploaded successfully', images: savedImages });
+//     console.log("success");
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: 'Internal Server Error' });
+//   }
+// };
+
+
+exports.UplodadSinglePrivete = async (req, res) => {
+  try {
+    // Assume we're dealing with a single file
+    const image = req.files.image[0]; // Access the first image in the array
+
+    // Read the file into a buffer
+    const fileBuffer = fs.readFileSync(image.path);
+      
+    const newImage = new Image({
+      url: 'data:' + image.type + ';base64,' + fileBuffer.toString('base64'),
+      public_id: shortid.generate(), // Generate a unique public_id
+    });
+
+    await newImage.save(); // Save to the database
+
+    res.status(201).json({ message: 'File uploaded successfully', image: newImage });
+    console.log("success");
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};

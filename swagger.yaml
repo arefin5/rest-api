@@ -496,7 +496,7 @@ paths:
       summary: Login using phone number and password
       description: Allows users to login using their phone number and password.
       tags:
-        - User
+        - Users
       requestBody:
         required: true
         content:
@@ -532,7 +532,7 @@ paths:
       summary: Reset password using phone number
       description: Allows users to reset their password using their phone number.
       tags:
-        - User Authentication
+        - Users
       security:
         - bearerAuth: []
       requestBody:
