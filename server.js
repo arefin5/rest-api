@@ -21,10 +21,10 @@ app.use(helmet());
 app.use(Fingerprint({
   parameters: [Fingerprint.useragent, Fingerprint.acceptHeaders, Fingerprint.geoip],
 }));
-app.use(formidableMiddleware({
-  encoding: 'utf-8',
-  multiples: true, // req.files to be arrays of files
-}))
+// app.use(formidableMiddleware({
+//   encoding: 'utf-8',
+//   multiples: true, // req.files to be arrays of files
+// }))
 // Load Swagger documentation from YAML file
 const swaggerDocument = yaml.load('./swagger.yaml');
 
@@ -33,7 +33,10 @@ app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 // Define API routes
 app.use('/api', require('./router/authRouter'));
-app.use('/api', require('./router/imageRouter'));
+// app.use('/api', require('./router/imageRouter'));
+const imageRouter = require('./router/imageRouter');
+
+app.use('/api/images', formidableMiddleware({ encoding: 'utf-8', multiples: true }), imageRouter);
 
 // Example routes
 app.get('/fingerprint', (req, res) => {
