@@ -2,10 +2,16 @@
 const { requireAuth } = require("../midleware/auth");
 const express = require("express");
 const router = express.Router();
+const multer = require('multer');
 
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 const {
   uploadImagesMultiple,
-  uploadImage
+  uploadImage,
+  UplodadSinglePrivete,
+  GetImage,
+  uploadVerifyImages
 } = require("../controlar/imageControlar");
 
 
@@ -17,5 +23,9 @@ router.post(
 router.post("/single-image-upload",
   requireAuth,
   uploadImage)
+// 
+router.post('/upload-privet',UplodadSinglePrivete);
+router.post('/upload-verify',uploadVerifyImages)
+router.get('/image/:public_id',GetImage);
 
 module.exports = router;

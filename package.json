@@ -35,6 +35,7 @@
     "pg": "^8.12.0",
     "sharp": "^0.33.5",
     "shortid": "^2.2.16",
+    "sslcommerz-nodejs": "^1.0.8",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "tesseract.js": "^5.1.0",

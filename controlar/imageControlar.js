@@ -1,4 +1,8 @@
-const cloudinary = require("cloudinary")
+const Image=require("../models/Image")
+const cloudinary = require("cloudinary");
+const shortid = require('shortid');
+const fs = require('fs');
+
 cloudinary.config({
   cloud_name: "arefintalukder5",
   api_key: "622592679337996",
@@ -66,3 +70,66 @@ exports.uploadImage = async (req, res) => {
       console.log(err);
     }
   };
+
+
+exports.UplodadSinglePrivete = async (req, res) => {
+  try {
+    // Assume we're dealing with a single file
+    const image = req.files.image[0]; // Access the first image in the array
+
+    // Read the file into a buffer
+    const fileBuffer = fs.readFileSync(image.path);
+      
+    const newImage = new Image({
+      url: 'data:' + image.type + ';base64,' + fileBuffer.toString('base64'),
+      public_id: shortid.generate(), // Generate a unique public_id
+    });
+
+    await newImage.save(); // Save to the database
+
+    res.status(201).json({ message: 'File uploaded successfully', image: newImage });
+    console.log("success");
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+// 
+
+exports.uploadVerifyImages = async (req, res) => {
+  try {
+    const imagesArray = req.files.image; // Assuming this is an array of images
+    const savedImages = [];
+
+    for (let image of imagesArray) {
+      const fileBuffer = fs.readFileSync(image.path);
+      
+      const newImage = new Image({
+        url: 'data:' + image.type + ';base64,' + fileBuffer.toString('base64'),
+        public_id: shortid.generate(), // Generate a unique public_id
+      });
+
+      await newImage.save(); // Save each image to the database
+      savedImages.push(newImage); // Push to the result array
+    }
+
+    res.status(201).json({ message: 'Files uploaded successfully', images: savedImages });
+    console.log("success");
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+//  
+exports.GetImage=async (req, res) => {
+  try {
+    const image = await Image.findOne({ public_id: req.params.public_id });
+    if (!image) {
+      return res.status(404).json({ message: 'Image not found' });
+    }
+    res.status(200).json({ image });
+  } catch (error) {
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+}

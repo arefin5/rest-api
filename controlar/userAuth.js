@@ -8,6 +8,7 @@ const sendOTPEmail = require("../helper/email"); // Import the sendOTPEmail func
 
 
 exports.register = async (req, res) => {
+  console.log("start")
   const { name, password, email, birth } = req.body;
   // validation
   if (!name) {

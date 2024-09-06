@@ -23,7 +23,7 @@ const { register, login, currentUser,
 // Other routes
 router.post("/generate-otp", generateOtp);
 router.post("/verify-otp", verifyOtp);
-router.post("/register", requireAuth, register);
+router.post("/register",  register);
 router.post("/login", login);
 router.post("/google-facebook-login", googleFacebookLogin);
 router.post("/forget-password", forgotPassword);
