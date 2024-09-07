@@ -15,6 +15,7 @@ const { register, login, currentUser,
   generateOtpPhone,
   verifyOtpPhone,
   resetPasswordPhone,
+  verifyRequest,
   loginByphone
 } = require("../controlar/userAuth.js");
 
@@ -35,7 +36,7 @@ router.post("/generate-otp-phone", generateOtpPhone);
 router.post("/verify-otp-phone", verifyOtpPhone);
 router.post("login-with-phone",loginByphone)
 router.put("/update-password-phone",requireAuth,resetPasswordPhone)
-
+router.put("/verify-user-request",requireAuth,verifyRequest)
 // Profile route
 router.get('/profile', requireAuth, currentUser);
 

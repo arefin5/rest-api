@@ -469,4 +469,52 @@ exports.loginByphone= async (req, res) => {
   }
 };
 
+exports.verifyRequest=async (req, res) => {
+  const { name,
+    fatherName,
+    motherName,
+    idnumber,
+    birth,
+    presentAddress,
+    parmanentAddress } = req.body;
 
+    const userID = req.user._id; // Fix this to use _id from req.user
+
+   console.log("test id",req.user);
+   console.log("Test ID:", req.user._id);
+
+  try {
+    const user = await User.findOne({ _id: userID});
+
+    // await User.findOne({ phone });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Ensure OTP was verified
+    // console.log("ok")
+    // if (!user.isOtpVerified) {
+    //   return res.status(400).json({ error: "OTP not verified" });
+    // }
+
+    // Hash the new password
+    
+    user.name=name,
+    user.fatherName=fatherName,
+    user.motherName=motherName,
+    user.idnumber=idnumber,
+    user.birth=birth,
+    user.presentAddress=presentAddress ,
+    user.parmanentAddress=parmanentAddress,
+
+    // Update user password
+    user.isOtpVerified = true; // Reset OTP verification status
+    user.isVerified=true;
+    await user.save();
+    user.password=null 
+    res.json({ message: "Password updated successfully",user });
+  } catch (err) {
+    console.error("Error in password reset:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
