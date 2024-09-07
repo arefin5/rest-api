@@ -24,8 +24,8 @@ router.post("/single-image-upload",
   requireAuth,
   uploadImage)
 // 
-router.post('/upload-privet',UplodadSinglePrivete);
-router.post('/upload-verify',uploadVerifyImages)
-router.get('/image/:public_id',GetImage);
+// router.post('/upload-privet',requireAuth,UplodadSinglePrivete);
+router.post('/upload-verify',requireAuth,uploadVerifyImages)
+// router.get('/privet-image/:public_id',GetImage);
 
 module.exports = router;

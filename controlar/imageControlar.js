@@ -96,8 +96,36 @@ exports.UplodadSinglePrivete = async (req, res) => {
 };
 // 
 
+// exports.uploadVerifyImages = async (req, res) => {
+//   try {
+//     console.log(req.user)
+//     const imagesArray = req.files.image; // Assuming this is an array of images
+//     const savedImages = [];
+
+//     for (let image of imagesArray) {
+//       const fileBuffer = fs.readFileSync(image.path);
+      
+//       const newImage = new Image({
+//         url: 'data:' + image.type + ';base64,' + fileBuffer.toString('base64'),
+//         public_id: shortid.generate(), // Generate a unique public_id
+//       });
+
+//       await newImage.save(); // Save each image to the database
+//       savedImages.push(newImage); // Push to the result array
+//     }
+
+//     res.status(201).json({ message: 'Files uploaded successfully', images: savedImages });
+//     console.log("success");
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: 'Internal Server Error' });
+//   }
+// };
+
 exports.uploadVerifyImages = async (req, res) => {
   try {
+    console.log(req.user);
+    
     const imagesArray = req.files.image; // Assuming this is an array of images
     const savedImages = [];
 
@@ -107,6 +135,8 @@ exports.uploadVerifyImages = async (req, res) => {
       const newImage = new Image({
         url: 'data:' + image.type + ';base64,' + fileBuffer.toString('base64'),
         public_id: shortid.generate(), // Generate a unique public_id
+        categories: req.body.categories || 'nid', // You can pass the category from the request body
+        user: req.user._id, // Assuming the user info is available in req.user
       });
 
       await newImage.save(); // Save each image to the database
@@ -121,8 +151,22 @@ exports.uploadVerifyImages = async (req, res) => {
   }
 };
 
-//  
+// 
+exports.getVerificationImage= async (req, res) => {
+ try {
+   const image = await Image.find({ user : req.user.id});
+   if (!image) {
+     return res.status(404).json({ message: 'Image not found' });
+   }
+   res.status(200).json({ image });
+ } catch (error) {
+   res.status(500).json({ message: 'Internal Server Error' });
+ }
+}
 exports.GetImage=async (req, res) => {
+  //  console.log(req.user)
+  //  
+
   try {
     const image = await Image.findOne({ public_id: req.params.public_id });
     if (!image) {
@@ -133,3 +177,5 @@ exports.GetImage=async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 }
+
+
