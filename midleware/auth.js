@@ -25,7 +25,7 @@ const requireAuth = async (req, res, next) => {
 
     // Attach the user data to the request
     req.user = user;
-    console.log(user)
+    // console.log(user)
     next();
   } catch (err) {
     console.error('Token verification error:', err);

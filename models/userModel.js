@@ -30,16 +30,19 @@ const userSchema = new Schema(
     birth:{
       type:String,
     },
-    FatherName:{
+    fatherName:{
         type:String,
     },
-    MotherName:{
+    idNumber:{
+        type:String,
+    },
+    motherName:{
       type:String
     },
-    pressentAddress:{
+    presentAddress:{
       type:String
     },
-    currentAddress:{
+    parmanentAddress:{
       type:String,
     },
     otp: { type: String },

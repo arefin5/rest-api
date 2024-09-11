@@ -33,7 +33,9 @@ app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 // Define API routes
 app.use('/api', require('./router/authRouter'));
-// app.use('/api', require('./router/imageRouter'));
+app.use('/api', require('./router/hostRoute'));
+
+app.use('/api', require('./router/getimage'));
 const imageRouter = require('./router/imageRouter');
 
 app.use('/api/images', formidableMiddleware({ encoding: 'utf-8', multiples: true }), imageRouter);
