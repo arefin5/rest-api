@@ -20,6 +20,6 @@ const AmenitiesSchema = new Schema({
     ski: { type: Boolean, default: false },
     outdoorShower: { type: Boolean, default: false },
 
-});
+} ,{ _id: false });
 
 module.exports = AmenitiesSchema;

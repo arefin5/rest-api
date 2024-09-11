@@ -10,8 +10,7 @@ const FavaritesSchema = new Schema({
     paidParking: { type: Boolean, default: false },
     airCondition: { type: Boolean, default: false },
     dedicatedWorkSpace: { type: Boolean, default: false },
-
-
-});
+    
+} ,{ _id: false });
 
 module.exports = FavaritesSchema;

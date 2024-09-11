@@ -23,9 +23,6 @@ const listSchema = new Schema(
       enum: ['An Entire Place', 'A Room', 'A Shared Room'], 
       default: 'An Entire Place'
     },
-    location: {
-      type: String
-    },
     guest: {
       type: Number,
       default: 4,
@@ -57,6 +54,16 @@ const listSchema = new Schema(
       ref: 'User',
       required: true,
     },
+    Review: [
+      {
+        text: String,
+        created: { type: Date, default: Date.now },
+        postedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+      },
+    ],
     title: {
       type: String,
       trim: true,
@@ -72,9 +79,23 @@ const listSchema = new Schema(
       type: String,
       default: 'inactive'
     },
+    location: {
+      type: {
+        type: String, 
+        enum: ['Point'], 
+        required: true
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+        required: true
+      }
+    },
+    review: [{ type: mongoose.Schema.ObjectId, ref: "User" }],
+    booking: [{ type: mongoose.Schema.ObjectId, ref: "User" }],
 
   },
   { timestamps: true }
 );
+listSchema.index({ location: '2dsphere' });
 
 module.exports = mongoose.model('List', listSchema);

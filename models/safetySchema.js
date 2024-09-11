@@ -8,6 +8,6 @@ const safetySchema = new Schema({
     firstAidKit: { type: Boolean, default: false  },
     carbonMonoxidealarm: { type: Boolean, default: false  },
 
-});
+}, { _id: false });
 
 module.exports = safetySchema;
