@@ -5,7 +5,8 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const safetySchema=require("./safetySchema")
 const FavaritesSchema=require("./FavaritesSchema")
-const AmenitiesSchema=require("./AmenitiesSchema")
+const AmenitiesSchema=require("./AmenitiesSchema");
+const bookingSchema=require("./bookingSchema")
 const listSchema = new Schema(
   {
    typeOfproperty: {
@@ -39,7 +40,7 @@ const listSchema = new Schema(
   
     safety: safetySchema,
     amenities:AmenitiesSchema,
-    hoseTitle:{
+    houseTitle:{
       type:String,
 
     },
@@ -90,10 +91,35 @@ const listSchema = new Schema(
         required: true
       }
     },
-    review: [{ type: mongoose.Schema.ObjectId, ref: "User" }],
-    booking: [{ type: mongoose.Schema.ObjectId, ref: "User" }],
-
+    gender:{
+     
+        type: String,
+        enum: ['male', 'female', 'unisex'], 
+        default: 'male'
+      
+    },
+    bookings: [bookingSchema], 
+    price : {
+      type:Number,
+      required:true
+    },
+    checkin:{
+      type:String,
+      
+    },
+    checkOut:{
+      type:String
+    },
+    serviceFee:{
+      type:Number,
+    },
+    bedge:{
+      type:String,
+      
+    },
+    available:{ type: Boolean, default: true }
   },
+ 
   { timestamps: true }
 );
 listSchema.index({ location: '2dsphere' });

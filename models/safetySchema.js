@@ -10,4 +10,5 @@ const safetySchema = new Schema({
 
 }, { _id: false });
 
+
 module.exports = safetySchema;
