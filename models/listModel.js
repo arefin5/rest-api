@@ -1,12 +1,14 @@
-
-
-
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const safetySchema=require("./safetySchema")
 const FavaritesSchema=require("./FavaritesSchema")
 const AmenitiesSchema=require("./AmenitiesSchema");
 const bookingSchema=require("./bookingSchema")
+const propertyFeatureSchema=require("./propertyFeatureSchema")
+const totalBedSchema=require("./totalBedSchema")
+const totalroomSchema=require("./totalroomSchema")
+const availableDateSchema=require("./availableDateSchema")
+const homeRuleSchema=require("./homeRuleSchema")
 const listSchema = new Schema(
   {
    typeOfproperty: {
@@ -19,37 +21,76 @@ const listSchema = new Schema(
   ],
   default: 'House'
 },
+
+propertyCondition:{
+  type:String,
+   enum:["full-furnished","semi-furnished","empty"],
+   required:true
+},
+// booking type 
     typeOfguests: {
       type: String,
       enum: ['An Entire Place', 'A Room', 'A Shared Room'], 
       default: 'An Entire Place'
     },
-    guest: {
+// 
+propertyTitle:{
+  type:String,
+  required:true,
+
+},
+description:{
+  type:String
+},
+// 
+// outdoorShower: { type: Boolean, default: false },
+
+propertyFeature:propertyFeatureSchema,
+    favorites:FavaritesSchema,
+     safety: safetySchema,
+    amenities:AmenitiesSchema,
+    bookings: [bookingSchema], 
+    totalroom:totalroomSchema,
+    totalBed:totalBedSchema,
+availablecheck:availableDateSchema,
+homerule:homeRuleSchema,
+    adults: {
       type: Number,
       default: 4,
     },
-    bedRoom: {
-      type: Number,
-      default: 0,
+    under14:{
+      type:Number
     },
-    beds: { type: Number, default: 0 },
-    bathroom: { type: Number, default: 0 },
+    gender:{
+      type: String,
+      enum: ['male', 'female', 'anyone'], 
+      required:true
+  },
+aprovingmethod:{
+  type: String,
+      enum: ['instant', 'manually',], 
+      required:true
+},
 
-    favorites:FavaritesSchema,
-   
-  
-    safety: safetySchema,
-    amenities:AmenitiesSchema,
-    houseTitle:{
-      type:String,
+price : {
+  type:Number,
+  required:true
+},
 
-    },
-    describehouse:{
-      type:String
-    },
-    description:{
-      type:String
-    },
+serviceFee:{
+  type:Number,
+  required:true
+},
+tex:{
+  type:Number,
+  required:true
+},
+images: [
+  {
+    url: String,
+    public_id: String,
+  }
+],
     Postedby: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -65,17 +106,6 @@ const listSchema = new Schema(
         },
       },
     ],
-    title: {
-      type: String,
-      trim: true,
-    },
-
-    images: [
-      {
-        url: String,
-        public_id: String,
-      }
-    ],
     status: {
       type: String,
       default: 'inactive'
@@ -89,35 +119,47 @@ const listSchema = new Schema(
       coordinates: {
         type: [Number], // [longitude, latitude]
         required: true
-      }
+      },
+      country:{
+        type:String,
+        required:true
+      },
+      fllor:{
+        type:String,
+      },
+      streetAddress:{
+        type:String,
+        required:true
+      },
+      address:{
+        type:String,
+        required:true
+      },
+      addresstwo:{
+        type:String,
+      },
+      thana:{
+        type:String,
+        required:true
+      },
+      district:{
+        type:String,
+        required:true
+      },
+      postcode:{
+        type:String,
+        required:true
+      },
+      googlemap:{
+        type:String,
+        required:true
+      },
     },
-    gender:{
-     
-        type: String,
-        enum: ['male', 'female', 'unisex'], 
-        default: 'male'
-      
-    },
-    bookings: [bookingSchema], 
-    price : {
-      type:Number,
-      required:true
-    },
-    checkin:{
-      type:String,
-      
-    },
-    checkOut:{
-      type:String
-    },
-    serviceFee:{
-      type:Number,
-    },
+
     bedge:{
       type:String,
       
     },
-    available:{ type: Boolean, default: true }
   },
  
   { timestamps: true }
