@@ -1,6 +1,8 @@
 const { verify } = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const User = require('../models/userModel'); // Import your User model
+const List=require("../models/listModel")
+const { expressjwt: jwt } = require("express-jwt");
 
 dotenv.config();
 
@@ -33,4 +35,39 @@ const requireAuth = async (req, res, next) => {
   }
 };
 
-module.exports = { requireAuth };
+const requireSignin = jwt({
+  secret: process.env.JWT_SECRET,
+  algorithms: ["HS256"],
+});
+// const canEditDeletePost = async (req, res, next) => {
+//   try {
+//     const list = await List.findById(req.params._id);
+//      console.log(req.auth)
+//     if (req.auth._id != list.Postedby) {
+//       return res.status(400).send("Unauthorized");
+//     } else {
+//       next();
+//     }
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
+const canEditDeletePost = async (req, res, next) => {
+  try {
+    const list = await List.findById(req.params.id);
+    if (!list) {
+      return res.status(404).send("Post not found");
+    }
+
+    if (req.auth._id != list.Postedby) {
+      return res.status(400).send("Unauthorized");
+    } else {
+      next();
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send("Server error");
+  }
+};
+
+module.exports = { requireAuth ,canEditDeletePost,requireSignin};

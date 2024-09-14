@@ -54,7 +54,7 @@ exports.createList = async (req, res) => {
       location, // Should match the location object in schema
       bedge,
       status,
-      Postedby: req.user._id, // Assuming the user is authenticated
+      Postedby: req.auth._id, // Assuming the user is authenticated
     });
 
     // Save the list in the database
@@ -68,6 +68,7 @@ exports.createList = async (req, res) => {
   }
 };
 exports.lists = async (req, res) => {
+  // console.log(req.auth.)
   try {
     const list = await List.find()
       .populate("Postedby", "name")
@@ -78,4 +79,71 @@ exports.lists = async (req, res) => {
     console.log(err);
   }
 };
+
+exports.updateList = async (req, res) => {
+  try {
+    const listId = req.params.id;
+    const updateData = req.body;
+
+    // Find the document by ID
+    const list = await List.findById(listId);
+
+    if (!list) {
+      return res.status(404).json({ message: 'Listing not found' });
+    }
+
+    // Loop over the request body and update only provided fields
+    Object.keys(updateData).forEach((key) => {
+      if (updateData[key] !== undefined) {
+        // Update fields in nested objects (deep update)
+        if (typeof updateData[key] === 'object' && !Array.isArray(updateData[key])) {
+          Object.keys(updateData[key]).forEach((nestedKey) => {
+            list[key][nestedKey] = updateData[key][nestedKey];
+          });
+        } else {
+          list[key] = updateData[key];
+        }
+      }
+    });
+
+    // Save the updated document
+    const updatedList = await list.save();
+
+    res.status(200).json(updatedList);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.deleteSinglelist = async (req, res) => {
+  try {
+    const listId = req.params.id;
+    const list = await List.findByIdAndDelete(listId);
+    if (!list) {
+      return res.status(404).json({ message: 'Listing not found' });
+    }
+
+    // Return success message after deletion
+    res.status(200).json({
+      message: "Listing deleted successfully",
+    });
+  } catch (error) {
+    // Return server error if any issues occur
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getSingleList=async (req, res) => {
+  const listId = req.params.id;
+  try {
+    const list = await List.findById(listId)
+      .populate("Postedby", "name")
+      if (!list) {
+        return res.status(404).json({ message: 'Listing not found' });
+      }
+      res.status(200).json(list);
+  } catch (err) {
+    console.log(err);
+  }
+}
 
