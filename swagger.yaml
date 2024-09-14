@@ -670,6 +670,354 @@ paths:
                     type: string
                   error:
                     type: string
+  /create-list:
+    post:
+      summary: Create a new property listing
+      description: Create a new property listing with the provided details.
+      tags:
+        - List
+      security:
+        - bearerAuth: []  
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                typeOfproperty:
+                  type: string
+                  enum:
+                    - House
+                    - Apartment
+                    - Barn
+                    - Bed & Breakfast
+                    - Boat
+                    - Cabin
+                    - Castle
+                    - Camper/RV
+                    - Casa Particular
+                    - Cave
+                    - Container
+                    - Dammuso
+                    - Dome
+                    - Cycladic Home
+                    - Earth Home
+                    - Tent
+                    - Tiny Home
+                    - Tower
+                    - Tree House
+                    - Trullo
+                    - Yurt
+                    - Windmill
+                  default: House
+                propertyCondition:
+                  type: string
+                  enum:
+                    - full-furnished
+                    - semi-furnished
+                    - empty
+                typeOfguests:
+                  type: string
+                  enum:
+                    - An Entire Place
+                    - A Room
+                    - A Shared Room
+                  default: An Entire Place
+                propertyTitle:
+                  type: string
+                description:
+                  type: string
+                outdoorShower:
+                  type: boolean
+                  default: false
+                propertyFeature:
+                  type: object
+                  properties:
+                    exclusive:
+                      type: boolean
+                      default: false
+                    nature:
+                      type: boolean
+                      default: false
+                    hill:
+                      type: boolean
+                      default: false
+                    seaBeatch:
+                      type: boolean
+                      default: false
+                    lakeView:
+                      type: boolean
+                      default: false
+                    Home:
+                      type: boolean
+                      default: false
+                    room:
+                      type: boolean
+                      default: false
+                    cottage:
+                      type: boolean
+                      default: false
+                favorites:
+                  type: object
+                  properties:
+                    wifi:
+                      type: boolean
+                      default: false
+                    tv:
+                      type: boolean
+                      default: false
+                    kitchen:
+                      type: boolean
+                      default: false
+                    washer:
+                      type: boolean
+                      default: false
+                    freeParking:
+                      type: boolean
+                      default: false
+                    paidParking:
+                      type: boolean
+                      default: false
+                    airCondition:
+                      type: boolean
+                      default: false
+                    dedicatedWorkSpace:
+                      type: boolean
+                      default: false
+                safety:
+                  type: object
+                  properties:
+                    smokeAlarm:
+                      type: boolean
+                      default: false
+                    fireExtingguisher:
+                      type: boolean
+                      default: false
+                    firstAidKit:
+                      type: boolean
+                      default: false
+                    carbonMonoxidealarm:
+                      type: boolean
+                      default: false
+                amenities:
+                  type: object
+                  properties:
+                    outdoorScenicView:
+                      type: object
+                      additionalProperties:
+                        type: boolean
+                    cookingCleaning:
+                      type: object
+                      additionalProperties:
+                        type: boolean
+                    internetOffice:
+                      type: object
+                      additionalProperties:
+                        type: boolean
+                    service:
+                      type: object
+                      additionalProperties:
+                        type: boolean
+                    notIncluded:
+                      type: object
+                      additionalProperties:
+                        type: boolean
+                    bathroom:
+                      type: object
+                      additionalProperties:
+                        type: boolean
+                    bedroomLaundry:
+                      type: object
+                      additionalProperties:
+                        type: boolean
+                    parkingFacilities:
+                      type: object
+                      additionalProperties:
+                        type: boolean
+                    general:
+                      type: object
+                      additionalProperties:
+                        type: boolean
+                totalroom:
+                  type: object
+                  properties:
+                    bedRoom:
+                      type: integer
+                      default: 0
+                    diningRoom:
+                      type: integer
+                      default: 0
+                    washRoom:
+                      type: integer
+                      default: 0
+                    others:
+                      type: integer
+                      default: 0
+                totalBed:
+                  type: object
+                  properties:
+                    singleBed:
+                      type: integer
+                      default: 0
+                    doubleBed:
+                      type: integer
+                      default: 0
+                    extrabed:
+                      type: integer
+                      default: 0
+                availablecheck:
+                  type: object
+                  properties:
+                    checkin:
+                      type: string
+                      enum:
+                        - as soon as possible
+                    startBookingDate:
+                      type: string
+                    thirtyPluseNight:
+                      type: boolean
+                      default: false
+                    maximumNight:
+                      type: string
+                    stopGettingBook:
+                      type: boolean
+                      default: false
+                    stopBookingDate:
+                      type: string
+                homeRule:
+                  type: object
+                  properties:
+                    pets:
+                      type: boolean
+                      default: false
+                    evenorPartys:
+                      type: boolean
+                      default: false
+                    checkinTimes:
+                      type: string
+                    checkouttimes:
+                      type: string
+                adults:
+                  type: integer
+                  default: 4
+                under14:
+                  type: integer
+                gender:
+                  type: string
+                  enum:
+                    - male
+                    - female
+                    - anyone
+                aprovingmethod:
+                  type: string
+                  enum:
+                    - instant
+                    - manually
+                price:
+                  type: number
+                serviceFee:
+                  type: number
+                tex:
+                  type: number
+                images:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                      public_id:
+                        type: string
+                location:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                        - Point
+                    coordinates:
+                      type: array
+                      items:
+                        type: number
+                    country:
+                      type: string
+                    fllor:
+                      type: string
+                    streetAddress:
+                      type: string
+                    address:
+                      type: string
+                    addresstwo:
+                      type: string
+                    thana:
+                      type: string
+                    district:
+                      type: string
+                    postcode:
+                      type: string
+                    googlemap:
+                      type: string
+                bedge:
+                  type: string
+                status:
+                  type: string
+                  default: inactive
+              required:
+                - typeOfproperty
+                - propertyCondition
+                - typeOfguests
+                - propertyTitle
+                - price
+                - serviceFee
+                - tex
+                - Postedby
+                - gender
+                - aprovingmethod
+      responses:
+        '201':
+          description: Successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/List'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /all-list:
+    get:
+      summary: Retrieve a list of items
+      description: Fetches a paginated list of items, populated with the `Postedby` user's name, sorted by creation date.
+      tags:
+        - List
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved the list of items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/List'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Server Error'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -706,3 +1054,238 @@ components:
         permanent:
           type: string
           example: Yes/No
+    List:
+      type: object
+      properties:
+        typeOfproperty:
+          type: string
+        propertyCondition:
+          type: string
+        typeOfguests:
+          type: string
+        propertyTitle:
+          type: string
+        description:
+          type: string
+        outdoorShower:
+          type: boolean
+        propertyFeature:
+          $ref: '#/components/schemas/PropertyFeature'
+        favorites:
+          $ref: '#/components/schemas/Favorites'
+        safety:
+          $ref: '#/components/schemas/Safety'
+        amenities:
+          $ref: '#/components/schemas/Amenities'
+        totalroom:
+          $ref: '#/components/schemas/TotalRoom'
+        totalBed:
+          $ref: '#/components/schemas/TotalBed'
+        availablecheck:
+          $ref: '#/components/schemas/AvailableCheck'
+        homeRule:
+          $ref: '#/components/schemas/HomeRule'
+        adults:
+          type: integer
+        under14:
+          type: integer
+        gender:
+          type: string
+        aprovingmethod:
+          type: string
+        price:
+          type: number
+        serviceFee:
+          type: number
+        tex:
+          type: number
+        images:
+          type: array
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+              public_id:
+                type: string
+        location:
+          $ref: '#/components/schemas/Location'
+        bedge:
+          type: string
+        status:
+          type: string
+        Postedby:
+          type: string
+        Review:
+          type: array
+          items:
+            type: object
+            properties:
+              text:
+                type: string
+              created:
+                type: string
+                format: date-time
+              postedBy:
+                type: string
+    PropertyFeature:
+      type: object
+      properties:
+        exclusive:
+          type: boolean
+        nature:
+          type: boolean
+        hill:
+          type: boolean
+        seaBeatch:
+          type: boolean
+        lakeView:
+          type: boolean
+        Home:
+          type: boolean
+        room:
+          type: boolean
+        cottage:
+          type: boolean
+    Favorites:
+      type: object
+      properties:
+        wifi:
+          type: boolean
+        tv:
+          type: boolean
+        kitchen:
+          type: boolean
+        washer:
+          type: boolean
+        freeParking:
+          type: boolean
+        paidParking:
+          type: boolean
+        airCondition:
+          type: boolean
+        dedicatedWorkSpace:
+          type: boolean
+    Safety:
+      type: object
+      properties:
+        smokeAlarm:
+          type: boolean
+        fireExtingguisher:
+          type: boolean
+        firstAidKit:
+          type: boolean
+        carbonMonoxidealarm:
+          type: boolean
+    Amenities:
+      type: object
+      properties:
+        outdoorScenicView:
+          type: object
+          additionalProperties:
+            type: boolean
+        cookingCleaning:
+          type: object
+          additionalProperties:
+            type: boolean
+        internetOffice:
+          type: object
+          additionalProperties:
+            type: boolean
+        service:
+          type: object
+          additionalProperties:
+            type: boolean
+        notIncluded:
+          type: object
+          additionalProperties:
+            type: boolean
+        bathroom:
+          type: object
+          additionalProperties:
+            type: boolean
+        bedroomLaundry:
+          type: object
+          additionalProperties:
+            type: boolean
+        parkingFacilities:
+          type: object
+          additionalProperties:
+            type: boolean
+        general:
+          type: object
+          additionalProperties:
+            type: boolean
+    TotalRoom:
+      type: object
+      properties:
+        bedRoom:
+          type: integer
+        diningRoom:
+          type: integer
+        washRoom:
+          type: integer
+        others:
+          type: integer
+    TotalBed:
+      type: object
+      properties:
+        singleBed:
+          type: integer
+        doubleBed:
+          type: integer
+        extrabed:
+          type: integer
+    AvailableCheck:
+      type: object
+      properties:
+        checkin:
+          type: string
+        startBookingDate:
+          type: string
+        thirtyPluseNight:
+          type: boolean
+        maximumNight:
+          type: string
+        stopGettingBook:
+          type: boolean
+        stopBookingDate:
+          type: string
+    HomeRule:
+      type: object
+      properties:
+        pets:
+          type: boolean
+        evenorPartys:
+          type: boolean
+        checkinTimes:
+          type: string
+        checkouttimes:
+          type: string
+    Location:
+      type: object
+      properties:
+        type:
+          type: string
+        coordinates:
+          type: array
+          items:
+            type: number
+        country:
+          type: string
+        fllor:
+          type: string
+        streetAddress:
+          type: string
+        address:
+          type: string
+        addresstwo:
+          type: string
+        thana:
+          type: string
+        district:
+          type: string
+        postcode:
+          type: string
+        googlemap:
+          type: string

@@ -1,41 +1,5 @@
 const List = require("../models/listModel");
 
-// exports.createList = async (req, res) => {
-//   try {
-//     const {
-//       title, images, typeOfproperty, typeOfguests, guest, bedRoom, beds, bathroom,
-//       wifi, tv, kitchen, washer, freeParking, paidParking, airCondition, dedicatedWorkSpace,
-//       pool, hottub, patio, bbqGrill, outdoorDiningArea, firePit, poolTable, indoorFirePlace,
-//       piano, exerciseEquipment, lakeAccess, beachAccess, ski, outdoorShower, safety,
-//       describehouse, description,location,
-//       propertyCondition,
-//       propertyTitle,
-//       price
-//     } = req.body;
-
-//     const newList = new List({
-//       title, images, typeOfproperty, typeOfguests,  guest, bedRoom, beds, bathroom,
-//       favorites: { wifi, tv, kitchen, washer, freeParking, paidParking, airCondition, dedicatedWorkSpace },
-//       safety, amenities: { pool, hottub, patio, bbqGrill, outdoorDiningArea, firePit, poolTable, indoorFirePlace, piano, exerciseEquipment, lakeAccess, beachAccess, ski, outdoorShower },
-//        describehouse, description,
-//       location,
-//       propertyCondition,
-//       propertyTitle,
-//       price,
-      
-//        Postedby: req.user._id
-//     });
-
-//     const savedList = await newList.save();
-//     res.status(201).json(savedList);
-//   } catch (error) {
-//     console.error('Error creating list:', error);
-//     res.status(500).json({ message: 'Server error' });
-//   }
-// };
-
-
-
 exports.createList = async (req, res) => {
   try {
     const {
@@ -103,3 +67,15 @@ exports.createList = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+exports.lists = async (req, res) => {
+  try {
+    const list = await List.find()
+      .populate("Postedby", "name")
+      .sort({ createdAt: -1 })
+      .limit(12);
+    res.json(list);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
