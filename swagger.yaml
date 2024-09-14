@@ -1017,7 +1017,87 @@ paths:
                   message:
                     type: string
                     example: 'Server Error'
+  /get-single-list/{id}:
+    get:
+      summary: Retrieve a single listing by ID
+      tags:
+        - List
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the listing to retrieve
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved the listing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/List'
+        '404':
+          description: Listing not found
+        '500':
+          description: Server error
 
+  /update-list/{id}:
+    put:
+      summary: Update a listing by ID
+      tags:
+        - List
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the listing to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListUpdate'
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully updated the listing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/List'
+        '400':
+          description: Bad request or unauthorized
+        '404':
+          description: Listing not found
+        '500':
+          description: Server error
+
+  /delete-list/{id}:
+    delete:
+      summary: Delete a listing by ID
+      tags:
+        - List
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the listing to delete
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Successfully deleted the listing
+        '404':
+          description: Listing not found
+        '500':
+          description: Server error
 components:
   securitySchemes:
     bearerAuth:
@@ -1289,3 +1369,25 @@ components:
           type: string
         googlemap:
           type: string
+    ListUpdate:
+      type: object
+      properties:
+        typeOfproperty:
+          type: string
+        propertyCondition:
+          type: string
+        propertyTitle:
+          type: string
+        description:
+          type: string
+        location:
+          type: object
+          properties:
+            country:
+              type: string
+            streetAddress:
+              type: string
+            coordinates:
+              type: array
+              items:
+                type: number      
