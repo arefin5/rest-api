@@ -159,30 +159,27 @@ exports.currentUser = async (req, res) => {
     res.sendStatus(400);
   }
 };
-exports.upDateProfile = async (req, res) => {
-  const userId = req.params.id;
+exports.editProfile = async (req, res) => {
+  const userId = req.auth._id;
   try {
     const user = await User.findById(userId); // Fix: Remove the curly braces around userId
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
     // Update user information
-    user.name = req.body.name;
-    user.email = req.body.email;
-    user.phone = req.body.phone;
-    user.father = req.body.father;
-    user.mother = req.body.mother;
-    user.paddress = req.body.paddress;
-    user.parent = req.body.permanent;
-    user.education = req.body.education;
-    user.image = req.body.image;
-
-    // Save the updated user document
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+    user.phone = req.body.phone || user.phone;
+    user.fatherName = req.body.fatherName || user.fatherName;
+    user.motherName = req.body.motherName || user.motherName;
+    user.presentAddress = req.body.presentAddress || user.presentAddress;
+    user.parmanentAddress = req.body.parmanentAddress || user.parmanentAddress;
+    user.birth = req.body.birth || user.birth;
+    user.profilePic = req.body.profilePic || user.profilePic;
+     user.cover=req.body.cover || user.cover;
     await user.save();
-
     // Exclude the password from the response
     user.password = undefined;
-
     // Send a response indicating success
     res.json({ message: 'Profile updated successfully', user });
   } catch (error) {
@@ -191,8 +188,7 @@ exports.upDateProfile = async (req, res) => {
   }
 };
 exports.userRole = async (req, res) => {
-  const userId = req.user.id; // Assuming req.user is populated with user info from authentication middleware
-
+  const userId = req.auth._id;
   try {
     const user = await User.findById(userId);
     if (!user) {
@@ -200,7 +196,7 @@ exports.userRole = async (req, res) => {
     }
 
     // Set the role to 'host'
-    user.role = 'host';
+    user.role = 'Host';
 
     // Save the updated user document
     await user.save();

@@ -1,11 +1,11 @@
 // const express = require("express")
-const { requireAuth } = require("../midleware/auth");
+const { requireAuth ,requireSignin} = require("../midleware/auth");
 const express = require("express");
 const router = express.Router();
 
 const { register, login, currentUser, 
-  upDateProfile, uploadImage
-  , userRole, 
+  editProfile,
+   userRole, 
   verifyOtp,
   generateOtp,
   googleFacebookLogin,
@@ -16,7 +16,8 @@ const { register, login, currentUser,
   verifyOtpPhone,
   resetPasswordPhone,
   verifyRequest,
-  loginByphone
+  loginByphone,
+  
 } = require("../controlar/userAuth.js");
 
 
@@ -29,15 +30,16 @@ router.post("/login", login);
 router.post("/google-facebook-login", googleFacebookLogin);
 router.post("/forget-password", forgotPassword);
 router.post("/verify-forget-pass", verifyForgotPasswordOtp);
-router.put("/reset-password", requireAuth, resetPassword);
+router.put("/reset-password", requireSignin, resetPassword);
 
 // Phone authentication and login
 router.post("/generate-otp-phone", generateOtpPhone);
 router.post("/verify-otp-phone", verifyOtpPhone);
 router.post("login-with-phone",loginByphone)
-router.put("/update-password-phone",requireAuth,resetPasswordPhone)
-router.put("/verify-user-request",requireAuth,verifyRequest)
+router.put("/update-password-phone",requireSignin,resetPasswordPhone)
+router.put("/verify-user-request",requireSignin,verifyRequest)
 // Profile route
-router.get('/profile', requireAuth, currentUser);
-
+router.get('/profile', requireSignin, currentUser);
+router.put("/change-role",requireSignin,userRole);
+router.put("/edit-profile",requireSignin,editProfile)
 module.exports = router;

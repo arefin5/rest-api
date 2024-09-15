@@ -22,7 +22,11 @@ const userSchema = new Schema(
     url: String,
     public_id: String,
   },
-  ProfilePic: {
+  cover: {
+    url: String,
+    public_id: String,
+  },
+  profilePic: {
     url: String,
     public_id: String,
   },
@@ -51,8 +55,13 @@ const userSchema = new Schema(
     isOtpVerified:{ type: Boolean, default: false } ,
     role: {
       type: String,
-      default: "host",
-    },
+    type: String,
+    enum: [
+      "user","host","admin"
+    ],
+    default: "user",
+  },
+
     status:{
       type:String,
       default:"inactive"
