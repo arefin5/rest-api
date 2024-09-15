@@ -69,5 +69,16 @@ const canEditDeletePost = async (req, res, next) => {
     return res.status(500).send("Server error");
   }
 };
-
-module.exports = { requireAuth ,canEditDeletePost,requireSignin};
+const isHost = async (req, res, next) => {
+  try {
+    if (req.auth.role != host) {
+      return res.status(400).send("Unauthorized");
+    } else {
+      next();
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send("Server error");
+  }
+};
+module.exports = { requireAuth ,canEditDeletePost,requireSignin,isHost};
