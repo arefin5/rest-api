@@ -148,12 +148,12 @@ exports.login = async (req, res) => {
     return res.status(400).send("Error. Try again.");
   }
 };
-exports.currentUser = async (req, res) => {
+exports.SingleUser = async (req, res) => {
   // console.log("test ")
   try {
     const user = await User.findById(req.user._id);
     // res.json(user);
-    res.json({ ok: true });
+    res.json({ user });
   } catch (err) {
     console.log(err);
     res.sendStatus(400);

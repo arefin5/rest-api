@@ -3,7 +3,7 @@ const { requireAuth ,requireSignin} = require("../midleware/auth");
 const express = require("express");
 const router = express.Router();
 
-const { register, login, currentUser, 
+const { register, login, SingleUser, 
   editProfile,
    userRole, 
   verifyOtp,
@@ -39,7 +39,8 @@ router.post("login-with-phone",loginByphone)
 router.put("/update-password-phone",requireSignin,resetPasswordPhone)
 router.put("/verify-user-request",requireSignin,verifyRequest)
 // Profile route
-router.get('/profile', requireSignin, currentUser);
+// router.get('/profile:id', requireSignin, SingleUser);
+
 router.put("/change-role",requireSignin,userRole);
 router.put("/edit-profile",requireSignin,editProfile)
 module.exports = router;
