@@ -10,10 +10,12 @@ const bookingSchema = new Schema({
   checkinDate: {
     type: Date,
     required: true,
+    unique:true,
   },
   checkoutDate: {
     type: Date,
     required: true,
+    unique:true,
   },
   price: {
     type: Number,

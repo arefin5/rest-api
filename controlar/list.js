@@ -135,6 +135,7 @@ exports.deleteSinglelist = async (req, res) => {
 
 exports.getSingleList=async (req, res) => {
   const listId = req.params.id;
+  // console.log(listId)
   try {
     const list = await List.findById(listId)
       .populate("Postedby", "name")
