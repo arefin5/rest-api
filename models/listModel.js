@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 const safetySchema=require("./safetySchema")
 const FavaritesSchema=require("./FavaritesSchema")
 const AmenitiesSchema=require("./AmenitiesSchema");
-const bookingSchema=require("./bookingSchema")
+const Booking=require("./bookingSchema")
 const propertyFeatureSchema=require("./propertyFeatureSchema")
 const totalBedSchema=require("./totalBedSchema")
 const totalroomSchema=require("./totalroomSchema")
@@ -49,11 +49,15 @@ propertyFeature:propertyFeatureSchema,
     favorites:FavaritesSchema,
      safety: safetySchema,
     amenities:AmenitiesSchema,
-    bookings: [bookingSchema], 
+    bookings: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Booking',
+      required: true,
+    },],
     totalroom:totalroomSchema,
     totalBed:totalBedSchema,
-availablecheck:availableDateSchema,
-homerule:homeRuleSchema,
+    availablecheck:availableDateSchema,
+    homerule:homeRuleSchema,
     adults: {
       type: Number,
       default: 4,

@@ -8,6 +8,8 @@ const swaggerUI = require('swagger-ui-express');
 const helmet = require('helmet');
 const Fingerprint = require("express-fingerprint");
  const db = require('./mongodb-connection');
+ const SSLCommerzPayment = require('sslcommerz-lts')
+
 // Initialize Express app
 const app = express();
 
@@ -21,11 +23,14 @@ app.use(helmet());
 app.use(Fingerprint({
   parameters: [Fingerprint.useragent, Fingerprint.acceptHeaders, Fingerprint.geoip],
 }));
-// app.use(formidableMiddleware({
-//   encoding: 'utf-8',
-//   multiples: true, // req.files to be arrays of files
-// }))
-// Load Swagger documentation from YAML file
+// SSLCOMMERZ credentials
+const store_id =process.env.StoreID
+const store_passwd =process.env.StorePassword
+const is_live = false; // Change to true for live environment
+app.use((req, res, next) => {
+  req.sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
+  next();
+});
 const swaggerDocument = yaml.load('./swagger.yaml');
 
 // Set up Swagger UI
