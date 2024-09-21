@@ -1261,13 +1261,20 @@ paths:
         500:
           description: Server error
 
-  /favoriteslist:
+  /user-favoriteslist/{id}:
     get:
       tags:
         - Favorites
       summary: Get the user's favorites list
       security:
         - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the user to retrieve   
       responses:
         200:
           description: Favorites list retrieved successfully
