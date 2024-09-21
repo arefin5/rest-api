@@ -42,9 +42,6 @@ propertyTitle:{
 description:{
   type:String
 },
-// 
-// outdoorShower: { type: Boolean, default: false },
-
 propertyFeature:propertyFeatureSchema,
     favorites:FavaritesSchema,
      safety: safetySchema,
@@ -112,7 +109,8 @@ images: [
     ],
     status: {
       type: String,
-      default: 'inactive'
+      enum: ['draft', 'published'], 
+      default: 'draft', // Default value is 'draft'
     },
     location: {
       type: {

@@ -65,10 +65,10 @@ const userSchema = new Schema(
   favoritelist: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "List", // Storing only one favorite list
+      ref: "List", 
+      default:[]
     },
   ],
-    
     status:{
       type:String,
       default:"inactive"

@@ -1139,6 +1139,207 @@ paths:
           description: Listing not found
         '500':
           description: Server error
+  /favoriteslist-list/{id}:
+    put:
+      tags:
+        - Favorites
+      summary: Add a property to the user's favorites list
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the property to add to favorites
+      responses:
+        200:
+          description: Property successfully added to favorites
+        500:
+          description: Server error  
+  /unfavoriteslist-list/{id}:
+    put:
+      tags:
+        - Favorites
+      summary: Remove a property from the user's favorites list
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the property to remove from favorites
+      responses:
+        200:
+          description: Property successfully removed from favorites
+        500:
+          description: Server error
+  /book/{id}:
+    post:
+      tags:
+        - Booking
+      summary: Book a property for a user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the property to book
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                checkinDate:
+                  type: string
+                  format: date
+                  example: '2024-10-01'
+                checkoutDate:
+                  type: string
+                  format: date
+                  example: '2024-10-07'
+                price:
+                  type: number
+                  example: 200
+      responses:
+        200:
+          description: Redirect to payment gateway
+        400:
+          description: The selected dates are already booked
+        500:
+          description: Server error
+
+  /check-available/{id}:
+    get:
+      tags:
+        - Booking
+      summary: Check if property is available for booking
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the property to check availability
+      responses:
+        200:
+          description: The selected dates are available
+        400:
+          description: The selected dates are already booked
+        500:
+          description: Error checking availability
+
+  /get-single-user/{id}:
+    get:
+      tags:
+        - User
+      summary: Get user details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the user to retrieve
+      responses:
+        200:
+          description: User details retrieved successfully
+        400:
+          description: User not found
+        500:
+          description: Server error
+
+  /favoriteslist:
+    get:
+      tags:
+        - Favorites
+      summary: Get the user's favorites list
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Favorites list retrieved successfully
+        400:
+          description: User not found
+        500:
+          description: Server error
+
+  /user-booking-list:
+    get:
+      tags:
+        - Booking
+      summary: Get the list of properties booked by the current user
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Booking list retrieved successfully
+        500:
+          description: Server error
+
+  /payment-success:
+    put:
+      tags:
+        - Payment
+      summary: Update booking status after successful payment
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tran_id:
+                  type: string
+                  description: Transaction ID from payment provider
+                status:
+                  type: string
+                  description: Payment status
+                  example: success
+      responses:
+        200:
+          description: Payment successful, booking confirmed
+        404:
+          description: Booking not found
+        500:
+          description: Error processing payment success
+
+  /fail-payment:
+    put:
+      tags:
+        - Payment
+      summary: Handle payment failure and cancel booking
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tran_id:
+                  type: string
+                  description: Transaction ID from payment provider
+      responses:
+        400:
+          description: Payment failed, booking canceled
+        500:
+          description: Error processing payment failure       
 components:
   securitySchemes:
     bearerAuth:
@@ -1200,6 +1401,12 @@ components:
         status:
           type: string
           example: inactive
+        favoritelist:
+           type: array
+           items:
+             type: string
+             example: "60d0fe4f5311236168a109cb" # Reference to List model
+           description: An array of ObjectId references to the favorited lists.  
     List:
       type: object
       properties:
@@ -1456,4 +1663,75 @@ components:
             coordinates:
               type: array
               items:
-                type: number      
+                type: number     
+    Booking:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "60d0fe4f5311236168a109ca"  # ObjectId reference for booking ID
+        user:
+          type: string
+          example: "60d0fe4f5311236168a109cb"  # ObjectId reference for User
+        property:
+          type: string
+          example: "60d0fe4f5311236168a109cc"  # ObjectId reference for Property (List model)
+        checkinDate:
+          type: string
+          format: date
+          example: "2024-09-15"
+        checkoutDate:
+          type: string
+          format: date
+          example: "2024-09-20"
+        price:
+          type: number
+          example: 200.50
+        status:
+          type: string
+          enum:
+            - pending
+            - confirmed
+            - failed
+          example: "pending"
+        tran_id:
+          type: string
+          example: "TRX12345"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-09-01T12:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-09-01T12:35:00Z" 
+    FailedBooking:
+      type: object
+      properties:
+        user:
+          type: string
+          example: "60d0fe4f5311236168a109ca" # ObjectId reference to User
+        property:
+          type: string
+          example: "60d0fe4f5311236168a109cb" # ObjectId reference to Property
+        tran_id:
+          type: string
+          example: "TRX12345"
+        checkinDate:
+          type: string
+          format: date
+          example: "2024-09-15"
+        checkoutDate:
+          type: string
+          format: date
+          example: "2024-09-20"
+        price:
+          type: number
+          example: 200.50
+        reason:
+          type: string
+          example: "Payment failed"
+        date:
+          type: string
+          format: date-time
+          example: "2024-09-21T12:30:00Z"

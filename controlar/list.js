@@ -70,7 +70,7 @@ exports.createList = async (req, res) => {
 exports.lists = async (req, res) => {
   // console.log(req.auth.)
   try {
-    const list = await List.find()
+    const list = await List.find({status:"published"})
       .populate("Postedby", "name")
       .sort({ createdAt: -1 })
       .limit(12);
