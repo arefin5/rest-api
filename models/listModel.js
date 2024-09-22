@@ -109,8 +109,8 @@ images: [
     ],
     status: {
       type: String,
-      enum: ['draft', 'published'], 
-      default: 'draft', // Default value is 'draft'
+      enum: ['draft', 'published','active'], 
+      default: 'draft', 
     },
     location: {
       type: {

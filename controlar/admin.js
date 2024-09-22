@@ -63,17 +63,17 @@ exports.getFailedBookings = async (req, res) => {
   
     try {
         // Find the single blog by id
-        const list = await Booking.findById(id);
+        const booking = await Booking.findById(id);
   
-        if (!list) {
+        if (!booking) {
             return res.status(404).json({ error: 'List not found' });
         }
         // Update the status to 'published'
-        list.status = 'published';
-        await list.save();
-        res.status(200).json({ message: 'list approved successfully', list });
+        booking.status = 'confirmed';
+        await booking.save();
+        res.status(200).json({ message: 'booking approved successfully', booking });
     } catch (error) {
-        console.error('Error updating list status:', error);
+        console.error('Error updating booking status:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
   };
@@ -87,7 +87,7 @@ exports.getFailedBookings = async (req, res) => {
             return res.status(404).json({ error: 'Blog not found' });
         }
         // Update the status to 'published'
-        list.status = 'confirmed';
+        list.status = 'active';
         await list.save();
         res.status(200).json({ message: 'list approved successfully', list });
     } catch (error) {
@@ -162,4 +162,21 @@ exports.getAlluser=async(req,res)=>{
       res.status(500).json({ error: 'Internal Server Error' });
     }
   }
+  exports.aprovedListPublished = async (req, res) => {
+    const { id } = req.params;
+    try {
+        // Find the single blog by id
+        const list = await List.findById(id);
   
+        if (!list) {
+            return res.status(404).json({ error: 'Blog not found' });
+        }
+        // Update the status to 'published'
+        list.status = 'published';
+        await list.save();
+        res.status(200).json({ message: 'list approved successfully', list });
+    } catch (error) {
+        console.error('Error updating list status:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };

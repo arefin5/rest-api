@@ -196,7 +196,7 @@ exports.userRole = async (req, res) => {
     }
 
     // Set the role to 'host'
-    user.role = 'Host';
+    user.role = 'host';
 
     // Save the updated user document
     await user.save();

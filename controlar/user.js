@@ -109,9 +109,8 @@ exports.getCurrentUser = async (req, res) => {
 };
 exports.UserBooklist=async(req,res)=>{
   try {
-    const userId = req.auth._id; // Assuming req.auth contains the authenticated user's info
+    const userId = req.auth._id;
 
-    // Fetch all bookings for the logged-in user, populating related fields
     const bookings = await Booking.find({ user: userId })
     .populate({
       path: 'property',
@@ -128,15 +127,17 @@ exports.UserBooklist=async(req,res)=>{
 exports.bookProperty=async (req, res) => {
   try {
     const propertyId = req.params.id;
-    console.log(propertyId)
-    const { checkinDate, checkoutDate, price } = req.body;
+    const { checkinDate, checkoutDate } = req.body;
 
     // Find the property by ID
     const property = await List.findById(propertyId);
     if (!property) {
       return res.status(404).json({ message: 'Property not found' });
     }
-    console.log("start")
+ // Check if property is published
+//  if (property.status !== 'published') {
+//   return res.status(400).json({ message: 'Property is not available for booking' });
+// }
     // Check for date conflicts
     const isBooked = await Booking.findOne({
       property: propertyId,
@@ -149,25 +150,40 @@ exports.bookProperty=async (req, res) => {
     if (isBooked) {
       return res.status(400).json({ message: 'The selected dates are already booked' });
     }
-
+    const checkinDateObj = new Date(checkinDate);
+    const checkoutDateObj = new Date(checkoutDate);
+    
+    // Calculate the length of stay in days
+    const lengthOfStay = Math.ceil((checkoutDateObj - checkinDateObj) / (1000 * 60 * 60 * 24)); 
+  const  amount=property.price
+    console.log(property.price)
     // Payment data object
     const paymentData = {
-      total_amount: property.price,
+      total_amount: amount,
       currency: 'BDT',
       success_url: 'http://localhost:3000/success',
       fail_url: 'http://localhost:3000/fail',
       cancel_url: 'http://localhost:3000/cancel',
       ipn_url: 'http://localhost:3000/ipn',
-      product_name: 'Property Booking',
       cus_name: "testrest",
       cus_email:  "testrest",
       cus_phone: "testrest",
       cus_add1:  "testrest",
+      shipping_method: 'NO',
+      product_name: 'Property Booking',
+      product_category: 'Real Estate',
+      product_profile: 'travel-vertical',
+      hotel_name: "bed bd",
+      length_of_stay: `2 days`,
+      check_in_time: "12:00 PM", 
+      hotel_city: property.location.thana,
     };
+    console.log("after paymentData chck")
 
     // Step 1: Initialize Payment
     const apiResponse = await initPayment(paymentData);
     const GatewayPageURL = apiResponse.GatewayPageURL;
+    console.log("after paymentData chck")
 
     if (!GatewayPageURL) {
       return res.status(500).json({ message: 'Payment gateway initialization failed' });
@@ -179,8 +195,7 @@ exports.bookProperty=async (req, res) => {
       property: propertyId,
       checkinDate: new Date(checkinDate),
       checkoutDate: new Date(checkoutDate),
-      price,
-      status: 'pending',
+      price:property.price,
       tran_id: paymentData.tran_id, // Save the transaction ID
     });
 
@@ -201,7 +216,7 @@ exports.bookProperty=async (req, res) => {
 };
 exports.paymentSuccess = async (req, res) => {
   try {
-    const { tran_id, status } = req.body; // Use actual payment gateway response
+    const { tran_id, status } = req.body;
     const booking = await Booking.findOne({ tran_id });
 
     if (!booking) {
