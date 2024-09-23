@@ -1386,7 +1386,264 @@ paths:
         400:
           description: Payment failed, booking canceled
         500:
-          description: Error processing payment failure       
+          description: Error processing payment failure   
+  /admin/failed-booking-all:
+    get:
+      summary: Get all failed bookings
+      description: Retrieve all failed bookings including the associated users and properties.
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of all failed bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Booking'
+        500:
+          description: Error retrieving failed bookings
+  /admin/get-single-list/{id}:
+    get:
+      summary: Get a specific list
+      description: Retrieve details of a specific list by its ID.
+      tags:
+        - Admin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the list to retrieve
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/List'
+        404:
+          description: List not found
+        500:
+          description: Error retrieving list details
+  /admin/published-list/{id}:
+    put:
+      summary: Publish a list
+      description: Approve and publish a specific list (property).
+      tags:
+        - Admin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the list to approve and publish
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List published successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/List'
+        404:
+          description: List not found
+        500:
+          description: Error publishing list
+
+  /admin/booking-confirm/{id}:
+    put:
+      summary: Confirm a booking
+      description: Approve a pending booking by updating its status to 'confirmed'.
+      tags:
+        - Admin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the booking to approve
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Booking confirmed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        404:
+          description: Booking not found
+        500:
+          description: Error confirming booking
+
+  /admin/create-admin/{id}:
+    put:
+      summary: Create a new admin
+      description: Approve and change the role of a user to 'admin'.
+      tags:
+        - Admin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the user to promote to admin
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: User promoted to admin successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        404:
+          description: User not found
+        500:
+          description: Error promoting user to admin 
+  /admin/all-user:
+    get:
+      summary: Get all users
+      description: Retrieve a list of all users in the system.
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of all users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        500:
+          description: Error retrieving users
+
+  /admin/all-list:
+    get:
+      summary: Get all lists
+      description: Retrieve all property lists.
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of all properties
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/List'
+        500:
+          description: Error retrieving lists
+  /admin/block-user/{id}:
+    put:
+      summary: Block a user
+      description: Block a specific user by updating their status to 'inactive'.
+      tags:
+        - Admin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the user to block
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: User blocked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        404:
+          description: User not found
+        500:
+          description: Error blocking user
+  /admin/get-pending/:
+    get:
+      summary: Retrieve Pending Bookings
+      description: Fetches a list of bookings with a "pending" status, including details of the property and user.
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []  # Adjust if your security scheme is named differently
+      responses:
+        '200':
+          description: Successful retrieval of pending bookings.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking' 
+        404:
+          description: Booking not found
+        500:
+          description: Error confirming booking
+  /admin/published-from-host/{id}:
+    put:
+      summary: Approve and Publish a List
+      description: Updates the status of a list to "published" based on the provided ID.
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []  # Adjust if your security scheme is named differently
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier of the list to be published.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List approved and published successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Success message indicating approval.
+                  list:
+                    $ref: '#/components/schemas/List'  # Reference to your existing list schema
+        '404':
+          description: List not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message indicating that the list was not found.
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message indicating an internal server issue.
 components:
   securitySchemes:
     bearerAuth:
