@@ -9,24 +9,23 @@ exports.createList = async (req, res) => {
       propertyTitle,
       description,
       outdoorShower,
-      propertyFeature, // List of property features (array)
-      favorites, // Object with amenities like wifi, tv, etc.
-      safety, // Safety features object
-      amenities, // Object for amenities
-      totalroom, // Object for total rooms
-      totalBed, // Object for total beds
-      availablecheck, // Date for availability
-      adults, // Number of adults
-      under14, // Number of guests under 14
-      gender, // Gender preference
-      aprovingmethod, // Approval method (instant or manual)
-      price, // Price of the property
-      serviceFee, // Service fee
-      tex, // Tax
-      images, // Images array (with url and public_id)
-      location, // Object with location data
-      bedge, // Badge or special recognition
-      status // Active/inactive status
+      propertyFeature, 
+      favorites, 
+      safety, 
+      amenities, 
+      totalroom, 
+      totalBed, 
+      availablecheck, 
+      adults, 
+      under14, 
+      gender, 
+      aprovingmethod, 
+      price,
+      serviceFee, 
+      tex, 
+      images,
+      location, 
+      bedge, 
     } = req.body;
 
     const newList = new List({
@@ -36,13 +35,13 @@ exports.createList = async (req, res) => {
       propertyTitle,
       description,
       outdoorShower,
-      propertyFeature, // Expecting an array here
-      favorites, // Should match the FavoritesSchema structure
-      safety, // Should match the safetySchema structure
-      amenities, // Should match the AmenitiesSchema structure
-      totalroom, // Should match totalroomSchema
-      totalBed, // Should match totalBedSchema
-      availablecheck, // Should match availableDateSchema
+      propertyFeature, 
+      favorites, 
+      safety, 
+      amenities, 
+      totalroom, 
+      totalBed, 
+      availablecheck,
       adults,
       under14,
       gender,
@@ -50,11 +49,9 @@ exports.createList = async (req, res) => {
       price,
       serviceFee,
       tex,
-      images, // Expecting an array of image objects {url, public_id}
-      location, // Should match the location object in schema
-      bedge,
-      status,
-      Postedby: req.auth._id, // Assuming the user is authenticated
+      images, 
+      location,
+      Postedby: req.auth._id, 
     });
 
     // Save the list in the database
@@ -70,7 +67,7 @@ exports.createList = async (req, res) => {
 exports.lists = async (req, res) => {
   // console.log(req.auth.)
   try {
-    const list = await List.find()
+    const list = await List.find({status:"active"})
       .populate("Postedby", "name")
       .sort({ createdAt: -1 })
       .limit(12);
@@ -135,6 +132,7 @@ exports.deleteSinglelist = async (req, res) => {
 
 exports.getSingleList=async (req, res) => {
   const listId = req.params.id;
+  // console.log(listId)
   try {
     const list = await List.findById(listId)
       .populate("Postedby", "name")
@@ -146,4 +144,34 @@ exports.getSingleList=async (req, res) => {
     console.log(err);
   }
 }
+exports.allListByUser = async (req, res) => {
+  try {
+    const list = await List.find({
+      Postedby: req.auth._id
+    })
+      .populate("Postedby", "name")
+      .sort({ createdAt: -1 })
+      .limit(12);
 
+    res.json(list);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+// exports.allListByuser = async (req, res) => {
+//   try {
+//     const list = await List.find({
+//       status: "active",
+//       Postedby: req.auth._id
+//     })
+//       .populate("Postedby", "name")
+//       .sort({ createdAt: -1 })
+//       .limit(12);
+
+//     res.json(list);
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };

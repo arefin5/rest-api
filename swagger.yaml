@@ -567,7 +567,47 @@ paths:
           description: OTP not verified or wrong password
         '404':
           description: No user found
-
+  /delete-user:
+    put:
+      summary: Soft delete the authenticated user's account
+      description: Mark the authenticated user's account as soft deleted by updating the `status` field to `active`. The user must be signed in to perform this action.
+      tags:
+        - User
+      security:
+        - bearerAuth: [] # Requires bearer authentication (JWT)
+      responses:
+        200:
+          description: User account soft deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User account soft deleted successfully"
+                  user:
+                    $ref: '#/components/schemas/User'
+        404:
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "User not found"
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Internal server error"
   /update-password-phone:
     put:
       summary: Reset password using phone number
@@ -1083,7 +1123,7 @@ paths:
           description: Listing not found
         '500':
           description: Server error
-
+  
   /update-list/{id}:
     put:
       summary: Update a listing by ID
@@ -1117,7 +1157,7 @@ paths:
           description: Listing not found
         '500':
           description: Server error
-
+  
   /delete-list/{id}:
     delete:
       summary: Delete a listing by ID
@@ -1139,6 +1179,471 @@ paths:
           description: Listing not found
         '500':
           description: Server error
+  /favoriteslist-list/{id}:
+    put:
+      tags:
+        - Favorites
+      summary: Add a property to the user's favorites list
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the property to add to favorites
+      responses:
+        200:
+          description: Property successfully added to favorites
+        500:
+          description: Server error  
+  /unfavoriteslist-list/{id}:
+    put:
+      tags:
+        - Favorites
+      summary: Remove a property from the user's favorites list
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the property to remove from favorites
+      responses:
+        200:
+          description: Property successfully removed from favorites
+        500:
+          description: Server error
+  /book/{id}:
+    post:
+      tags:
+        - Booking
+      summary: Book a property for a user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the property to book
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                checkinDate:
+                  type: string
+                  format: date
+                  example: '2024-10-01'
+                checkoutDate:
+                  type: string
+                  format: date
+                  example: '2024-10-07'
+                price:
+                  type: number
+                  example: 200
+      responses:
+        200:
+          description: Redirect to payment gateway
+        400:
+          description: The selected dates are already booked
+        500:
+          description: Server error
+
+  /check-available/{id}:
+    get:
+      tags:
+        - Booking
+      summary: Check if property is available for booking
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the property to check availability
+      responses:
+        200:
+          description: The selected dates are available
+        400:
+          description: The selected dates are already booked
+        500:
+          description: Error checking availability
+
+  /get-single-user/{id}:
+    get:
+      tags:
+        - User
+      summary: Get user details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the user to retrieve
+      responses:
+        200:
+          description: User details retrieved successfully
+        400:
+          description: User not found
+        500:
+          description: Server error
+
+  /user-favoriteslist/{id}:
+    get:
+      tags:
+        - Favorites
+      summary: Get the user's favorites list
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the user to retrieve   
+      responses:
+        200:
+          description: Favorites list retrieved successfully
+        400:
+          description: User not found
+        500:
+          description: Server error
+
+  /user-booking-list:
+    get:
+      tags:
+        - Booking
+      summary: Get the list of properties booked by the current user
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Booking list retrieved successfully
+        500:
+          description: Server error
+
+  /payment-success:
+    put:
+      tags:
+        - Payment
+      summary: Update booking status after successful payment
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tran_id:
+                  type: string
+                  description: Transaction ID from payment provider
+                status:
+                  type: string
+                  description: Payment status
+                  example: success
+      responses:
+        200:
+          description: Payment successful, booking confirmed
+        404:
+          description: Booking not found
+        500:
+          description: Error processing payment success
+
+  /fail-payment:
+    put:
+      tags:
+        - Payment
+      summary: Handle payment failure and cancel booking
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tran_id:
+                  type: string
+                  description: Transaction ID from payment provider
+      responses:
+        400:
+          description: Payment failed, booking canceled
+        500:
+          description: Error processing payment failure   
+  /admin/failed-booking-all:
+    get:
+      summary: Get all failed bookings
+      description: Retrieve all failed bookings including the associated users and properties.
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of all failed bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Booking'
+        500:
+          description: Error retrieving failed bookings
+  /admin/get-single-list/{id}:
+    get:
+      summary: Get a specific list
+      description: Retrieve details of a specific list by its ID.
+      tags:
+        - Admin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the list to retrieve
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/List'
+        404:
+          description: List not found
+        500:
+          description: Error retrieving list details
+  /admin/published-list/{id}:
+    put:
+      summary: Publish a list
+      description: Approve and publish a specific list (property).
+      tags:
+        - Admin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the list to approve and publish
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List published successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/List'
+        404:
+          description: List not found
+        500:
+          description: Error publishing list
+
+  /admin/booking-confirm/{id}:
+    put:
+      summary: Confirm a booking
+      description: Approve a pending booking by updating its status to 'confirmed'.
+      tags:
+        - Admin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the booking to approve
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Booking confirmed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        404:
+          description: Booking not found
+        500:
+          description: Error confirming booking
+
+  /admin/create-admin/{id}:
+    put:
+      summary: Create a new admin
+      description: Approve and change the role of a user to 'admin'.
+      tags:
+        - Admin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the user to promote to admin
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: User promoted to admin successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        404:
+          description: User not found
+        500:
+          description: Error promoting user to admin 
+  /admin/all-user:
+    get:
+      summary: Get all users
+      description: Retrieve a list of all users in the system.
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of all users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        500:
+          description: Error retrieving users
+
+  /admin/all-list:
+    get:
+      summary: Get all lists
+      description: Retrieve all property lists.
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of all properties
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/List'
+        500:
+          description: Error retrieving lists
+  /admin/block-user/{id}:
+    put:
+      summary: Block a user
+      description: Block a specific user by updating their status to 'inactive'.
+      tags:
+        - Admin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the user to block
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: User blocked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        404:
+          description: User not found
+        500:
+          description: Error blocking user
+  /admin/get-pending/:
+    get:
+      summary: Retrieve Pending Bookings
+      description: Fetches a list of bookings with a "pending" status, including details of the property and user.
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []  # Adjust if your security scheme is named differently
+      responses:
+        '200':
+          description: Successful retrieval of pending bookings.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking' 
+        404:
+          description: Booking not found
+        500:
+          description: Error confirming booking
+  /admin/published-from-host/{id}:
+    put:
+      summary: Approve and Publish a List
+      description: Updates the status of a list to "published" based on the provided ID.
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []  # Adjust if your security scheme is named differently
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier of the list to be published.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List approved and published successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Success message indicating approval.
+                  list:
+                    $ref: '#/components/schemas/List'  # Reference to your existing list schema
+        '404':
+          description: List not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message indicating that the list was not found.
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message indicating an internal server issue.
 components:
   securitySchemes:
     bearerAuth:
@@ -1200,6 +1705,12 @@ components:
         status:
           type: string
           example: inactive
+        favoritelist:
+           type: array
+           items:
+             type: string
+             example: "60d0fe4f5311236168a109cb" # Reference to List model
+           description: An array of ObjectId references to the favorited lists.  
     List:
       type: object
       properties:
@@ -1456,4 +1967,75 @@ components:
             coordinates:
               type: array
               items:
-                type: number      
+                type: number     
+    Booking:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "60d0fe4f5311236168a109ca"  # ObjectId reference for booking ID
+        user:
+          type: string
+          example: "60d0fe4f5311236168a109cb"  # ObjectId reference for User
+        property:
+          type: string
+          example: "60d0fe4f5311236168a109cc"  # ObjectId reference for Property (List model)
+        checkinDate:
+          type: string
+          format: date
+          example: "2024-09-15"
+        checkoutDate:
+          type: string
+          format: date
+          example: "2024-09-20"
+        price:
+          type: number
+          example: 200.50
+        status:
+          type: string
+          enum:
+            - pending
+            - confirmed
+            - failed
+          example: "pending"
+        tran_id:
+          type: string
+          example: "TRX12345"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-09-01T12:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-09-01T12:35:00Z" 
+    FailedBooking:
+      type: object
+      properties:
+        user:
+          type: string
+          example: "60d0fe4f5311236168a109ca" # ObjectId reference to User
+        property:
+          type: string
+          example: "60d0fe4f5311236168a109cb" # ObjectId reference to Property
+        tran_id:
+          type: string
+          example: "TRX12345"
+        checkinDate:
+          type: string
+          format: date
+          example: "2024-09-15"
+        checkoutDate:
+          type: string
+          format: date
+          example: "2024-09-20"
+        price:
+          type: number
+          example: 200.50
+        reason:
+          type: string
+          example: "Payment failed"
+        date:
+          type: string
+          format: date-time
+          example: "2024-09-21T12:30:00Z"

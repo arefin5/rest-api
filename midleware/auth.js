@@ -70,8 +70,10 @@ const canEditDeletePost = async (req, res, next) => {
   }
 };
 const isHost = async (req, res, next) => {
+const user=await User.findById(req.auth._id)
   try {
-    if (req.auth.role != host) {
+    console.log(req.auth.role)
+    if (user.role !== "host") {
       return res.status(400).send("Unauthorized");
     } else {
       next();
