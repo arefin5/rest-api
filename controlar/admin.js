@@ -107,7 +107,7 @@ exports.getFailedBookings = async (req, res) => {
         // Update the status to 'published'
         user.role = 'admin';
         await user.save();
-        res.status(200).json({ message: 'user approved successfully', list });
+        res.status(200).json({ message: 'user approved successfully', user });
     } catch (error) {
         console.error('Error updating user Role:', error);
         res.status(500).json({ error: 'Internal Server Error' });

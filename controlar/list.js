@@ -144,3 +144,34 @@ exports.getSingleList=async (req, res) => {
     console.log(err);
   }
 }
+exports.allListByUser = async (req, res) => {
+  try {
+    const list = await List.find({
+      Postedby: req.auth._id
+    })
+      .populate("Postedby", "name")
+      .sort({ createdAt: -1 })
+      .limit(12);
+
+    res.json(list);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+// exports.allListByuser = async (req, res) => {
+//   try {
+//     const list = await List.find({
+//       status: "active",
+//       Postedby: req.auth._id
+//     })
+//       .populate("Postedby", "name")
+//       .sort({ createdAt: -1 })
+//       .limit(12);
+
+//     res.json(list);
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };

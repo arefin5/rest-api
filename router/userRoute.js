@@ -2,7 +2,6 @@
 const express = require("express");
 const { requireSignin ,canEditDeletePost,isHost} = require("../midleware/auth");
 const router = express.Router();
-const {checkAdmin} =require("../midleware/admin")
 const {
     addFavoritelist,
     removeFavoritelist,
@@ -12,7 +11,8 @@ const {
     UserBooklist,
     paymentSuccess ,
     paymentFail,
-    favoritelist
+    favoritelist,
+    softDeleteUser
 } = require("../controlar/user.js");
 
 router.put("/favoriteslist-list/:id",requireSignin,addFavoritelist)
@@ -27,5 +27,5 @@ router.get("/user-favoriteslist/:id",requireSignin,favoritelist)
 router.get("/user-booking-list",requireSignin,UserBooklist);
 router.put("/payment-success",requireSignin,paymentSuccess);
 router.put("/fail-payment",requireSignin,paymentFail)
-
+router.put("/delete-user",requireSignin,softDeleteUser)
 module.exports = router;

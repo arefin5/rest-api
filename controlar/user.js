@@ -156,12 +156,11 @@ exports.bookProperty=async (req, res) => {
     // Calculate the length of stay in days
     const lengthOfStay = Math.ceil((checkoutDateObj - checkinDateObj) / (1000 * 60 * 60 * 24)); 
   const  amount=property.price
-    console.log(property.price)
     // Payment data object
     const paymentData = {
       total_amount: amount,
       currency: 'BDT',
-      success_url: 'http://localhost:3000/success',
+      success_url: 'http://localhost:3000/success/${}',
       fail_url: 'http://localhost:3000/fail',
       cancel_url: 'http://localhost:3000/cancel',
       ipn_url: 'http://localhost:3000/ipn',
@@ -208,7 +207,7 @@ exports.bookProperty=async (req, res) => {
 
     // Step 3: Redirect the user to the payment gateway for payment
     res.json({ GatewayPageURL, message: 'Redirecting to payment gateway' });
-
+  //  after payment success then how can find tran_id here and use this into front end 
   } catch (error) {
     console.error('Error booking the property:', error);
     res.status(500).json({ message: 'Error booking the property', error });
@@ -274,5 +273,22 @@ exports.paymentFail = async (req, res) => {
   } catch (error) {
     console.error('Error in payment failure:', error);
     res.status(500).json({ message: 'Error processing payment failure', error });
+  }
+};
+
+exports.softDeleteUser = async (req, res) => {
+  try {
+    const userId = req.auth.id; // Assuming the authenticated user's ID is available in req.auth.id
+    
+    const user = await User.findByIdAndUpdate(userId, { status: 'active' }, { new: true });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ message: 'User account soft deleted successfully', user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };

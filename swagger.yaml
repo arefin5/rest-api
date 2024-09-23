@@ -567,7 +567,47 @@ paths:
           description: OTP not verified or wrong password
         '404':
           description: No user found
-
+  /delete-user:
+    put:
+      summary: Soft delete the authenticated user's account
+      description: Mark the authenticated user's account as soft deleted by updating the `status` field to `active`. The user must be signed in to perform this action.
+      tags:
+        - User
+      security:
+        - bearerAuth: [] # Requires bearer authentication (JWT)
+      responses:
+        200:
+          description: User account soft deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User account soft deleted successfully"
+                  user:
+                    $ref: '#/components/schemas/User'
+        404:
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "User not found"
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Internal server error"
   /update-password-phone:
     put:
       summary: Reset password using phone number
@@ -1083,7 +1123,7 @@ paths:
           description: Listing not found
         '500':
           description: Server error
-
+  
   /update-list/{id}:
     put:
       summary: Update a listing by ID
@@ -1117,7 +1157,7 @@ paths:
           description: Listing not found
         '500':
           description: Server error
-
+  
   /delete-list/{id}:
     delete:
       summary: Delete a listing by ID
