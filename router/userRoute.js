@@ -12,7 +12,8 @@ const {
     paymentSuccess ,
     paymentFail,
     favoritelist,
-    softDeleteUser
+    softDeleteUser,
+    createReview
 } = require("../controlar/user.js");
 
 router.put("/favoriteslist-list/:id",requireSignin,addFavoritelist)
@@ -27,5 +28,6 @@ router.get("/user-favoriteslist/:id",requireSignin,favoritelist)
 router.get("/user-booking-list",requireSignin,UserBooklist);
 router.put("/payment-success",requireSignin,paymentSuccess);
 router.put("/fail-payment",requireSignin,paymentFail)
-router.put("/delete-user",requireSignin,softDeleteUser)
+router.put("/delete-user",requireSignin,softDeleteUser);
+router.post("/create-review/:id",requireSignin,createReview);
 module.exports = router;
