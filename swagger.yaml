@@ -4,9 +4,9 @@ info:
   description: API for Bed Bd Rest api.
   version: 1.0.0
 servers:
-  - url: http://localhost:5000/api
+  - url: http://localhost:5050/api
     description: Local server
-  - url: http://203.161.60.224/:5000/api
+  - url: http://45.77.247.238:5050/api
     description: Public Server   
 tags:
   - name: Users
