@@ -42,7 +42,7 @@ app.use('/api', require('./router/hostRoute'));
 app.use('/api', require('./router/adminRoute'));
 
 app.use("/api",require('./router/userRoute'))
-app.use('/api', require('./router/getimage'));
+app.use('/api', require('./router/getImage'));
 const imageRouter = require('./router/imageRouter');
 
 app.use('/api/images', formidableMiddleware({ encoding: 'utf-8', multiples: true }), imageRouter);
