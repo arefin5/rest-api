@@ -45,6 +45,41 @@ exports.register = async (req, res) => {
     return res.status(400).send("Error. Try again.");
   }
 };
+// normal user
+exports.singup= async (req, res) => {
+    //  console.log("REGISTER ENDPOINT => ", req.body);
+    const {password, email } = req.body;
+    // validation
+    const exist = await User.findOne({ email });
+    if (exist) {
+      return res.json({
+        error: "email is taken",
+      });
+    }
+    // hash password
+    const hashedPassword = await hashPassword(password);
+
+    const user = new User({
+      password: hashedPassword,
+      phone: email,
+    });
+    // console.log(user)
+    try {
+      await user.save();
+      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+        expiresIn: "7d",
+      });
+      user.password = undefined;
+      res.json({
+        token,
+        user,
+      });
+    } catch (err) {
+      console.log("REGISTER FAILED => ", err);
+      return res.status(400).send("Error. Try again.");
+    }
+};
+
 exports.generateOtp = async (req, res) => {
   const { email } = req.body;
   const ipAddress = req.ip;

@@ -17,7 +17,7 @@ const { register, login, SingleUser,
   resetPasswordPhone,
   verifyRequest,
   loginByphone,
-  
+  singup
 } = require("../controlar/userAuth.js");
 
 
@@ -26,11 +26,14 @@ const { register, login, SingleUser,
 router.post("/generate-otp", generateOtp);
 router.post("/verify-otp", verifyOtp);
 router.post("/register",  register);
+
 router.post("/login", login);
 router.post("/google-facebook-login", googleFacebookLogin);
 router.post("/forget-password", forgotPassword);
 router.post("/verify-forget-pass", verifyForgotPasswordOtp);
 router.put("/reset-password", requireSignin, resetPassword);
+
+router.post("/singup-user",  singup);
 
 // Phone authentication and login
 router.post("/generate-otp-phone", generateOtpPhone);
