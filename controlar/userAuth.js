@@ -403,7 +403,7 @@ exports.generateOtpPhone = async (req, res) => {
     // await sendOTPEmail(email, otp); // Make sure this function sends the phone
 
     logger.info(`OTP generated and sent to ${phone}`);
-    res.json({ message: "OTP sent successfully" });
+    res.json({ message: "OTP sent successfully" ,phone});
     console.log(otp)
   } catch (err) {
     logger.error(`Error during OTP generation: ${err.message}`);

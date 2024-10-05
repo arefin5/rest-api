@@ -20,7 +20,7 @@ const { register, login, SingleUser,
    signup,
    verifyEmail,
    confirmEmailVerification
-   
+  
 } = require("../controlar/userAuth.js");
 
 
@@ -46,7 +46,7 @@ router.put("/update-password-phone",requireSignin,resetPasswordPhone)
 router.put("/verify-user-request",requireSignin,verifyRequest)
 // Profile route
 // router.get('/profile:id', requireSignin, SingleUser);
-// Route to send verification email
+// email verification
 router.post('/send-verification-email', verifyEmail);
 
 // Route to verify email with the token
