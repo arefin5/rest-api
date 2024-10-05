@@ -19,7 +19,8 @@ const { register, login, SingleUser,
   loginByphone,
    signup,
    verifyEmail,
-   verifyRequest
+   confirmEmailVerification
+  
 } = require("../controlar/userAuth.js");
 
 
