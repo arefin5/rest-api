@@ -9,11 +9,12 @@ const helmet = require('helmet');
 const Fingerprint = require("express-fingerprint");
  const db = require('./mongodb-connection');
  const SSLCommerzPayment = require('sslcommerz-lts')
-
+ const socketIO = require('socket.io');
+ const http = require('http');
 // Initialize Express app
 const app = express();
 
-
+const server = http.createServer(app);
 // Middleware setup
 app.use(bodyParser.json());
 app.use(express.json());
@@ -42,7 +43,7 @@ app.use('/api', require('./router/hostRoute'));
 app.use('/api', require('./router/adminRoute'));
 
 app.use("/api",require('./router/userRoute'))
-app.use('/api', require('./router/getimage'));
+app.use('/api', require('./router/getImage'));
 const imageRouter = require('./router/imageRouter');
 
 app.use('/api/images', formidableMiddleware({ encoding: 'utf-8', multiples: true }), imageRouter);
@@ -82,9 +83,15 @@ app.get('/mongodb-data', async (req, res) => {
     res.status(500).send('Server Error');
   }
 });
-
+const io = socketIO(server, {
+  cors: {
+    origin: '*', // Allow any origin (or restrict to your frontend origin)
+    methods: ['GET', 'POST'],
+  }
+});
+require('./socketHandler')(io); // Load socket handle
 // Start the server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 5050;
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

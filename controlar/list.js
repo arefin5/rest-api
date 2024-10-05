@@ -64,18 +64,56 @@ exports.createList = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+// exports.lists = async (req, res) => {
+//   // console.log(req.auth.)
+//   try {
+//     const list = await List.find({status:"active"})
+//       .populate("Postedby", "name")
+//       .sort({ createdAt: -1 })
+//       .limit(12);
+//     res.json(list);
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
+
 exports.lists = async (req, res) => {
-  // console.log(req.auth.)
   try {
-    const list = await List.find({status:"active"})
-      .populate("Postedby", "name")
+    // Fetch lists with associated reviews and users
+    const lists = await List.find({ status: "active" })
+      .populate("Postedby", "name") // Populate Postedby field with user name
+      .populate({
+        path: 'reviews',
+        populate: {
+          path: 'user', // Populate user data in the review
+          select: 'name', // Only retrieve the name field
+        }
+      })
       .sort({ createdAt: -1 })
       .limit(12);
-    res.json(list);
+
+    // Optionally calculate average ratings
+    const listsWithAvgRating = lists.map(list => {
+      const reviews = list.reviews;
+      let totalRating = 0;
+      reviews.forEach(review => {
+        totalRating += review.overallRating; // Sum up the overall ratings
+      });
+      const avgRating = reviews.length ? (totalRating / reviews.length).toFixed(1) : 0;
+
+      return {
+        ...list.toObject(),
+        avgRating: avgRating, // Add average rating to each list
+      };
+    });
+
+    res.json(listsWithAvgRating);
   } catch (err) {
     console.log(err);
+    res.status(500).json({ error: 'An error occurred while fetching the lists' });
   }
 };
+
 
 exports.updateList = async (req, res) => {
   try {
@@ -159,19 +197,4 @@ exports.allListByUser = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-// exports.allListByuser = async (req, res) => {
-//   try {
-//     const list = await List.find({
-//       status: "active",
-//       Postedby: req.auth._id
-//     })
-//       .populate("Postedby", "name")
-//       .sort({ createdAt: -1 })
-//       .limit(12);
 
-//     res.json(list);
-//   } catch (err) {
-//     console.log(err);
-//     res.status(500).json({ error: 'Internal server error' });
-//   }
-// };

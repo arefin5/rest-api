@@ -2,7 +2,7 @@ const User = require("../models/userModel");
 const List = require('../models/listModel'); 
 const Booking = require("../models/bookingSchema"); 
 const FailedBooking = require('../models/failedBookingSchema'); 
-
+const Review=require("../models/Review")
 const { initPayment } = require('../service/payment');
 exports.addFavoritelist = async (req, res) => {
   const id = req.params.id;
@@ -290,5 +290,36 @@ exports.softDeleteUser = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Internal server error' });
+  }
+};
+exports.createReview = async (req, res) => {
+  try {
+      const listId = req.params.id;
+      const userId = req.auth._id; // Authenticated user's ID
+      const reviewData = req.body.reviewData;
+      // Create a new review with reference to the user
+      const newReview = new Review({
+          listId: listId,
+          categories: reviewData.categories,
+          user: userId, // Store user ID for population
+          reviewText: reviewData.reviewText
+      });
+
+      // Save the review to the database
+      await newReview.save();
+
+      // Populate the user details in the saved review
+      const populatedReview = await Review.findById(newReview._id).populate('user', 'name');
+      await List.findByIdAndUpdate(listId, { $push: { reviews: populatedReview._id } });
+
+      // Send the created review with populated user details
+      return res.status(201).json({
+          message: 'Review created successfully',
+          review: populatedReview,
+          overallRating: populatedReview.overallRating
+      });
+  } catch (err) {
+      console.error('Error creating review:', err);
+      return res.status(500).json({ message: 'Error creating review', error: err.message });
   }
 };
