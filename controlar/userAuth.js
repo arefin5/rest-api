@@ -5,10 +5,11 @@ const mongoose = require('mongoose');
 const { generateOTP, sendOTP } = require("../helper/otp");
 const logger = require("../utils/logger"); // Import the logger
 const sendOTPEmail = require("../helper/email"); // Import the sendOTPEmail function
-
+const crypto = require('crypto');
+const {sendVerificationEmail} =require("../helper/sendVerificationEmail")
 
 exports.register = async (req, res) => {
-  console.log("start")
+  // console.log("start")
   const { name, password, email, birth } = req.body;
   // validation
   if (!name) {
@@ -46,38 +47,44 @@ exports.register = async (req, res) => {
   }
 };
 // normal user
-exports.singup= async (req, res) => {
-    //  console.log("REGISTER ENDPOINT => ", req.body);
-    const {password, email } = req.body;
-    // validation
-    const exist = await User.findOne({ email });
-    if (exist) {
-      return res.json({
-        error: "email is taken",
-      });
-    }
-    // hash password
-    const hashedPassword = await hashPassword(password);
+exports.signup = async (req, res) => {
+  const { password, email } = req.body;
 
+  try {
+    const users = await User.findOne({ email });
+    // console.log(user);
+    if (users) {
+      return res.status(400).json({ error: "User  is exist in there " });
+    }
+     console.log(users);
+
+    const hashedPassword = await hashPassword(password);
+    // Create new user
     const user = new User({
       password: hashedPassword,
-      phone: email,
+      email: email,
     });
-    // console.log(user)
-    try {
-      await user.save();
-      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-        expiresIn: "7d",
-      });
-      user.password = undefined;
-      res.json({
-        token,
-        user,
-      });
-    } catch (err) {
-      console.log("REGISTER FAILED => ", err);
-      return res.status(400).send("Error. Try again.");
-    }
+
+    // Save user
+    await user.save();
+
+    // // Generate JWT token
+    // const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+    //   expiresIn: "7d",
+    // });
+
+    // Exclude password from the response
+    user.password = undefined;
+
+    // Send success response
+    res.json({
+      user,
+    });
+
+  } catch (err) {
+    console.log("REGISTER FAILED => ", err);
+    return res.status(500).json({ error: "Registration failed. Please try again." });
+  }
 };
 
 exports.generateOtp = async (req, res) => {
@@ -281,8 +288,9 @@ exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
   try {
     const user = await User.findOne({ email });
+    // console.log(user);
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(400).json({ error: "User not found" });
     }
     // Generate OTP
     const otp = generateOTP();
@@ -290,11 +298,11 @@ exports.forgotPassword = async (req, res) => {
     user.otpExpires = Date.now() + 10 * 60 * 10000; // OTP valid for 10 minutes
     // Save OTP to user record
     await user.save();
-
+    console.log("otp forget",otp)
     // Send OTP to user email
-    await sendOTPEmail(email, otp);
+    // await sendOTPEmail(email, otp);
 
-    res.json({ message: "OTP sent to your email" });
+    res.json({ message: "OTP sent to your email" ,email});
   } catch (err) {
     console.error("Error in forgot password:", err);
     res.status(500).json({ error: "Internal Server Error" });
@@ -547,5 +555,60 @@ exports.verifyRequest=async (req, res) => {
   } catch (err) {
     console.error("Error in password reset:", err);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+exports.verifyEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Check if the user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).send("User not found.");
+    }
+
+    // Generate a verification token (could be a simple token or OTP)
+    const token = crypto.randomBytes(20).toString('hex');
+    
+    // Set the token and expiration time (e.g., 1 hour)
+    user.otp = token;
+    user.otpExpires = Date.now() + 3600000; // 1 hour from now
+    await user.save();
+
+    // Construct a verification URL
+    const verificationUrl = `${req.protocol}://${req.get('host')}/verify/${token}`;
+
+    // Send verification email with the link
+    // await sendVerificationEmail(user.email, verificationUrl);
+      console.log(user.email,verificationUrl)
+    return res.status(200).send("Verification email sent. Please check your inbox.");
+  } catch (error) {
+    return res.status(500).send("Error. Try again.");
+  }
+};
+// Route to verify email based on the token
+exports.confirmEmailVerification = async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    // Find user by the token and ensure it's not expired
+    const user = await User.findOne({
+      otp: token,
+      otpExpires: { $gt: Date.now() } // Check that the token is not expired
+    });
+
+    if (!user) {
+      return res.status(400).send("Invalid or expired token.");
+    }
+
+    // Update user as verified
+    user.isemailVerify = true;
+    user.otp = undefined; // Clear the token
+    user.otpExpires = undefined; // Clear the expiration time
+    await user.save();
+
+    return res.status(200).send("Email successfully verified.");
+  } catch (error) {
+    return res.status(500).send("Error verifying email. Try again.");
   }
 };

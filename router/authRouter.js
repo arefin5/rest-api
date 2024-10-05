@@ -17,7 +17,10 @@ const { register, login, SingleUser,
   resetPasswordPhone,
   verifyRequest,
   loginByphone,
-  singup
+   signup,
+   verifyEmail,
+   confirmEmailVerification
+   
 } = require("../controlar/userAuth.js");
 
 
@@ -33,7 +36,7 @@ router.post("/forget-password", forgotPassword);
 router.post("/verify-forget-pass", verifyForgotPasswordOtp);
 router.put("/reset-password", requireSignin, resetPassword);
 
-router.post("/singup-user",  singup);
+router.post("/singup-user",  signup);
 
 // Phone authentication and login
 router.post("/generate-otp-phone", generateOtpPhone);
@@ -43,7 +46,11 @@ router.put("/update-password-phone",requireSignin,resetPasswordPhone)
 router.put("/verify-user-request",requireSignin,verifyRequest)
 // Profile route
 // router.get('/profile:id', requireSignin, SingleUser);
+// Route to send verification email
+router.post('/send-verification-email', verifyEmail);
 
+// Route to verify email with the token
+router.get('/verify/:token', confirmEmailVerification);
 router.put("/change-role",requireSignin,userRole);
 router.put("/edit-profile",requireSignin,editProfile)
 module.exports = router;

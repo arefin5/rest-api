@@ -1644,6 +1644,122 @@ paths:
                   error:
                     type: string
                     description: Error message indicating an internal server issue.
+  /messages:
+    post:
+      tags:
+        - Messaging
+      summary: Send a message
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: message
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              sender:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: "60d0fe4f5311236168a109ca"
+              receiver:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: "60d0fe4f5311236168a109cb"
+              message:
+                type: string
+                example: "Hello, how are you?"
+      responses:
+        200:
+          description: Message sent successfully
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                example: "60d0fe4f5311236168a109cd"
+              sender:
+                type: string
+                example: "60d0fe4f5311236168a109ca"
+              receiver:
+                type: string
+                example: "60d0fe4f5311236168a109cb"
+              message:
+                type: string
+                example: "Hello, how are you?"
+              isRead:
+                type: boolean
+                example: false
+              isDelivered:
+                type: boolean
+                example: false
+              createdAt:
+                type: string
+                format: date-time
+                example: "2024-09-15T12:30:00Z"
+              updatedAt:
+                type: string
+                format: date-time
+                example: "2024-09-15T12:30:00Z"
+        400:
+          description: Bad request, invalid data
+        401:
+          description: Unauthorized, invalid token
+        500:
+          description: Server error
+
+  /messages/{id}:
+    get:
+      tags:
+        - Messaging
+      summary: Get a message by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Message details
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                example: "60d0fe4f5311236168a109cd"
+              sender:
+                type: string
+                example: "60d0fe4f5311236168a109ca"
+              receiver:
+                type: string
+                example: "60d0fe4f5311236168a109cb"
+              message:
+                type: string
+                example: "Hello, how are you?"
+              isRead:
+                type: boolean
+                example: false
+              isDelivered:
+                type: boolean
+                example: false
+              createdAt:
+                type: string
+                format: date-time
+                example: "2024-09-15T12:30:00Z"
+              updatedAt:
+                type: string
+                format: date-time
+                example: "2024-09-15T12:30:00Z"
+        404:
+          description: Message not found
+        500:
+          description: Server error
 components:
   securitySchemes:
     bearerAuth:
