@@ -128,6 +128,7 @@ exports.generateOtp = async (req, res) => {
 exports.verifyOtp = async (req, res) => {
   const { email, otp } = req.body;
   const ipAddress = req.ip;
+console.log(email,otp);
 
   logger.info(`OTP verification attempted by ${email} from IP ${ipAddress}`);
 
@@ -202,33 +203,80 @@ exports.SingleUser = async (req, res) => {
   }
 };
 exports.editProfile = async (req, res) => {
-  const userId = req.auth._id;
   try {
-    const user = await User.findById(userId); // Fix: Remove the curly braces around userId
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+    const { phone, email } = req.body;
+    const userId = req.auth._id;
+
+    // If phone or email are non-empty, check uniqueness
+    if (phone || email) {
+      const existingUser = await User.findOne({
+        _id: { $ne: userId }, // Exclude current user
+        $or: [{ email: email }, { phone: phone }],
+      });
+
+      if (existingUser) {
+        return res.status(400).json({ message: 'Email or phone number already in use' });
+      }
     }
-    // Update user information
-    user.name = req.body.name || user.name;
-    user.email = req.body.email || user.email;
-    user.phone = req.body.phone || user.phone;
-    user.fatherName = req.body.fatherName || user.fatherName;
-    user.motherName = req.body.motherName || user.motherName;
-    user.presentAddress = req.body.presentAddress || user.presentAddress;
-    user.parmanentAddress = req.body.parmanentAddress || user.parmanentAddress;
-    user.birth = req.body.birth || user.birth;
-    user.profilePic = req.body.profilePic || user.profilePic;
-     user.cover=req.body.cover || user.cover;
+
+    // Find the user by ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Track changes for email and phone
+    let emailChanged = false;
+    let phoneChanged = false;
+
+    // Update fields if they exist in req.body and are not empty strings
+    if (req.body.fname) user.fname = req.body.fname;
+    if (req.body.lname) user.lname = req.body.lname;
+    if (req.body.name) user.name = req.body.name;
+
+    if (req.body.email && req.body.email !== "") {
+      if (user.email !== req.body.email) {
+        user.email = req.body.email;
+        user.isemailVerify = false; // Reset email verification status
+        emailChanged = true;
+      }
+    }
+
+    if (req.body.phone && req.body.phone !== "") {
+      if (user.phone !== req.body.phone) {
+        user.phone = req.body.phone;
+        user.isPhoneVerified = false; // Reset phone verification status
+        phoneChanged = true;
+      }
+    }
+
+    if (req.body.fatherName) user.fatherName = req.body.fatherName;
+    if (req.body.motherName) user.motherName = req.body.motherName;
+    if (req.body.presentAddress) user.presentAddress = req.body.presentAddress;
+    if (req.body.parmanentAddress) user.parmanentAddress = req.body.parmanentAddress;
+    if (req.body.birth) user.birth = req.body.birth;
+    if (req.body.profilePic) user.profilePic = req.body.profilePic;
+    if (req.body.cover) user.cover = req.body.cover;
+
+    // Save the updated user data
     await user.save();
-    // Exclude the password from the response
-    user.password = undefined;
-    // Send a response indicating success
-    res.json({ message: 'Profile updated successfully', user });
-  } catch (error) {
-    console.error('Error updating profile:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+
+    // If email or phone was changed, notify the user (optional)
+    if (emailChanged) {
+      // Send email verification logic can go here (e.g., send email)
+    }
+    if (phoneChanged) {
+      // Send OTP or phone verification logic can go here (e.g., SMS OTP)
+    }
+
+    // Return success response
+    res.status(200).json({ message: 'User updated successfully', user });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
+
 exports.userRole = async (req, res) => {
   const userId = req.auth._id;
   try {
@@ -311,13 +359,14 @@ exports.forgotPassword = async (req, res) => {
 
 exports.verifyForgotPasswordOtp = async (req, res) => {
   const { email, otp } = req.body;
+  console.log(email)
 
   try {
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-
+     console.log(user);
     if (user.otp !== otp || user.otpExpires < Date.now()) {
       return res.status(400).json({ error: "Invalid or expired OTP" });
     }
@@ -328,6 +377,7 @@ exports.verifyForgotPasswordOtp = async (req, res) => {
     user.isOtpVerified = true;
 
     await user.save();
+    console.log(user)
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
@@ -342,13 +392,13 @@ exports.verifyForgotPasswordOtp = async (req, res) => {
   }
 };
 exports.resetPassword = async (req, res) => {
-  const { email, newPassword } = req.body;
+  const { email, password } = req.body;
 
    const {userID}=req.user._id ;
    console.log("test id",userID,req.user);
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ userID });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -359,7 +409,7 @@ exports.resetPassword = async (req, res) => {
     }
 
     // Hash the new password
-    const hashedPassword = await hashPassword(newPassword);
+    const hashedPassword = await hashPassword(password);
 
     // Update user password
     user.password = hashedPassword;
@@ -377,79 +427,7 @@ const normalizePhone = (phone) => {
   return phone.replace(/\D/g, ''); // Removes all non-digit characters
 };
 
-// exports.generateOtpPhone = async (req, res) => {
-//   const { phone } = req.body;
-//   const ipAddress = req.ip;
 
-//   logger.info(`OTP generation requested by ${phone} from IP ${ipAddress}`);
-
-//   try {
-//     // Try to find the user by phone
-//     let user = await User.findOne({ phone });
-
-//     // If the user does not exist, create a new user
-//     if (!user) {
-//       logger.info(`User not found. Creating new user with email ${phone}`);
-//       user = new User({
-//         phone,
-//       });
-//       await user.save(); // Save the new user in the database
-//       logger.info(`New user created with phone ${phone}`);
-//     }
-//     // Generate OTP
-//     const otp = generateOTP();
-//     user.otp = otp;
-//     user.otpExpires = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
-
-//     // Save the OTP and expiry time to the user record
-//     await user.save();
-
-//     // Send OTP to user phone
-//     // await sendOTPEmail(email, otp); // Make sure this function sends the phone
-
-//     logger.info(`OTP generated and sent to ${phone}`);
-//     res.json({ message: "OTP sent successfully" ,phone});
-//     console.log(otp)
-//   } catch (err) {
-//     logger.error(`Error during OTP generation: ${err.message}`);
-//     return res.status(500).json({ error: "Internal Server Error" });
-//   }
-// };
-// exports.verifyOtpPhone = async (req, res) => {
-//   const { phone, otp } = req.body;
-//   const ipAddress = req.ip;
-//    console.log(phone);
-//   logger.info(`OTP verification attempted by ${phone} from IP ${ipAddress}`);
-
-//   const user = await User.findOne({ phone });
-//   console.log(user);
-
-//   if (!user) {
-//     logger.warn(`OTP verification failed: User not found with phone ${phone}`);
-//     return res.status(400).json({ error: "User not found with this phone" });
-//   }
-//   if (user.otp !== otp || user.otpExpires < Date.now()) {
-//     logger.warn(`OTP verification failed: Invalid or expired OTP for phone ${phone}`);
-//     return res.status(400).json({ error: "Invalid or expired OTP" });
-//   }
-
-//   user.otp = undefined;
-//   user.isOtpVerified = true;
-//   user.status = "active";
-//   user.otpExpires = undefined;
-//   await user.save();
-
-//   logger.info(`OTP verified successfully for ${phone}`);
-
-//   const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-//     expiresIn: "7d",
-//   });
-//   res.json({
-//     message: "OTP verified successfully",
-//     token,
-//     user,
-//   });
-// };
 exports.generateOtpPhone = async (req, res) => {
   const { phone } = req.body;
   const normalizedPhone = normalizePhone(phone);

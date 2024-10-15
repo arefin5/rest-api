@@ -7,6 +7,14 @@ const userSchema = new Schema(
       type: String,
       trim: true,
     },
+    fname:{
+      type: String,
+      trim: true,
+    } ,
+     lname:{
+      type: String,
+      trim: true,
+    },
     email: {
       type: String,
       trim: true,
