@@ -1,5 +1,5 @@
 const List = require("../models/listModel");
-
+const User=require("../models/userModel")
 exports.createList = async (req, res) => {
   try {
     const {
@@ -198,3 +198,23 @@ exports.allListByUser = async (req, res) => {
   }
 };
 
+exports.HostCheck=async(req,res)=>{
+  try {
+    // Find the user by ID from the authenticated request
+    const user = await User.findById(req.auth._id);
+    
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    // Assuming you have an 'isHost' field to check host status
+    if (user.role==="host") {
+      return res.status(200).json({ isHost: true, message: "User is a host" });
+    } else {
+      return res.status(400).json({ isHost: false, message: "User is not a host" });
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Server error");
+  }
+}

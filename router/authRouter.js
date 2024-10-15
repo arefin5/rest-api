@@ -34,6 +34,7 @@ router.post("/login", login);
 router.post("/google-facebook-login", googleFacebookLogin);
 router.post("/forget-password", forgotPassword);
 router.post("/verify-forget-pass", verifyForgotPasswordOtp);
+
 router.put("/reset-password", requireSignin, resetPassword);
 
 router.post("/singup-user",  signup);
