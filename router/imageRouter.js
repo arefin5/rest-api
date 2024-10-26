@@ -17,11 +17,16 @@ const {
 
 router.post(
   "/upload-image-file",
-  requireAuth,
+
   uploadImagesMultiple
 );
+// router.post("/single-image-upload",
+//   requireAuth,
+//   uploadImage)
+
+
 router.post("/single-image-upload",
-  requireAuth,
+  
   uploadImage)
 // 
 // router.post('/upload-privet',requireAuth,UplodadSinglePrivete);

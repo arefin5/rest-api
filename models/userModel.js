@@ -58,6 +58,9 @@ const userSchema = new Schema(
     parmanentAddress:{
       type:String,
     },
+    about:{
+      type:String,
+    },
     isemailVerify:{ type: Boolean, default: false },
     isPhoneVerified:{type:Boolean,default:false},
     otp: { type: String },

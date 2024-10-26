@@ -3,26 +3,21 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const availableDateSchema = new Schema({
-    checkin:{
+    checkInStart:{
         type:String,
-        enum: ['as soon as possible'], 
+        enum: ['asap'], 
         required:true
     },
-    startBookingDate:{
+    allowExtend:{
         type:String,
         required:true
     },
-    thirtyPluseNight: { type: Boolean, default: false },
-    maximumNight:{
+   
+    bookingExtend:{
         type:String,
-        
+        required:true
     },
-    stopGettingBook:{
-     type: Boolean, default: false  
-    },
-    stopBookingDate:{
-        type:String
-    }
+   
        
 } ,{ _id: false });
 

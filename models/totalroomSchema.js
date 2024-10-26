@@ -5,6 +5,11 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const totalroomSchema = new Schema({
+
+
+  
+
+
     bedRoom: {
         type: Number,
         default: 0,

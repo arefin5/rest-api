@@ -249,7 +249,7 @@ exports.editProfile = async (req, res) => {
         phoneChanged = true;
       }
     }
-
+    if(req.body.about) user.about=req.body.about;
     if (req.body.fatherName) user.fatherName = req.body.fatherName;
     if (req.body.motherName) user.motherName = req.body.motherName;
     if (req.body.presentAddress) user.presentAddress = req.body.presentAddress;
@@ -260,7 +260,7 @@ exports.editProfile = async (req, res) => {
 
     // Save the updated user data
     await user.save();
-
+console.log(user)
     // If email or phone was changed, notify the user (optional)
     if (emailChanged) {
       // Send email verification logic can go here (e.g., send email)

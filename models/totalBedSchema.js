@@ -20,7 +20,7 @@ const totalBedSchema = new Schema({
         default: 0,
       },
      
-   
+      
 } ,{ _id: false,strict: false  });
 
 module.exports = totalBedSchema;
