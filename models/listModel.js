@@ -1,3 +1,170 @@
+// const mongoose = require('mongoose');
+// const { Schema } = mongoose;
+// const safetySchema=require("./safetySchema")
+// const FavaritesSchema=require("./FavaritesSchema")
+// const AmenitiesSchema=require("./AmenitiesSchema");
+// const Booking=require("./bookingSchema")
+// const propertyFeatureSchema=require("./propertyFeatureSchema")
+// const totalBedSchema=require("./totalBedSchema")
+// const totalroomSchema=require("./totalroomSchema")
+// const availableDateSchema=require("./availableDateSchema")
+// const homeRuleSchema=require("./homeRuleSchema")
+// const listSchema = new Schema(
+//   {
+//    typeOfproperty: {
+//   type: String,
+//   enum: [
+// "Villa",
+// "Farmhouse",
+// "Condons",
+// "Apartment", 
+// "House","Shard Room",
+//   ],
+//   default: 'House'
+// },
+// propertyFeature: {
+//     type: propertyFeatureSchema,  // Correct usage here
+//     required: true
+//   },
+// propertyCondition:{
+//   type:String,
+//    enum:["full-furnished","semi-furnished","empty"],
+//    required:true
+// },
+// // booking type 
+//     typeOfguests: {
+//       type: String,
+//       enum: ['An Entire Place', 'A Room', 'A Shared Room'], 
+//       default: 'An Entire Place'
+//     },
+// // 
+// propertyTitle:{
+//   type:String,
+//   required:true,
+
+// },
+// description:{
+//   type:String
+// },
+
+//     favorites:FavaritesSchema,
+//      safety: safetySchema,
+//     amenities:AmenitiesSchema,
+//     bookings: [{
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: 'Booking',
+//       required: true,
+//     },],
+//     totalroom:totalroomSchema,
+//     totalBed:totalBedSchema,
+//     availablecheck:availableDateSchema,
+//     homerule:homeRuleSchema,
+//     adults: {
+//       type: Number,
+//       default: 4,
+//     },
+//     under14:{
+//       type:Number
+//     },
+//     gender:{
+//       type: String,
+//       enum: ['male', 'female', 'anyone'], 
+//       required:true
+//   },
+// aprovingmethod:{
+//   type: String,
+//       enum: ['instant', 'manually',], 
+//       required:true
+// },
+
+// price : {
+//   type:Number,
+//   required:true
+// },
+
+// serviceFee:{
+//   type:Number,
+//   required:true
+// },
+// tex:{
+//   type:Number,
+//   required:true
+// },
+// images: [
+//   {
+//     url: String,
+//     public_id: String,
+//   }
+// ],
+//     Postedby: {
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: 'User',
+//       required: true,
+//     },
+//     reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
+
+//     status: {
+//       type: String,
+//       enum: ['draft', 'published','active'], 
+//       default: 'draft', 
+//     },
+//     location: {
+//       type: {
+//         type: String, 
+//         enum: ['Point'], 
+//         required: true
+//       },
+//       coordinates: {
+//         type: [Number], // [longitude, latitude]
+//         // required: true
+//       },
+//       country:{
+//         type:String,
+//         required:true
+//       },
+//       floor:{
+//         type:String,
+//       },
+//       streetAddress:{
+//         type:String,
+//         required:true
+//       },
+//       address:{
+//         type:String,
+//         required:true
+//       },
+//       addresstwo:{
+//         type:String,
+//       },
+//       thana:{
+//         type:String,
+//         required:true
+//       },
+//       district:{
+//         type:String,
+//         required:true
+//       },
+//       postcode:{
+//         type:String,
+//         required:true
+//       },
+//       googleMap:{
+//         type:String,
+//         required:true
+//       },
+//     },
+
+//     bedge:{
+//       type:String,
+      
+//     },
+//   },
+ 
+//   { timestamps: true }
+// );
+// listSchema.index({ location: '2dsphere' });
+
+// module.exports = mongoose.model('List', listSchema);
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const safetySchema=require("./safetySchema")
@@ -8,25 +175,32 @@ const propertyFeatureSchema=require("./propertyFeatureSchema")
 const totalBedSchema=require("./totalBedSchema")
 const totalroomSchema=require("./totalroomSchema")
 const availableDateSchema=require("./availableDateSchema")
-const homeRuleSchema=require("./homeRuleSchema")
+const homeRuleSchema=require("./homeRuleSchema");
+const GuestSchema=require("./GuestSchema")
+const bookingtype=require("./bookingtypeSchema")
 const listSchema = new Schema(
   {
    typeOfproperty: {
   type: String,
   enum: [
-    'House', 'Apartment', 'Barn', 'Bed & Breakfast', 'Boat', 'Cabin', 'Castle',
-    'Camper/RV', 'Casa Particular', 'Cave', 'Container', 'Dammuso', 'Dome',
-    'Cycladic Home', 'Earth Home', 'Tent', 'Tiny Home', 'Tower', 'Tree House',
-    'Trullo', 'Yurt', 'Windmill'
+"Villa",
+"Farmhouse",
+"Condons",
+"Apartment", 
+"House","Shard Room",
   ],
   default: 'House'
 },
-
+propertyFeature: {
+    type: propertyFeatureSchema,
+    required: true
+  },
 propertyCondition:{
   type:String,
-   enum:["full-furnished","semi-furnished","empty"],
+  //  enum:["","semi-furnished","empty"],
    required:true
 },
+
 // booking type 
     typeOfguests: {
       type: String,
@@ -34,6 +208,7 @@ propertyCondition:{
       default: 'An Entire Place'
     },
 // 
+bookingtype:bookingtype,
 propertyTitle:{
   type:String,
   required:true,
@@ -42,10 +217,11 @@ propertyTitle:{
 description:{
   type:String
 },
-propertyFeature:propertyFeatureSchema,
+
     favorites:FavaritesSchema,
      safety: safetySchema,
     amenities:AmenitiesSchema,
+    Guest:GuestSchema,
     bookings: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Booking',
@@ -55,23 +231,18 @@ propertyFeature:propertyFeatureSchema,
     totalBed:totalBedSchema,
     availablecheck:availableDateSchema,
     homerule:homeRuleSchema,
-    adults: {
-      type: Number,
-      default: 4,
-    },
-    under14:{
-      type:Number
-    },
+    
+
     gender:{
       type: String,
       enum: ['male', 'female', 'anyone'], 
       required:true
   },
-aprovingmethod:{
-  type: String,
-      enum: ['instant', 'manually',], 
-      required:true
-},
+// aprovingmethod:{
+//   type: String,
+//       enum: ['instant', 'manually',], 
+//       required:true
+// },
 
 price : {
   type:Number,
@@ -82,7 +253,12 @@ serviceFee:{
   type:Number,
   required:true
 },
-tex:{
+tax:{
+  type:Number,
+  required:true
+},
+      
+GroundPrice:{
   type:Number,
   required:true
 },
@@ -108,17 +284,17 @@ images: [
       type: {
         type: String, 
         enum: ['Point'], 
-        required: true
+        // required: true
       },
       coordinates: {
         type: [Number], // [longitude, latitude]
-        required: true
+        // required: true
       },
       country:{
         type:String,
         required:true
       },
-      fllor:{
+      floor:{
         type:String,
       },
       streetAddress:{
@@ -149,7 +325,14 @@ images: [
         required:true
       },
     },
-
+checkInTime:{
+  type:String,
+  required:true
+},
+      checkOutTime:{
+        type:String,
+        required:true,
+      },
     bedge:{
       type:String,
       

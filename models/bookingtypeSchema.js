@@ -1,11 +1,9 @@
 
-
-
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 // Define the schema for each property feature (name-value pair)
-const homesRoulesSchema = new Schema({
+const bookingTypes = new Schema({
   name: {
     type: String,
     required: true,
@@ -16,12 +14,12 @@ const homesRoulesSchema = new Schema({
   }
 }, { _id: false });
 
-const homeRuleSchema = new Schema({
-  homesRoules: {
+const BookingTypeSchema = new Schema({
+  bookingTypes: {
     type: Map,
-    of: homesRoulesSchema,
+    of: bookingTypes,
   }
 
 }, { _id: false });
 
-module.exports = homeRuleSchema;
+module.exports = BookingTypeSchema;

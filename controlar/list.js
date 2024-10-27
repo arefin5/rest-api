@@ -1,81 +1,6 @@
 const List = require("../models/listModel");
 const User=require("../models/userModel")
-exports.createList = async (req, res) => {
-  try {
-    const {
-      typeOfproperty,
-      propertyCondition,
-      typeOfguests,
-      propertyTitle,
-      description,
-      outdoorShower,
-      propertyFeature, 
-      favorites, 
-      safety, 
-      amenities, 
-      totalroom, 
-      totalBed, 
-      availablecheck, 
-      adults, 
-      under14, 
-      gender, 
-      aprovingmethod, 
-      price,
-      serviceFee, 
-      tex, 
-      images,
-      location, 
-      bedge, 
-    } = req.body;
 
-    const newList = new List({
-      typeOfproperty,
-      propertyCondition,
-      typeOfguests,
-      propertyTitle,
-      description,
-      outdoorShower,
-      propertyFeature, 
-      favorites, 
-      safety, 
-      amenities, 
-      totalroom, 
-      totalBed, 
-      availablecheck,
-      adults,
-      under14,
-      gender,
-      aprovingmethod,
-      price,
-      serviceFee,
-      tex,
-      images, 
-      location,
-      Postedby: req.auth._id, 
-    });
-
-    // Save the list in the database
-    const savedList = await newList.save();
-
-    // Send response
-    res.status(201).json(savedList);
-  } catch (error) {
-    console.error('Error creating list:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-// exports.lists = async (req, res) => {
-//   // console.log(req.auth.)
-//   try {
-//     const list = await List.find({status:"active"})
-//       .populate("Postedby", "name")
-//       .sort({ createdAt: -1 })
-//       .limit(12);
-//     res.json(list);
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
 
 exports.lists = async (req, res) => {
   try {
@@ -90,7 +15,7 @@ exports.lists = async (req, res) => {
         }
       })
       .sort({ createdAt: -1 })
-      .limit(12);
+      // .limit(12);
 
     // Optionally calculate average ratings
     const listsWithAvgRating = lists.map(list => {
@@ -218,3 +143,78 @@ exports.HostCheck=async(req,res)=>{
     return res.status(500).send("Server error");
   }
 }
+
+exports.createList = async (req, res) => {
+  try {
+ 
+    //  console.log(req.body.aprovingmethod)
+    const {
+      typeOfproperty,
+      propertyCondition,
+      propertyTitle,
+      description,
+      outdoorShower,
+      propertyFeature, 
+      location,
+      price,
+      tax,
+      serviceFee,
+      GroundPrice,
+      aprovingmethod,
+      gender,
+      image,
+      amenities,
+      bookingtype,
+      Guest,
+      totalroom,
+      totalBed,
+      availablecheck,
+      checkInTime,
+      checkOutTime,
+      homerule
+    } = req.body;
+    if (!typeOfproperty || !propertyTitle || !price) {
+      return res.status(400).json({ message: "Required fields are missing." });
+    }
+     let status="published"
+ if(aprovingmethod==="instant") {
+   status="published"
+ }else{
+  status="draft"
+ }
+    const newList = new List({
+      typeOfproperty,
+      propertyCondition,
+      propertyFeature: { features: propertyFeature },
+    
+      homerule:{homesRoules:homerule},
+      propertyTitle,
+      bookingtype:{bookingTypes:bookingtype},
+      description,
+      outdoorShower,
+      location,
+      price,
+      gender,
+      tax,
+      images:image,
+      serviceFee,
+      GroundPrice,
+      Guest,
+      totalroom,
+      totalBed,
+      availablecheck,
+      checkInTime,
+      checkOutTime,
+      status,
+      Postedby: req.auth._id, 
+    });
+    // Save the list in the database
+    const savedList = await newList.save();
+    // console.log(savedList)
+    // Send response
+    res.status(201).json(savedList);
+  } catch (error) {
+    console.error('Error creating list:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
