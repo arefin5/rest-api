@@ -4,6 +4,8 @@ const Booking = require("../models/bookingSchema");
 const FailedBooking = require('../models/failedBookingSchema'); 
 const Review=require("../models/Review")
 const { initPayment } = require('../service/payment');
+const uuid = require('uuid'); // To generate unique transaction IDs
+
 exports.addFavoritelist = async (req, res) => {
   const id = req.params.id;
   try {
@@ -21,22 +23,7 @@ exports.addFavoritelist = async (req, res) => {
   }
 };
 
-// exports.addFavoritelist = async (req, res) => {
-//   const id = req.params.id;
-//   try {
-//     const updatedUser = await User.findByIdAndUpdate(
-//       req.auth._id,
-//       {
-//         $addToSet: { favoritelist: id },
-//       },
-//       { new: true }
-//     );
-//     res.json(updatedUser);
-//   } catch (err) {
-//     console.log(err);
-//     res.status(500).json({ error: "Error adding to favoritelist" });
-//   }
-// };
+
 exports.removeFavoritelist = async (req, res) => {
   const id = req.params.id;
   try {
@@ -110,11 +97,11 @@ exports.getCurrentUser = async (req, res) => {
 exports.UserBooklist=async(req,res)=>{
   try {
     const userId = req.auth._id;
-
+      
     const bookings = await Booking.find({ user: userId })
     .populate({
       path: 'property',
-      select: 'propertyTitle description image', // Select only specific fields
+      select: 'propertyTitle description image',
     })
     .exec();
 
@@ -128,7 +115,6 @@ exports.bookProperty=async (req, res) => {
   try {
     const propertyId = req.params.id;
     const { checkinDate, checkoutDate } = req.body;
-
     // Find the property by ID
     const property = await List.findById(propertyId);
     if (!property) {
@@ -150,17 +136,14 @@ exports.bookProperty=async (req, res) => {
     if (isBooked) {
       return res.status(400).json({ message: 'The selected dates are already booked' });
     }
-    const checkinDateObj = new Date(checkinDate);
-    const checkoutDateObj = new Date(checkoutDate);
-    
     // Calculate the length of stay in days
-    const lengthOfStay = Math.ceil((checkoutDateObj - checkinDateObj) / (1000 * 60 * 60 * 24)); 
-  const  amount=property.price
-    // Payment data object
+  const  amount=property.price;
+  const transactionId = `TRANS_${uuid.v4()}`;
     const paymentData = {
+      tran_id:transactionId,
       total_amount: amount,
       currency: 'BDT',
-      success_url: 'http://localhost:3000/success/${}',
+      success_url : `http://localhost:3000/success?tran_id=${transactionId}`,
       fail_url: 'http://localhost:3000/fail',
       cancel_url: 'http://localhost:3000/cancel',
       ipn_url: 'http://localhost:3000/ipn',
@@ -177,20 +160,16 @@ exports.bookProperty=async (req, res) => {
       check_in_time: "12:00 PM", 
       hotel_city: property.location.thana,
     };
-    console.log("after paymentData chck")
 
     // Step 1: Initialize Payment
     const apiResponse = await initPayment(paymentData);
     const GatewayPageURL = apiResponse.GatewayPageURL;
-    console.log("after paymentData chck")
-
+  
     if (!GatewayPageURL) {
       return res.status(500).json({ message: 'Payment gateway initialization failed' });
     }
-
-    // Step 2: Create a new booking with status 'pending'
     const newBooking = new Booking({
-      user: req.auth._id,
+      // user: req.auth._id,
       property: propertyId,
       checkinDate: new Date(checkinDate),
       checkoutDate: new Date(checkoutDate),
@@ -321,5 +300,160 @@ exports.createReview = async (req, res) => {
   } catch (err) {
       console.error('Error creating review:', err);
       return res.status(500).json({ message: 'Error creating review', error: err.message });
+  }
+};
+
+
+exports.PropertyBooklist=async(req,res)=>{
+  
+  try {
+    const property = req.params.id;
+      console.log(property);
+    const bookings = await Booking.find({ property: property })
+    .populate({
+      path: 'property',
+      select: 'propertyTitle description image',
+    })
+    .exec();
+
+    res.status(200).json({ bookings });
+  } catch (error) {
+    console.error('Error fetching user booking list:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
+
+// Unified route handler for booking property and handling payment status
+exports.handleBooking = async (req, res) => {
+  const { action } = req.query;
+  console.log(req.body);
+   const amount =req.body.totalCost;
+  try {
+    switch (action) {
+      case 'book': // Booking initiation
+        const propertyId = req.params.id;
+        const { checkinDate, checkoutDate } = req.body;
+
+        // Find the property by ID
+        const property = await List.findById(propertyId);
+        if (!property) return res.status(404).json({ message: 'Property not found' });
+
+        // Check for date conflicts
+        const isBooked = await Booking.findOne({
+          property: propertyId,
+          $or: [
+            { checkinDate: { $lte: new Date(checkoutDate), $gte: new Date(checkinDate) } },
+            { checkoutDate: { $gte: new Date(checkinDate), $lte: new Date(checkoutDate) } }
+          ],
+        });
+        if (isBooked) return res.status(400).json({ message: 'The selected dates are already booked' });
+
+        const paymentData = {
+          total_amount: amount,
+          currency: 'BDT',
+          success_url: '',
+          fail_url: 'http://localhost:3000/booking?action=fail',
+          cancel_url: 'http://localhost:3000/cancel',
+          ipn_url: 'http://localhost:3000/ipn',
+          cus_name: "testrest",
+          cus_email:  "testrest",
+          cus_phone: "testrest",
+          cus_add1:  "testrest",
+          shipping_method: 'NO',
+          product_name: 'Property Booking',
+          product_category: 'Real Estate',
+          product_profile: 'travel-vertical',
+          hotel_name: "bed bd",
+          length_of_stay: `2 days`,
+          check_in_time: "12:00 PM", 
+          hotel_city: property.location.thana,
+        };
+        // console.log("after paymentData chck")
+        const apiResponse = await initPayment(paymentData);
+        const GatewayPageURL = apiResponse.GatewayPageURL;
+        if (!GatewayPageURL) return res.status(500).json({ message: 'Payment gateway initialization failed' });
+
+        // Create a new booking with status 'pending'
+        const newBooking = new Booking({
+          user: req.auth._id,
+          property: propertyId,
+          checkinDate: checkinDate,
+          checkoutDate:checkoutDate,
+          price: property.price,
+          tran_id: paymentData.tran_id,
+          status:"pending",
+        });
+        const savedBooking = await newBooking.save();
+        property.bookings.push(savedBooking._id);
+        await property.save();
+
+        return res.json({ GatewayPageURL, message: 'Redirecting to payment gateway' });
+
+      // case 'success': // Payment success
+      //   const { tran_id: successTranId } = req.body;
+      //   const successBooking = await Booking.findOne({ tran_id: successTranId });
+      //   if (!successBooking) return res.status(404).json({ message: 'Booking not found' });
+
+      //   successBooking.status = 'confirmed';
+      //   await successBooking.save();
+      //   return res.status(200).json({ message: 'Payment successful, booking confirmed', booking: successBooking });
+
+      // case 'fail': // Payment failure
+      //   const { tran_id: failTranId } = req.body;
+      //   const failedBooking = await Booking.findOne({ tran_id: failTranId });
+      //   if (!failedBooking) return res.status(404).json({ message: 'Booking not found' });
+
+      //   failedBooking.status = 'failed';
+      //   await failedBooking.save();
+      //   return res.status(400).json({ message: 'Payment failed, booking canceled' });
+
+      default:
+        return res.status(400).json({ message: 'Invalid action specified' });
+    }
+  } catch (error) {
+    console.error('Error in booking handler:', error);
+    res.status(500).json({ message: 'Error processing booking request', error });
+  }
+};
+
+exports.confirmPayment = async (req, res) => {
+  try {
+    const { tran_id } = req.body;
+
+    // Call SSLCommerz to verify the payment status
+    const paymentStatus = await verifyPaymentStatus(tran_id);
+
+    if (paymentStatus) {
+      // Update booking status in your database (e.g., to 'confirmed')
+      const booking = await Booking.findOne({ tran_id });
+      if (booking) {
+        booking.status = 'confirmed'; // Or any other status you define
+        await booking.save();
+        return res.status(200).json({ message: 'Payment confirmed', booking });
+      }
+      return res.status(404).json({ message: 'Booking not found' });
+    } else {
+      return res.status(400).json({ message: 'Payment verification failed' });
+    }
+  } catch (error) {
+    console.error('Error confirming payment:', error);
+    res.status(500).json({ message: 'Error confirming payment', error });
+  }
+};
+
+const verifyPaymentStatus = async (tran_id) => {
+  const store_id = process.env.StoreID; // Your store ID
+  const store_passwd = process.env.StorePassword; // Your store password
+  const is_live = false; // Set to true if you're in the live environment
+
+  const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
+
+  try {
+    const response = await sslcz.paymentStatus(tran_id);
+    return response; // This should include the payment status
+  } catch (error) {
+    console.error('Error verifying payment status:', error);
+    throw new Error('Payment status verification failed');
   }
 };
