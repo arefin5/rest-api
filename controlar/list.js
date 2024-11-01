@@ -5,8 +5,8 @@ const User=require("../models/userModel")
 exports.lists = async (req, res) => {
   try {
     // Fetch lists with associated reviews and users
-    const lists = await List.find({ status: "active" })
-      .populate("Postedby", "name") // Populate Postedby field with user name
+    const lists = await List.find({ status: "published" })
+      .populate("Postedby", "name profilePic isVerified") // Populate Postedby field with user name
       .populate({
         path: 'reviews',
         populate: {
@@ -98,7 +98,7 @@ exports.getSingleList=async (req, res) => {
   // console.log(listId)
   try {
     const list = await List.findById(listId)
-      .populate("Postedby", "name")
+      .populate("Postedby", "name profilePic isVerified")
       if (!list) {
         return res.status(404).json({ message: 'Listing not found' });
       }
@@ -115,7 +115,11 @@ exports.allListByUser = async (req, res) => {
       .populate("Postedby", "name")
       .sort({ createdAt: -1 })
       .limit(12);
-
+if(!list ){
+  return res.status(400).json({
+    error:"user has no List "
+  })
+}
     res.json(list);
   } catch (err) {
     console.log(err);

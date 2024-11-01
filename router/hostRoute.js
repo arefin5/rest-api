@@ -19,5 +19,6 @@ router.get("/get-single-list/:id",getSingleList)
 router.put("/update-list/:id",requireSignin,canEditDeletePost,updateList)
 router.delete("/delete-list/:id",requireSignin,canEditDeletePost,deleteSinglelist);
 router.get("/all-draft",canEditDeletePost,allListByUser);
+
 router.get("/host-check",requireSignin,isHost,HostCheck)
 module.exports = router;
