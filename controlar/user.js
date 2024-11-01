@@ -41,10 +41,12 @@ exports.removeFavoritelist = async (req, res) => {
   }
 };
 exports.favoritelist=async(req,res)=>{
-  const userId=req.params.id;
+  
+  const userId=req.auth._id;
+
   try {
     const user = await User.findById(userId)
-    .sort({ createdAt: -1 })    
+    .sort({ createdAt: -1 }).populate("favoritelist","images location price serviceFee tex  avgRating reviews")   
     if (!user) {
       return res.status(400).json({ message: 'This user not found' });
     }
@@ -115,6 +117,7 @@ exports.bookProperty=async (req, res) => {
   try {
     const propertyId = req.params.id;
     const { checkinDate, checkoutDate } = req.body;
+    console.log(propertyId)
     // Find the property by ID
     const property = await List.findById(propertyId);
     if (!property) {
@@ -143,7 +146,7 @@ exports.bookProperty=async (req, res) => {
       tran_id:transactionId,
       total_amount: amount,
       currency: 'BDT',
-      success_url : `http://localhost:3000/success?tran_id=${transactionId}`,
+      success_url : `http://localhost:5001/api/success-payment/${transactionId}/`,
       fail_url: 'http://localhost:3000/fail',
       cancel_url: 'http://localhost:3000/cancel',
       ipn_url: 'http://localhost:3000/ipn',
@@ -169,7 +172,7 @@ exports.bookProperty=async (req, res) => {
       return res.status(500).json({ message: 'Payment gateway initialization failed' });
     }
     const newBooking = new Booking({
-      // user: req.auth._id,
+      user: req.auth._id,
       property: propertyId,
       checkinDate: new Date(checkinDate),
       checkoutDate: new Date(checkoutDate),
@@ -193,6 +196,7 @@ exports.bookProperty=async (req, res) => {
   }
 };
 exports.paymentSuccess = async (req, res) => {
+  
   try {
     const { tran_id, status } = req.body;
     const booking = await Booking.findOne({ tran_id });
@@ -442,18 +446,75 @@ exports.confirmPayment = async (req, res) => {
   }
 };
 
-const verifyPaymentStatus = async (tran_id) => {
-  const store_id = process.env.StoreID; // Your store ID
-  const store_passwd = process.env.StorePassword; // Your store password
-  const is_live = false; // Set to true if you're in the live environment
+// const verifyPaymentStatus = async (tran_id) => {
+//   const store_id = process.env.StoreID; // Your store ID
+//   const store_passwd = process.env.StorePassword; // Your store password
+//   const is_live = false; // Set to true if you're in the live environment
 
-  const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
+//   const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
 
+//   try {
+//     const response = await sslcz.paymentStatus(tran_id);
+//     return response; // This should include the payment status
+//   } catch (error) {
+//     console.error('Error verifying payment status:', error);
+//     throw new Error('Payment status verification failed');
+//   }
+// };
+
+// exports.confirmSuccess=async(req,res)=>{
+//   try{
+   
+//     const tran_id=req.params.id;
+//     console.log("tran_id success page",tran_id);
+//     // const { tran_id, status } = req.body;
+//     const booking = await Booking.findOne({ tran_id });
+
+//     if (!booking) {
+//       return res.status(404).json({ message: 'Booking not found' });
+//     }
+//     booking.status="confirmed";
+//   await  booking.save();
+//   res.status(200).json({ message: 'Payment successful, booking confirmed', booking });
+//   // res.json({messege:"success ..."})
+//     // const redirectClientSiteUrl = `http://localhost:3000/success/${tran_id}/`;
+//     // res.redirect(redirectClientSiteUrl);
+//   } 
+//   catch (error) {
+//     res.status(500).json({ message: 'Error processing payment success', error });
+//   }
+// }
+
+
+exports.confirmSuccess = async (req, res) => {
   try {
-    const response = await sslcz.paymentStatus(tran_id);
-    return response; // This should include the payment status
+      const tran_id = req.params.id;
+      console.log("tran_id success page", tran_id);
+
+      const booking = await Booking.findOne({ tran_id });
+
+      if (!booking) {
+          return res.status(404).json({ message: 'Booking not found' });
+      }
+
+      booking.status = "confirmed";
+      await booking.save();
+
+      // Send an HTML response with JavaScript for popup and redirect
+      res.send(`
+          <html>
+              <body>
+                  <script>
+                      alert("Your payment was successful");
+                      setTimeout(function() {
+                          window.location.href = "http://localhost:3000/success/${tran_id}";
+                      }, 2000);
+                  </script>
+              </body>
+          </html>
+      `);
   } catch (error) {
-    console.error('Error verifying payment status:', error);
-    throw new Error('Payment status verification failed');
+      console.error("Error processing payment success:", error);
+      res.status(500).json({ message: 'Error processing payment success', error: error.message || error });
   }
 };

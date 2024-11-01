@@ -9,7 +9,7 @@ const crypto = require('crypto');
 const {sendVerificationEmail} =require("../helper/sendVerificationEmail")
 
 exports.register = async (req, res) => {
-  // console.log("start")
+  // console.log("register")
   const { name, password, email, birth } = req.body;
   // validation
   if (!name) {
@@ -42,41 +42,40 @@ exports.register = async (req, res) => {
       user,
     });
   } catch (err) {
-    console.log("REGISTER FAILED => ", err);
+    // console.log("REGISTER FAILED => ", err);
     return res.status(400).send("Error. Try again.");
   }
 };
 // normal user
 exports.signup = async (req, res) => {
   const { password, email } = req.body;
-
   try {
     const users = await User.findOne({ email });
     // console.log(user);
     if (users) {
-      return res.status(400).json({ error: "User  is exist in there " });
+      return res.status(400).json({ error: "User already  is exist in there " });
     }
-     console.log(users);
+    //  console.log(users);
 
     const hashedPassword = await hashPassword(password);
     // Create new user
+    const otp = generateOTP();
+    // user.otp = otp;
+     const otpExpirescreate = Date.now() + 10 * 60 * 1000; 
     const user = new User({
       password: hashedPassword,
       email: email,
+      otp : otp,
+      otpExpires:otpExpirescreate,
     });
 
     // Save user
     await user.save();
-
-    // // Generate JWT token
-    // const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-    //   expiresIn: "7d",
-    // });
-
-    // Exclude password from the response
+      // Send OTP to user email
+      // await sendOTPEmail(email, otp); // Make sure this function sends the email
+      console.log(otp)
     user.password = undefined;
 
-    // Send success response
     res.json({
       user,
     });
@@ -97,7 +96,6 @@ exports.generateOtp = async (req, res) => {
     // Try to find the user by email
     let user = await User.findOne({ email });
 
-    // If the user does not exist, create a new user
     if (!user) {
       logger.info(`User not found. Creating new user with email ${email}`);
       user = new User({
@@ -115,7 +113,7 @@ exports.generateOtp = async (req, res) => {
     await user.save();
 
     // Send OTP to user email
-    await sendOTPEmail(email, otp); // Make sure this function sends the email
+    // await sendOTPEmail(email, otp); // Make sure this function sends the email
 
     logger.info(`OTP generated and sent to ${email}`);
     res.json({ message: "OTP sent successfully" });
@@ -146,6 +144,8 @@ console.log(email,otp);
   user.isOtpVerified = true;
   user.status = "active";
   user.otpExpires = undefined;
+  user.isemailVerify=true;
+  
   await user.save();
 
   logger.info(`OTP verified successfully for ${email}`);
@@ -260,7 +260,7 @@ exports.editProfile = async (req, res) => {
 
     // Save the updated user data
     await user.save();
-console.log(user)
+// console.log(user)
     // If email or phone was changed, notify the user (optional)
     if (emailChanged) {
       // Send email verification logic can go here (e.g., send email)
@@ -297,7 +297,7 @@ exports.userRole = async (req, res) => {
     // Send a response indicating success
     res.json({ message: 'Role updated to host successfully', user });
   } catch (error) {
-    console.error('Error updating role:', error);
+    // console.error('Error updating role:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
@@ -327,7 +327,7 @@ exports.googleFacebookLogin = async (req, res) => {
       user,
     });
   } catch (error) {
-    console.log(err);
+    // console.log(err);
     return res.status(400).send("Error. Try again.");
   }
 
@@ -359,7 +359,7 @@ exports.forgotPassword = async (req, res) => {
 
 exports.verifyForgotPasswordOtp = async (req, res) => {
   const { email, otp } = req.body;
-  console.log(email)
+  // console.log(email)
 
   try {
     const user = await User.findOne({ email });
@@ -394,8 +394,8 @@ exports.verifyForgotPasswordOtp = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   const { email, password } = req.body;
 
-   const {userID}=req.user._id ;
-   console.log("test id",userID,req.user);
+   const userID=req.user._id ;
+  //  console.log("test id",userID,req.user);
 
   try {
     const user = await User.findOne({ userID });

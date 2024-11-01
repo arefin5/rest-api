@@ -115,7 +115,11 @@ exports.allListByUser = async (req, res) => {
       .populate("Postedby", "name")
       .sort({ createdAt: -1 })
       .limit(12);
-
+if(!list ){
+  return res.status(400).json({
+    error:"user has no List "
+  })
+}
     res.json(list);
   } catch (err) {
     console.log(err);
