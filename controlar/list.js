@@ -1,5 +1,6 @@
 const List = require("../models/listModel");
 const User=require("../models/userModel")
+const Booking = require("../models/bookingSchema"); 
 
 
 exports.lists = async (req, res) => {
@@ -108,11 +109,12 @@ exports.getSingleList=async (req, res) => {
   }
 }
 exports.allListByUser = async (req, res) => {
+  console.log(req.auth._id)
   try {
     const list = await List.find({
       Postedby: req.auth._id
     })
-      .populate("Postedby", "name")
+      .populate("bookings", "checkinDate")
       .sort({ createdAt: -1 })
       .limit(12);
 if(!list ){
@@ -218,7 +220,31 @@ exports.createList = async (req, res) => {
     // Send response
     res.status(201).json(savedList);
   } catch (error) {
-    console.error('Error creating list:', error);
+    // console.error('Error creating list:', error);
     res.status(500).json({ message: 'Server error' });
+  }
+};
+exports.authorBookingDetails = async (req, res) => {
+  try {
+    const bookings = await Booking.find()
+      .populate({
+        path: 'property',         
+        match: { Postedby: req.auth._id },
+      })
+      .exec();
+
+    // Filter out any bookings where 'property' is null due to the match condition
+    const filteredBookings = bookings.filter(booking => booking.property !== null);
+
+    if (filteredBookings.length === 0) {
+      return res.status(400).json({
+        error: "User has no bookings for their properties",
+      });
+    }
+
+    res.json(filteredBookings);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };

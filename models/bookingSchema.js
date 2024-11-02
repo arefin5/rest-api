@@ -2,11 +2,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const bookingSchema = new Schema({
-  // user: {
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   ref: 'User',
-  //   required: true,
-  // },
+
   property: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'List', // Reference to the property (List model)
@@ -21,6 +17,10 @@ const bookingSchema = new Schema({
     required: true,
   },
   price: {
+    type: Number,
+    required: true,
+  },
+  basePrice:{
     type: Number,
     required: true,
   },
