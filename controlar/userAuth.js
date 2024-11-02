@@ -394,11 +394,11 @@ exports.verifyForgotPasswordOtp = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   const { email, password } = req.body;
 
-   const userID=req.user._id ;
+  //  const userID=req.user._id ;
   //  console.log("test id",userID,req.user);
 
   try {
-    const user = await User.findOne({ userID });
+    const user = await User.findOne({email});
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }

@@ -177,7 +177,8 @@ exports.bookProperty=async (req, res) => {
       checkinDate: new Date(checkinDate),
       checkoutDate: new Date(checkoutDate),
       price:property.price,
-      tran_id: paymentData.tran_id, // Save the transaction ID
+      tran_id: paymentData.tran_id,
+      basePrice:property.GroundPrice
     });
 
     // Save the booking (in 'pending' state)
@@ -446,44 +447,7 @@ exports.confirmPayment = async (req, res) => {
   }
 };
 
-// const verifyPaymentStatus = async (tran_id) => {
-//   const store_id = process.env.StoreID; // Your store ID
-//   const store_passwd = process.env.StorePassword; // Your store password
-//   const is_live = false; // Set to true if you're in the live environment
 
-//   const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
-
-//   try {
-//     const response = await sslcz.paymentStatus(tran_id);
-//     return response; // This should include the payment status
-//   } catch (error) {
-//     console.error('Error verifying payment status:', error);
-//     throw new Error('Payment status verification failed');
-//   }
-// };
-
-// exports.confirmSuccess=async(req,res)=>{
-//   try{
-   
-//     const tran_id=req.params.id;
-//     console.log("tran_id success page",tran_id);
-//     // const { tran_id, status } = req.body;
-//     const booking = await Booking.findOne({ tran_id });
-
-//     if (!booking) {
-//       return res.status(404).json({ message: 'Booking not found' });
-//     }
-//     booking.status="confirmed";
-//   await  booking.save();
-//   res.status(200).json({ message: 'Payment successful, booking confirmed', booking });
-//   // res.json({messege:"success ..."})
-//     // const redirectClientSiteUrl = `http://localhost:3000/success/${tran_id}/`;
-//     // res.redirect(redirectClientSiteUrl);
-//   } 
-//   catch (error) {
-//     res.status(500).json({ message: 'Error processing payment success', error });
-//   }
-// }
 
 
 exports.confirmSuccess = async (req, res) => {

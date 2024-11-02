@@ -10,48 +10,10 @@ const secret = process.env.JWT_SECRET;
 
 // Middleware to check the authorization token
 const requireAuth = async (req, res, next) => {
-  const token = req.headers.authorization;
 
-  if (!token) {
-    return res.status(401).json({ error: 'Unauthorized - Token missing' });
-  }
-
-  try {
-    const decoded = verify(token.split(' ')[1], secret);
-    // Fetch the complete user data from the database
-    const user = await User.findById(decoded._id);
-    
-    if (!user) {
-      return res.status(401).json({ error: 'Unauthorized - User not found' });
-    }
-
-    // Attach the user data to the request
-    req.user = user;
-    // console.log(user)
-    next();
-  } catch (err) {
-    console.error('Token verification error:', err);
-    return res.status(401).json({ error: 'Unauthorized - Invalid token' });
-  }
 };
 
-const requireSignin = jwt({
-  secret: process.env.JWT_SECRET,
-  algorithms: ["HS256"],
-});
-// const canEditDeletePost = async (req, res, next) => {
-//   try {
-//     const list = await List.findById(req.params._id);
-//      console.log(req.auth)
-//     if (req.auth._id != list.Postedby) {
-//       return res.status(400).send("Unauthorized");
-//     } else {
-//       next();
-//     }
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
+
 const canEditDeletePost = async (req, res, next) => {
   try {
     const list = await List.findById(req.params.id);
@@ -83,4 +45,11 @@ const user=await User.findById(req.auth._id)
     return res.status(500).send("Server error");
   }
 };
+const requireSignin = jwt({
+  secret: process.env.JWT_SECRET,
+  algorithms: ['HS256'],
+  getToken: (req) => req.headers.authorization?.split(' ')[1],
+});
+
+
 module.exports = { requireAuth ,canEditDeletePost,requireSignin,isHost};
