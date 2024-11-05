@@ -1,4 +1,3 @@
-
 name: CI/CD for Node.js with Docker
 
 on:
@@ -28,15 +27,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Docker Buildx (optional)
-        run: |
-          docker buildx create --use  # Only necessary for multi-arch builds
-          docker version  # Verify Docker version to ensure it's correctly configured
-
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}  # Use GitHub secrets
+          username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ vars.DOCKER_PASSWORD }}
 
       - name: Build and push Docker image
@@ -51,8 +45,8 @@ jobs:
       - name: Deploy to Server
         uses: appleboy/ssh-action@v0.1.5
         with:
-          host: ${{ vars.SERVER_IP }}  # Use GitHub secrets for sensitive info
-          username: root  # Change to your specific user if needed
+          host: ${{ vars.SERVER_IP }}
+          username: root  # Use a non-root user if possible
           password: ${{ vars.SERVER_PASSWORD }}
           script: |
             mkdir -p /var/www/bed-bd-rest-api/
