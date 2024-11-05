@@ -287,6 +287,68 @@
 #             docker stop nodejs_app || true && docker rm nodejs_app || true
 #             docker run -d --name nodejs_app -p ${{ vars.SERVER_PORT }}:5001 \
 #               -e NODE_ENV=production ${{ vars.DOCKERHUB_USERNAME }}/nodejs-app:latest
+# name: CI/CD for Node.js with Docker
+
+# on:
+#   push:
+#     branches:
+#       - master
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+
+#       - name: Set up Node.js
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: '21.7.1'  # Match your project Node version
+
+#       - name: Install dependencies
+#         run: npm ci
+
+#   docker:
+#     needs: build
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+
+#       - name: Set Docker to use default builder
+#         run: |
+#           export DOCKER_CLI_EXPERIMENTAL=disabled
+
+#       - name: Login to Docker Hub
+#         uses: docker/login-action@v3
+#         with:
+#           username: ${{ vars.DOCKERHUB_USERNAME }}
+#           password: ${{ vars.DOCKER_PASSWORD }}
+
+#       - name: Build and push Docker image
+#         run: |
+#           docker build -t ${{ vars.DOCKERHUB_USERNAME }}/my-new-app:latest .
+#           docker push ${{ vars.DOCKERHUB_USERNAME }}/my-new-app:latest
+
+#   deploy:
+#     needs: docker
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Deploy to Server
+#         uses: appleboy/ssh-action@v0.1.5
+#         with:
+#           host: ${{ vars.SERVER_IP }}
+#           username: root
+#           password: ${{ vars.SERVER_PASSWORD }}
+#           script: |
+#             mkdir -p /var/www/my-new-app/
+#             docker pull ${{ vars.DOCKERHUB_USERNAME }}/my-new-app:latest
+#             docker stop my_new_app || true && docker rm my_new_app || true
+#             docker run -d --name my_new_app -p ${{ vars.SERVER_PORT }}:5001 \
+#               -e NODE_ENV=production ${{ vars.DOCKERHUB_USERNAME }}/my-new-app:latest
+
+
 name: CI/CD for Node.js with Docker
 
 on:
@@ -318,18 +380,19 @@ jobs:
 
       - name: Set Docker to use default builder
         run: |
-          export DOCKER_CLI_EXPERIMENTAL=disabled
+          docker buildx create --use  # Ensure the buildx builder is used
+          docker version  # Verify Docker version to ensure it's correctly configured
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ vars.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push Docker image
         run: |
-          docker build -t ${{ vars.DOCKERHUB_USERNAME }}/my-new-app:latest .
-          docker push ${{ vars.DOCKERHUB_USERNAME }}/my-new-app:latest
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/my-new-app:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/my-new-app:latest
 
   deploy:
     needs: docker
@@ -338,12 +401,12 @@ jobs:
       - name: Deploy to Server
         uses: appleboy/ssh-action@v0.1.5
         with:
-          host: ${{ vars.SERVER_IP }}
+          host: ${{ secrets.SERVER_IP }}
           username: root
-          password: ${{ vars.SERVER_PASSWORD }}
+          password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             mkdir -p /var/www/my-new-app/
-            docker pull ${{ vars.DOCKERHUB_USERNAME }}/my-new-app:latest
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/my-new-app:latest
             docker stop my_new_app || true && docker rm my_new_app || true
-            docker run -d --name my_new_app -p ${{ vars.SERVER_PORT }}:5001 \
-              -e NODE_ENV=production ${{ vars.DOCKERHUB_USERNAME }}/my-new-app:latest
+            docker run -d --name my_new_app -p ${{ secrets.SERVER_PORT }}:5001 \
+              -e NODE_ENV=production ${{ secrets.DOCKERHUB_USERNAME }}/my-new-app:latest
