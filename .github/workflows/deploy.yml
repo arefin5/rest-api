@@ -57,9 +57,9 @@ jobs:
         with:
           host: ${{ vars.SERVER_IP }}
           username: root
-          password: ${{ vars.SERVER_PASSWORD }}
+          password: ${{ vars.SERVER_PASSWORD }}  
           script: |
             mkdir -p /var/www/bedbd-restapi/
             docker pull ${{ env.DOCKER_IMAGE }}
             docker stop bedbd_app || true && docker rm bedbd_app || true
-            docker run -d --name bedbd_app -p 5001:50001 ${{ env.DOCKER_IMAGE }}
+            docker run -d --name bedbd_app -p 5001:5001 ${{ env.DOCKER_IMAGE }}
