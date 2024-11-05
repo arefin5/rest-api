@@ -1,78 +1,49 @@
-# # # Stage 1: Build
-# # FROM node:21.7.1 AS builder
-
-# # # Set the working directory
-# # WORKDIR /app
-
-# # # Copy package.json and package-lock.json
-# # COPY package*.json ./
-
-# # # Install production dependencies only
-# # RUN npm ci --only=production
-
-# # # Copy the application code
-# # COPY . .
-
-# # # Stage 2: Production Image
-# # FROM node:21.7.1 AS production
-
-# # # Set the working directory
-# # WORKDIR /app
-
-# # # Copy necessary files from the builder stage
-# # COPY --from=builder /app .
-
-# # # Expose the API port
-# # EXPOSE 5001
-
-# # # Start the application
-# # CMD ["node", "server.js"]
-# # Stage 1: Builder
-# FROM node:21.7.1 AS builder
+# # Stage 1: Install dependencies
+# FROM node:21.7.1 AS dependencies
 
 # # Set the working directory
 # WORKDIR /app
 
-# # Copy package.json and package-lock.json for dependency installation
+# # Copy package.json and package-lock.json files
 # COPY package*.json ./
 
-# # Install production dependencies
+# # Install only production dependencies
 # RUN npm ci --only=production
 
-# # Copy the rest of the application code to the builder
-# COPY . .
-
-# # Stage 2: Production Image
+# # Stage 2: Copy code and setup environment
 # FROM node:21.7.1 AS production
 
-# # Set the working directory in the final image
+# # Set the working directory
 # WORKDIR /app
 
-# # Copy only the necessary files from the builder stage
-# COPY --from=builder /app .
+# # Copy dependencies from the previous stage
+# COPY --from=dependencies /app/node_modules ./node_modules
 
-# # Expose the desired port (5001 in this case)
+# # Copy the application code
+# COPY . .
+
+# # Expose the application port
 # EXPOSE 5001
 
-# # Define the command to run the application
+# # Start the application
 # CMD ["node", "server.js"]
-# Stage 1: Build
+# Stage 1: Builder
 FROM node:21.7.1 AS builder
 
 # Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy package.json and package-lock.json files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install dependencies (this will install bcrypt for the correct OS)
+RUN npm ci
 
 # Copy the application code
 COPY . .
 
-# Delete node_modules to reinstall with Linux binaries
-RUN rm -rf node_modules && npm ci --only=production
+# Remove development dependencies if needed (optional)
+RUN npm prune --production
 
 # Stage 2: Production Image
 FROM node:21.7.1 AS production
@@ -80,10 +51,10 @@ FROM node:21.7.1 AS production
 # Set the working directory
 WORKDIR /app
 
-# Copy necessary files from the builder stage
+# Copy only the necessary files from the builder stage
 COPY --from=builder /app . 
 
-# Expose the API port
+# Expose the application port
 EXPOSE 5001
 
 # Start the application
