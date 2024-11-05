@@ -386,13 +386,13 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ vars.DOCKER_PASSWORD }}
 
       - name: Build and push Docker image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/my-new-app:latest .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/my-new-app:latest
+          docker build -t ${{ vars.DOCKERHUB_USERNAME }}/my-new-app:latest .
+          docker push ${{ vars.DOCKERHUB_USERNAME }}/my-new-app:latest
 
   deploy:
     needs: docker
@@ -406,7 +406,7 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             mkdir -p /var/www/my-new-app/
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/my-new-app:latest
+            docker pull ${{ vars.DOCKERHUB_USERNAME }}/my-new-app:latest
             docker stop my_new_app || true && docker rm my_new_app || true
-            docker run -d --name my_new_app -p ${{ secrets.SERVER_PORT }}:5001 \
-              -e NODE_ENV=production ${{ secrets.DOCKERHUB_USERNAME }}/my-new-app:latest
+            docker run -d --name my_new_app -p ${{ vars.SERVER_PORT }}:5001 \
+              -e NODE_ENV=production ${{ vars.DOCKERHUB_USERNAME }}/my-new-app:latest
