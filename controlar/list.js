@@ -109,12 +109,11 @@ exports.getSingleList=async (req, res) => {
   }
 }
 exports.allListByUser = async (req, res) => {
-  console.log(req.auth._id)
+  // console.log(req.auth._id)
   try {
     const list = await List.find({
       Postedby: req.auth._id
     })
-      .populate("bookings", "checkinDate")
       .sort({ createdAt: -1 })
       .limit(12);
 if(!list ){
@@ -123,6 +122,7 @@ if(!list ){
   })
 }
     res.json(list);
+    // console.log(list)
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: 'Internal server error' });
