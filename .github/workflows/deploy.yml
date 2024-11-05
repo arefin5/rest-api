@@ -7,7 +7,7 @@ on:
 
 env:
   ACTIONS_STEP_DEBUG: true
-  DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/bedbd-restapi:latest
+  DOCKER_IMAGE: ${{ vars.DOCKERHUB_USERNAME }}/bedbd-restapi:latest
 
 jobs:
   build:
@@ -26,7 +26,7 @@ jobs:
         run: npm ci
 
       - name: Build the project
-        run: npm install
+        run: npm run build
 
   docker:
     needs: build
@@ -56,10 +56,10 @@ jobs:
         uses: appleboy/ssh-action@v0.1.5
         with:
           host: ${{ vars.SERVER_IP }}
-          username: root  # Change to your specific user if needed
-          password: ${{ vars.SERVER_PASSWORD }}  
+          username: root
+          password: ${{ vars.SERVER_PASSWORD }}
           script: |
             mkdir -p /var/www/bedbd-restapi/
             docker pull ${{ env.DOCKER_IMAGE }}
             docker stop bedbd_app || true && docker rm bedbd_app || true
-            docker run -d --name bedbd_app -p ${{ vars.SERVER_PORT }}:3000 ${{ env.DOCKER_IMAGE }}
+            docker run -d --name bedbd_app -p 5001:3000 ${{ env.DOCKER_IMAGE }}
