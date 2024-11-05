@@ -35,9 +35,8 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t ${{ vars.DOCKERHUB_USERNAME }}/bed-bd-rest-api:latest .
+          docker buildx build -t ${{ vars.DOCKERHUB_USERNAME }}/bed-bd-rest-api:latest .
           docker push ${{ vars.DOCKERHUB_USERNAME }}/bed-bd-rest-api:latest
-
   deploy:
     needs: docker
     runs-on: ubuntu-latest
