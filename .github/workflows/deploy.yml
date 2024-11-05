@@ -227,7 +227,7 @@ jobs:
           password: ${{ vars.SERVER_PASSWORD }}
           script: |
             mkdir -p /var/www/nodejs-app/
-            docker pull ${{ vars.DOCKERHUB_USERNAME }}/nodejs-app:latest
+            docker pull ${{ vars.DOCKERHUB_USERNAME }}/nodejs-app:latest .
             docker stop nodejs_app || true && docker rm nodejs_app || true
             docker run -d --name nodejs_app -p ${{ vars.SERVER_PORT }}:5001 \
               -e NODE_ENV=production ${{ vars.DOCKERHUB_USERNAME }}/nodejs-app:latest
