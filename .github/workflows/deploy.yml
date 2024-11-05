@@ -62,4 +62,4 @@ jobs:
             mkdir -p /var/www/bedbd-restapi/
             docker pull ${{ env.DOCKER_IMAGE }}
             docker stop bedbd_app || true && docker rm bedbd_app || true
-            docker run -d --name bedbd_app -p 5001:3000 ${{ env.DOCKER_IMAGE }}
+            docker run -d --name bedbd_app -p 5001:50001 ${{ env.DOCKER_IMAGE }}
