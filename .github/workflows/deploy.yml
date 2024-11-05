@@ -26,7 +26,7 @@ jobs:
         run: npm ci
 
       - name: Build the project
-        run: npm run build
+        run: npm install
 
   docker:
     needs: build
