@@ -349,6 +349,67 @@
 #               -e NODE_ENV=production ${{ vars.DOCKERHUB_USERNAME }}/my-new-app:latest
 
 
+# name: CI/CD for Node.js with Docker
+
+# on:
+#   push:
+#     branches:
+#       - master
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+
+#       - name: Set up Node.js
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: '21.7.1'  # Match your project Node version
+
+#       - name: Install dependencies
+#         run: npm ci
+
+#   docker:
+#     needs: build
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+
+#       - name: Set Docker to use default builder
+#         run: |
+#           docker buildx create --use  # Ensure the buildx builder is used
+#           docker version  # Verify Docker version to ensure it's correctly configured
+
+#       - name: Login to Docker Hub
+#         uses: docker/login-action@v3
+#         with:
+#           username: ${{ vars.DOCKERHUB_USERNAME }}
+#           password: ${{ vars.DOCKER_PASSWORD }}
+
+#       - name: Build and push Docker image
+#         run: |
+#           docker build -t ${{ vars.DOCKERHUB_USERNAME }}/my-new-app:latest .
+#           docker push ${{ vars.DOCKERHUB_USERNAME }}/my-new-app:latest
+
+#   deploy:
+#     needs: docker
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Deploy to Server
+#         uses: appleboy/ssh-action@v0.1.5
+#         with:
+#           host: ${{ secrets.SERVER_IP }}
+#           username: root
+#           password: ${{ secrets.SERVER_PASSWORD }}
+#           script: |
+#             mkdir -p /var/www/my-new-app/
+#             docker pull ${{ vars.DOCKERHUB_USERNAME }}/my-new-app:latest
+#             docker stop my_new_app || true && docker rm my_new_app || true
+#             docker run -d --name my_new_app -p ${{ vars.SERVER_PORT }}:5001 \
+#               -e NODE_ENV=production ${{ vars.DOCKERHUB_USERNAME }}/my-new-app:latest
 name: CI/CD for Node.js with Docker
 
 on:
@@ -378,15 +439,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set Docker to use default builder
+      - name: Set up Docker Buildx (optional)
         run: |
-          docker buildx create --use  # Ensure the buildx builder is used
+          docker buildx create --use  # Only necessary for multi-arch builds
           docker version  # Verify Docker version to ensure it's correctly configured
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
+          username: ${{ vars.DOCKERHUB_USERNAME }}  # Use GitHub secrets
           password: ${{ vars.DOCKER_PASSWORD }}
 
       - name: Build and push Docker image
@@ -401,9 +462,9 @@ jobs:
       - name: Deploy to Server
         uses: appleboy/ssh-action@v0.1.5
         with:
-          host: ${{ secrets.SERVER_IP }}
-          username: root
-          password: ${{ secrets.SERVER_PASSWORD }}
+          host: ${{ vars.SERVER_IP }}  # Use GitHub secrets for sensitive info
+          username: root  # Change to your specific user if needed
+          password: ${{ vars.SERVER_PASSWORD }}
           script: |
             mkdir -p /var/www/my-new-app/
             docker pull ${{ vars.DOCKERHUB_USERNAME }}/my-new-app:latest
