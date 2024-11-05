@@ -62,7 +62,7 @@ name: CI/CD for Node.js with Docker
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build:
