@@ -3,7 +3,7 @@ name: CI/CD for bedbd with Docker
 on:
   push:
     branches:
-      - main
+      - master
 
 env:
   ACTIONS_STEP_DEBUG: true
