@@ -5,9 +5,8 @@ const List=require("../models/listModel")
 const { expressjwt: jwt } = require("express-jwt");
 
 dotenv.config();
-const JWT_SECRET=`SHDFAKSHDAOIW9438934JDHHSKDFJHIEW`
 
-const secret = JWT_SECRET;
+const secret =process.env.JWT_SECRET
 
 // Middleware to check the authorization token
 const requireAuth = async (req, res, next) => {
