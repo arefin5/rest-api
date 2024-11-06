@@ -65,7 +65,9 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
           port : ${{secrets.port}}
+           
           script: |
+            whoami
             echo "Restarting Docker service and ensuring iptables is configured..."
             sudo systemctl restart docker
             echo '{"iptables": true}' | sudo tee /etc/docker/daemon.json
@@ -73,12 +75,6 @@ jobs:
             IMAGE_TAG="${{ secrets.DOCKERHUB_USERNAME }}/restapitest:latest"
             echo "Deploying Docker image with tag: $IMAGE_TAG"
              # Stop any process using the previous port (5001)
-            echo "Stopping any process using port 5001..."
-            sudo fuser -k 5001/tcp || true
-            # Open port 5001 on the firewall if it's closed (for UFW)
-            echo "Opening port 5001 on the firewall..."
-            sudo ufw allow 5001/tcp || true
-            # Pull, stop, and remove any existing container
             docker pull $IMAGE_TAG
             docker stop restapitest || true
             docker rm restapitest || true
