@@ -5,8 +5,9 @@ const List=require("../models/listModel")
 const { expressjwt: jwt } = require("express-jwt");
 
 dotenv.config();
+const JWT_SECRET=`SHDFAKSHDAOIW9438934JDHHSKDFJHIEW`
 
-const secret = process.env.JWT_SECRET;
+const secret = JWT_SECRET;
 
 // Middleware to check the authorization token
 const requireAuth = async (req, res, next) => {
@@ -46,7 +47,7 @@ const user=await User.findById(req.auth._id)
   }
 };
 const requireSignin = jwt({
-  secret: process.env.JWT_SECRET,
+  secret: secret,
   algorithms: ['HS256'],
   getToken: (req) => req.headers.authorization?.split(' ')[1],
 });
