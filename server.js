@@ -62,7 +62,16 @@ app.use((err, req, res, next) => {
     next();
   }
 });
-
+app.get('/build', (req, res) => {
+  exec('npm run build', (error, stdout, stderr) => {
+    if (error) {
+      console.error(`exec error: ${error}`);
+      return res.status(500).send('Build failed');
+    }
+    console.log(stdout);  // Logs the success message from npm run build
+    res.send('Build completed successfully!');
+  });
+});
 
 app.get('/postgresql-data', async (req, res) => {
   try {
