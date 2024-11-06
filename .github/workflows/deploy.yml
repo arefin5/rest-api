@@ -41,21 +41,21 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t ${{ env.DOCKER_IMAGE }} .
-          docker push ${{ env.DOCKER_IMAGE }}
-
+          docker buildx create --use  # Ensures buildx is used
+          docker buildx build -t ${{ env.DOCKER_IMAGE }} . --push
   deploy:
     needs: docker
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Deploy to Server
         uses: appleboy/ssh-action@v0.1.5
         with:
           host: ${{ vars.SERVER_IP }}
-          username: root
+          username: root  # or the specific user you want
           password: ${{ vars.SERVER_PASSWORD }}  
           script: |
-            mkdir -p /var/www/bedbd-restapi/
+            mkdir -p  /var/www/bedbd-restapi/
             docker pull ${{ env.DOCKER_IMAGE }}
             docker stop bedbd_app || true && docker rm bedbd_app || true
             docker run -d --name bedbd_app -p 5001:5001 ${{ env.DOCKER_IMAGE }}
