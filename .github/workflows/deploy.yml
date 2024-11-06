@@ -53,9 +53,9 @@ jobs:
       - name: Deploy to Server
         uses: appleboy/ssh-action@v0.1.5
         with:
-          host: ${{ vars.SERVER_IP }}
+          host: ${{ secrets.SERVER_IP }}
           username: root  # or the specific user you want
-          password: ${{ vars.SERVER_PASSWORD }}  
+          password: ${{ secrets.SERVER_PASSWORD }}  
           script: |
             mkdir -p /var/www/bedbd-restapi/
             docker pull ${{ env.DOCKER_IMAGE }}
