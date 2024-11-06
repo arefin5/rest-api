@@ -41,7 +41,7 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          # Using docker build (standard, simpler option)
+          # Use standard docker build command without buildx
           docker build -t ${{ env.DOCKER_IMAGE }} .
           docker push ${{ env.DOCKER_IMAGE }}
 
