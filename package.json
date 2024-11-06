@@ -7,7 +7,6 @@
     "start": "nodemon server.js",
     "migrate": "node migration-script.js",
     "dev": "next dev",
-    "build": "npm install",
     "lint": "node server.js"
   },
   "keywords": [],
