@@ -47,9 +47,6 @@ jobs:
     if: github.ref == 'refs/heads/master'
 
     env:
-      SERVER_IP: ${{ secrets.SERVER_IP }}
-      SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}
-      SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       MONGODB_URI: ${{secrets.MONGODB_URI}}
       JWT_SECRET: ${{secrets.JWT_SECRET}}
@@ -62,7 +59,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Deploy to server using SSH and Docker
-        uses: appleboy/ssh-action@v0.1.5
+        uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USERNAME }}
@@ -85,4 +82,13 @@ jobs:
             docker stop restapitest || true
             docker rm restapitest || true
             # Run the new container
-            docker run -d --name restapitest -p 5001:5001 $IMAGE_TAG
+            
+            docker run -d --name restapitest -p 5001:5001 \
+                -e MONGODB_URI="${{ secrets.MONGODB_URI }}" \
+                -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+                -e StoreID="${{ secrets.StoreID }}" \
+                -e StorePassword="${{ secrets.StorePassword }}" \
+                -e CLIENT_SECRET="${{ secrets.CLIENT_SECRET }}" \
+                -e CLIENT_ID="${{ secrets.CLIENT_ID }}" \
+                -e PORT="${{ secrets.PORT }}" \
+                --restart unless-stopped $IMAGE_TAG   
