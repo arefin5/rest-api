@@ -13,38 +13,32 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DOCKER_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
-      DOCKER_PASSWORD: ${{ vars.DOCKER_PASSWORD }}
+      DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: '16'
 
-      - name: Install dependencies
-        run: npm install
+      - run: npm install
 
-      - name: Build Docker image
-        run: |
-          IMAGE_TAG="${{ vars.DOCKERHUB_USERNAME }}/restapitest:latest"
+      - run: |-
+          IMAGE_TAG: "{{ secrets.DOCKERHUB_USERNAME }}/restapitest:latest"
           echo "Building Docker image with tag: $IMAGE_TAG"
           docker build -t $IMAGE_TAG .
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+      - uses: docker/login-action@v2
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ vars.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push Docker image to Docker Hub
-        run: |
-          IMAGE_TAG="${{ vars.DOCKERHUB_USERNAME }}/restapitest:latest"
-          echo "Pushing Docker image with tag: $IMAGE_TAG"
-          docker push $IMAGE_TAG
+      - run: |-
+          IMAGE_TAG: "{{ secrets.DOCKERHUB_USERNAME }}/restapitest:latest"
+          echo "Building Docker image with tag: $IMAGE_TAG"
+          docker build -t $IMAGE_TAG .
 
   deploy:
     runs-on: ubuntu-latest
@@ -52,23 +46,19 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     env:
-      SERVER_IP: ${{ vars.SERVER_IP }}
-    
+      SERVER_IP: ${{ secrets.SERVER_IP }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
     steps:
-      - name: Deploy to server using Docker and SSH
+      - uses: actions/checkout@v3
+
+      - name: Deploy to server using SSH and Docker
         run: |
-          IMAGE_TAG="${{ vars.DOCKERHUB_USERNAME }}/restapitest:latest"
-          echo "Deploying Docker image with tag: $IMAGE_TAG"
-          ssh -o StrictHostKeyChecking=no root@${{ vars.SERVER_IP }} << EOF
-            # Pull the latest Docker image
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} root@${{ secrets.SERVER_IP }} << EOF
+            IMAGE_TAG="${{ secrets.DOCKERHUB_USERNAME }}/restapitest:latest"
+            echo "Deploying Docker image with tag: $IMAGE_TAG"
             docker pull $IMAGE_TAG
-
-            # Stop the running container (if any)
             docker stop restapitest || true
-
-            # Remove the existing container (if any)
             docker rm restapitest || true
-
-            # Run the new container on port 5001
             docker run -d --name restapitest -p 5001:5001 $IMAGE_TAG
           EOF
