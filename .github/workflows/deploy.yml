@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
+      DOCKER_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
       DOCKER_PASSWORD: ${{ vars.DOCKER_PASSWORD }}
 
     steps:
@@ -30,19 +30,19 @@ jobs:
 
       - name: Build Docker image
         run: |
-          IMAGE_TAG="${{ vars.DOCKER_USERNAME }}/restapitest:latest"
+          IMAGE_TAG="${{ vars.DOCKERHUB_USERNAME }}/restapitest:latest"
           echo "Building Docker image with tag: $IMAGE_TAG"
           docker build -t $IMAGE_TAG .
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ vars.DOCKER_USERNAME }}
+          username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ vars.DOCKER_PASSWORD }}
 
       - name: Push Docker image to Docker Hub
         run: |
-          IMAGE_TAG="${{ vars.DOCKER_USERNAME }}/restapitest:latest"
+          IMAGE_TAG="${{ vars.DOCKERHUB_USERNAME }}/restapitest:latest"
           echo "Pushing Docker image with tag: $IMAGE_TAG"
           docker push $IMAGE_TAG
 
@@ -57,7 +57,7 @@ jobs:
     steps:
       - name: Deploy to server using Docker and SSH
         run: |
-          IMAGE_TAG="${{ vars.DOCKER_USERNAME }}/restapitest:latest"
+          IMAGE_TAG="${{ vars.DOCKERHUB_USERNAME }}/restapitest:latest"
           echo "Deploying Docker image with tag: $IMAGE_TAG"
           ssh -o StrictHostKeyChecking=no root@${{ vars.SERVER_IP }} << EOF
             # Pull the latest Docker image
