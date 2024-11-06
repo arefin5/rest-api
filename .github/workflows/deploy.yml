@@ -1,141 +1,4 @@
 
-# # name: Node.js CI/CD with Docker
-
-# # on:
-# #   push:
-# #     branches:
-# #       - master
-# #   pull_request:
-# #     branches:
-# #       - master
-
-# # jobs:
-# #   build:
-# #     runs-on: ubuntu-latest
-
-# #     env:
-# #       DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-# #       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
-# #     steps:
-# #       - uses: actions/checkout@v3
-
-# #       - uses: actions/setup-node@v3
-# #         with:
-# #           node-version: '16'
-
-# #       - run: npm install
-
-# #       - run: |
-# #           IMAGE_TAG="${{ secrets.DOCKERHUB_USERNAME }}/restapitest:latest"
-# #           echo "Building Docker image with tag: $IMAGE_TAG"
-# #           docker build -t $IMAGE_TAG .
-
-# #       - uses: docker/login-action@v2
-# #         with:
-# #           username: ${{ secrets.DOCKERHUB_USERNAME }}
-# #           password: ${{ secrets.DOCKER_PASSWORD }}
-
-# #       - run: |
-# #           IMAGE_TAG="${{ secrets.DOCKERHUB_USERNAME }}/restapitest:latest"
-# #           echo "Pushing Docker image with tag: $IMAGE_TAG"
-# #           docker push $IMAGE_TAG
-
-# #   deploy:
-# #     runs-on: ubuntu-latest
-# #     needs: build
-# #     if: github.ref == 'refs/heads/master'
-
-# #     env:
-# #       SERVER_IP: ${{ secrets.SERVER_IP }}
-# #       SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}
-# #       SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
-
-# #     steps:
-# #       - uses: actions/checkout@v3
-
-# #       - name: Deploy to server using SSH and Docker
-# #         uses: appleboy/ssh-action@master
-# #         with:
-# #           host: ${{ secrets.SERVER_IP }}
-# #           username: ${{ secrets.SERVER_USERNAME }}
-# #           password: ${{ secrets.SERVER_PASSWORD }}
-# #           script: |
-# #             IMAGE_TAG="${{ secrets.DOCKERHUB_USERNAME }}/restapitest:latest"
-# #             echo "Deploying Docker image with tag: $IMAGE_TAG"
-# #             docker pull $IMAGE_TAG
-# #             docker stop restapitest || true
-# #             docker rm restapitest || true
-# #             docker run -d --name restapitest -p 5001:5001 $IMAGE_TAG
-# name: Node.js CI/CD with Docker
-
-# on:
-#   push:
-#     branches:
-#       - master
-#   pull_request:
-#     branches:
-#       - master
-
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-
-#     env:
-#       DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-#       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
-#     steps:
-#       - uses: actions/checkout@v3
-
-#       - uses: actions/setup-node@v3
-#         with:
-#           node-version: '16'
-
-#       - run: npm install
-
-#       - run: |
-#           IMAGE_TAG="${{ secrets.DOCKERHUB_USERNAME }}/restapitest:latest"
-#           echo "Building Docker image with tag: $IMAGE_TAG"
-#           docker build -t $IMAGE_TAG .
-
-#       - uses: docker/login-action@v2
-#         with:
-#           username: ${{ secrets.DOCKERHUB_USERNAME }}
-#           password: ${{ secrets.DOCKER_PASSWORD }}
-
-#       - run: |
-#           IMAGE_TAG="${{ secrets.DOCKERHUB_USERNAME }}/restapitest:latest"
-#           echo "Pushing Docker image with tag: $IMAGE_TAG"
-#           docker push $IMAGE_TAG
-
-#   deploy:
-#     runs-on: ubuntu-latest
-#     needs: build
-#     if: github.ref == 'refs/heads/master'
-
-#     env:
-#       SERVER_IP: ${{ secrets.SERVER_IP }}
-#       SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}
-#       SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
-#       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-
-#     steps:
-#       - uses: actions/checkout@v3
-
-#       - name: Deploy to server using SSH and Docker
-#         uses: appleboy/ssh-action@v0.1.5
-#         with:
-#           host: ${{ secrets.SERVER_IP }}
-#           username: ${{ secrets.SERVER_USERNAME }}
-#           password: ${{ secrets.SERVER_PASSWORD }}
-#           script: |
-#             IMAGE_TAG="${{ secrets.DOCKERHUB_USERNAME }}/restapitest:latest"
-#             echo "Deploying Docker image with tag: $IMAGE_TAG"
-#             docker pull $IMAGE_TAG
-#             docker stop restapitest || true
-#             docker rm restapitest || true
-#             docker run -d --name restapitest -p 5001:5001 $IMAGE_TAG
 name: Node.js CI/CD with Docker
 
 on:
@@ -188,7 +51,13 @@ jobs:
       SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}
       SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-
+      MONGODB_URI: ${{secrets.MONGODB_URI}}
+      JWT_SECRET: ${{secrets.JWT_SECRET}}
+      StoreID : ${{secrets.StoreID}}
+      StorePassword: ${{secrets.StorePassword}}
+      CLIENT_SECRET: ${{secrets.CLIENT_SECRET}}
+      CLIENT_ID : ${{secrets.CLIENT_ID}}
+      PORT : ${{secrets.PORT}}
     steps:
       - uses: actions/checkout@v3
 
