@@ -1,4 +1,3 @@
-
 name: Node.js CI/CD with Docker
 
 on:
@@ -48,38 +47,45 @@ jobs:
 
     env:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      MONGODB_URI: ${{secrets.MONGODB_URI}}
-      JWT_SECRET: ${{secrets.JWT_SECRET}}
-      StoreID : ${{secrets.StoreID}}
-      StorePassword: ${{secrets.StorePassword}}
-      CLIENT_SECRET: ${{secrets.CLIENT_SECRET}}
-      CLIENT_ID : ${{secrets.CLIENT_ID}}
-      PORT : ${{secrets.PORT}}
+      MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      StoreID: ${{ secrets.StoreID }}
+      StorePassword: ${{ secrets.StorePassword }}
+      CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+      CLIENT_ID: ${{ secrets.CLIENT_ID }}
+      PORT: ${{ secrets.PORT }}
+
     steps:
       - uses: actions/checkout@v3
 
-      - name: Deploy to server using SSH and Docker
-        uses: appleboy/ssh-action@v0.1.6
+      - name: Setup SSH
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
+          chmod 600 private_key
+          ssh-keyscan -H "${{ secrets.SERVER_IP }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy to server with SSH
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          password: ${{ secrets.SERVER_PASSWORD }}
-          port : ${{secrets.port}}
-           
-          script: |
-            whoami
-            echo "Restarting Docker service and ensuring iptables is configured..."
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "./"
+          target: "/root/deployment"
+
+      - name: Execute Deployment Script on Server
+        run: |
+          ssh -i private_key -o StrictHostKeyChecking=no root@${{ secrets.SERVER_IP }} << 'EOF'
+            echo "Restarting Docker service and configuring iptables..."
             sudo systemctl restart docker
             echo '{"iptables": true}' | sudo tee /etc/docker/daemon.json
             sudo systemctl restart docker
             IMAGE_TAG="${{ secrets.DOCKERHUB_USERNAME }}/restapitest:latest"
-            echo "Deploying Docker image with tag: $IMAGE_TAG"
-             # Stop any process using the previous port (5001)
+            echo "Pulling and running Docker image with tag: $IMAGE_TAG"
             docker pull $IMAGE_TAG
             docker stop restapitest || true
             docker rm restapitest || true
-            # Run the new container
-            
             docker run -d --name restapitest -p 5001:5001 \
                 -e MONGODB_URI="${{ secrets.MONGODB_URI }}" \
                 -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
@@ -88,4 +94,5 @@ jobs:
                 -e CLIENT_SECRET="${{ secrets.CLIENT_SECRET }}" \
                 -e CLIENT_ID="${{ secrets.CLIENT_ID }}" \
                 -e PORT="${{ secrets.PORT }}" \
-                --restart unless-stopped $IMAGE_TAG   
+                --restart unless-stopped $IMAGE_TAG
+          EOF
