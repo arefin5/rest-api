@@ -178,8 +178,13 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           source: "./"
-          target: "/root/deployment"
-
+      - name: Test SSH connection
+        run: |
+          ssh -i private_key -o StrictHostKeyChecking=no root@145.223.22.239 "echo 'SSH connection successful!'"
+            target: "/root/deployment"
+      - name: Ping server to check connectivity
+        run: |
+          ping -c 4 145.223.22.239       
       - name: Execute Deployment Script on Server
         run: |
           ssh -i private_key -o StrictHostKeyChecking=no root@${{ secrets.SERVER_IP }} << 'EOF'
