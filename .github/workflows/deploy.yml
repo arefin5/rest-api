@@ -166,7 +166,7 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
           chmod 600 private_key
           # Use ssh-keyscan to add the server's key to the known_hosts file
-          ssh-keyscan -H "${{ secrets.SERVER_IP }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "145.223.22.239" >> ~/.ssh/known_hosts
           # Set permissions for the known_hosts file
           chmod 644 ~/.ssh/known_hosts
 
