@@ -3,8 +3,8 @@ const { hashPassword, comparePassword } = require("../helper/auth.js")
 const jwt = require("jsonwebtoken")
 const mongoose = require('mongoose');
 const { generateOTP, sendOTP } = require("../helper/otp");
-const logger = require("../utils/logger"); // Import the logger
-const sendOTPEmail = require("../helper/email"); // Import the sendOTPEmail function
+const logger = require("../utils/logger");
+const sendOTPEmail = require("../helper/email");
 const crypto = require('crypto');
 const {sendVerificationEmail} =require("../helper/sendVerificationEmail")
 
@@ -147,6 +147,7 @@ exports.verifyOtp = async (req, res) => {
   user.otpExpires = undefined;
   user.isemailVerify=true;
   
+
   await user.save();
 
   logger.info(`OTP verified successfully for ${email}`);
@@ -305,17 +306,21 @@ exports.userRole = async (req, res) => {
 
 exports.googleFacebookLogin = async (req, res) => {
   try {
-    const { name, email, birth } = req.body;
+    const { name, email,fname,lname ,profilePic} = req.body;
+    // console.log(req.body)
     let user = await User.findOne({ email });
     if (!user) {
       logger.info(`User not found. Creating new user with email ${email}`);
       user = new User({
         email,
         name,
-        birth,
+        fname,
+        lname ,
+        profilePic,
         isOtpVerified: true,
         status: "active",
-        isVerified: true
+        isVerified: true,    
+        isemailVerify:true,
       });
     }
     await user.save();
