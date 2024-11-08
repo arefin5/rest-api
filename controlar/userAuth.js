@@ -72,7 +72,7 @@ exports.signup = async (req, res) => {
     // Save user
     await user.save();
       // Send OTP to user email
-      // await sendOTPEmail(email, otp); // Make sure this function sends the email
+      await sendOTPEmail(email, otp); // Make sure this function sends the email
       console.log(otp)
     user.password = undefined;
 
@@ -348,7 +348,7 @@ exports.forgotPassword = async (req, res) => {
     await user.save();
     console.log("otp forget",otp)
     // Send OTP to user email
-    // await sendOTPEmail(email, otp);
+    await sendOTPEmail(email, otp);
 
     res.json({ message: "OTP sent to your email" ,email});
   } catch (err) {
