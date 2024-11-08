@@ -63,7 +63,7 @@ jobs:
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       SERVER_IP: ${{ secrets.SERVER_IP }}
       SSH_PORT: ${{ secrets.SSH_PORT }}
-
+      passforG: ${{secrets.passforG}}
     steps:
       # Check out the repository code
       - name: Check out the code
@@ -105,6 +105,7 @@ jobs:
             docker rm restapitest || true
             docker run -d --name restapitest -p 5001:5001 \
                 -e MONGODB_URI="${{ secrets.MONGODB_URI }}" \
+                -e passforG="${{ secrets.passforG }}" \
                 -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
                 -e StoreID="${{ secrets.StoreID }}" \
                 -e StorePassword="${{ secrets.StorePassword }}" \
