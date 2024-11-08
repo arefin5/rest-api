@@ -146,7 +146,7 @@ exports.bookProperty=async (req, res) => {
       tran_id:transactionId,
       total_amount: amount,
       currency: 'BDT',
-      success_url : `http://localhost:5001/api/success-payment/${transactionId}/`,
+      success_url : `http://145.223.22.239:5001/api/success-payment/${transactionId}/`,
       fail_url: 'http://localhost:3000/fail',
       cancel_url: 'http://localhost:3000/cancel',
       ipn_url: 'http://localhost:3000/ipn',
@@ -471,7 +471,7 @@ exports.confirmSuccess = async (req, res) => {
                   <script>
                       alert("Your payment was successful");
                       setTimeout(function() {
-                          window.location.href = "http://localhost:3000/success/${tran_id}";
+                          window.location.href = "http://www.bedbd.com/success/${tran_id}";
                       }, 2000);
                   </script>
               </body>
