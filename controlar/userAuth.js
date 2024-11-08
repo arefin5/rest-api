@@ -68,11 +68,11 @@ exports.signup = async (req, res) => {
       otp : otp,
       otpExpires:otpExpirescreate,
     });
+    await sendOTPEmail(email, otp); 
 
     // Save user
     await user.save();
       // Send OTP to user email
-      await sendOTPEmail(email, otp); // Make sure this function sends the email
       console.log(otp)
     user.password = undefined;
 
@@ -108,7 +108,7 @@ exports.generateOtp = async (req, res) => {
     const otp = generateOTP();
     user.otp = otp;
     user.otpExpires = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
-
+  
     // Save the OTP and expiry time to the user record
     await user.save();
 
@@ -126,7 +126,6 @@ exports.generateOtp = async (req, res) => {
 exports.verifyOtp = async (req, res) => {
   const { email, otp } = req.body;
   const ipAddress = req.ip;
-console.log(email,otp);
 
   logger.info(`OTP verification attempted by ${email} from IP ${ipAddress}`);
 
@@ -135,6 +134,8 @@ console.log(email,otp);
     logger.warn(`OTP verification failed: User not found with email ${email}`);
     return res.status(400).json({ error: "User not found with this email" });
   }
+  console.log("verifyOtp",email,otp);
+
   if (user.otp !== otp || user.otpExpires < Date.now()) {
     logger.warn(`OTP verification failed: Invalid or expired OTP for email ${email}`);
     return res.status(400).json({ error: "Invalid or expired OTP" });
@@ -366,8 +367,11 @@ exports.verifyForgotPasswordOtp = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-     console.log(user);
-    if (user.otp !== otp || user.otpExpires < Date.now()) {
+    //  console.log(user);
+    // if (user.otp !== otp || user.otpExpires < Date.now()) {
+    //   return res.status(400).json({ error: "Invalid or expired OTP" });
+    // }
+    if (user.otp !== otp ) {
       return res.status(400).json({ error: "Invalid or expired OTP" });
     }
 
@@ -377,7 +381,7 @@ exports.verifyForgotPasswordOtp = async (req, res) => {
     user.isOtpVerified = true;
 
     await user.save();
-    console.log(user)
+    console.log("user")
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });

@@ -6,7 +6,7 @@ info:
 servers:
   - url: http://localhost:5001/api
     description: Local server
-  - url: http://45.77.247.238:5050/api
+  - url: http://145.223.22.239:5001/api
     description: Public Server   
 tags:
   - name: Users
