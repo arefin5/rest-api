@@ -4,15 +4,15 @@ const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport({
   service: 'Gmail',
   auth: {
-    user: 'arefintalukder5@gmail.com',
-    pass: 'nzvpycdcyoblvagq',  // App-specific password for Gmail
+    user: 'booking@bedbd.com',
+    pass: process.env.passforG,  // App-specific password for Gmail
   },
 });
 
 // Function to send the verification email
 const sendVerificationEmail = async (toEmail, verificationLink) => {
   const mailOptions = {
-    from: 'arefintalukder5@gmail.com',  // Sender address
+    from: 'booking@bedbd.com',  // Sender address
     to: toEmail,                        // Receiver address
     subject: 'Verify Your Email',       // Subject line
     text: `Click the following link to verify your email: ${verificationLink}`, // Plain text body
