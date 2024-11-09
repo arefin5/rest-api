@@ -123,11 +123,6 @@ exports.bookProperty=async (req, res) => {
     if (!property) {
       return res.status(404).json({ message: 'Property not found' });
     }
- // Check if property is published
-//  if (property.status !== 'published') {
-//   return res.status(400).json({ message: 'Property is not available for booking' });
-// }
-    // Check for date conflicts
     const isBooked = await Booking.findOne({
       property: propertyId,
       $or: [
@@ -140,13 +135,15 @@ exports.bookProperty=async (req, res) => {
       return res.status(400).json({ message: 'The selected dates are already booked' });
     }
     // Calculate the length of stay in days
+    // success_url : `http://145.223.22.239:5001/api/success-payment/${transactionId}/`,
+
   const  amount=property.price;
   const transactionId = `TRANS_${uuid.v4()}`;
     const paymentData = {
       tran_id:transactionId,
       total_amount: amount,
       currency: 'BDT',
-      success_url : `http://145.223.22.239:5001/api/success-payment/${transactionId}/`,
+      success_url : `http:///145.223.22.239:5001/api/success-payment/${transactionId}/`,
       fail_url: 'http://localhost:3000/fail',
       cancel_url: 'http://localhost:3000/cancel',
       ipn_url: 'http://localhost:3000/ipn',
@@ -171,6 +168,7 @@ exports.bookProperty=async (req, res) => {
     if (!GatewayPageURL) {
       return res.status(500).json({ message: 'Payment gateway initialization failed' });
     }
+    console.log(property.Postedby)
     const newBooking = new Booking({
       user: req.auth._id,
       property: propertyId,
@@ -178,13 +176,14 @@ exports.bookProperty=async (req, res) => {
       checkoutDate: new Date(checkoutDate),
       price:property.price,
       tran_id: paymentData.tran_id,
-      basePrice:property.GroundPrice
+      basePrice:property.GroundPrice,
+     Host:property.Postedby,
     });
 
-    // Save the booking (in 'pending' state)
+    // // Save the booking (in 'pending' state)
     const savedBooking = await newBooking.save();
 
-    // Add the booking's ID to the property
+    // // Add the booking's ID to the property
     property.bookings.push(savedBooking._id);
     await property.save();
 
@@ -461,7 +460,7 @@ exports.confirmSuccess = async (req, res) => {
           return res.status(404).json({ message: 'Booking not found' });
       }
 
-      booking.status = "confirmed";
+      booking.status = "paymentsuccess";
       await booking.save();
 
       // Send an HTML response with JavaScript for popup and redirect
@@ -482,3 +481,4 @@ exports.confirmSuccess = async (req, res) => {
       res.status(500).json({ message: 'Error processing payment success', error: error.message || error });
   }
 };
+

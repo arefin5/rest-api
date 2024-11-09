@@ -5,7 +5,12 @@ const bookingSchema = new Schema({
 
   property: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'List', // Reference to the property (List model)
+    ref: 'List',
+    required: true,
+  },
+  Host: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', // Reference to the User model (Poster)
     required: true,
   },
   checkinDate: {
@@ -26,7 +31,7 @@ const bookingSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'confirmed', 'failed'],
+    enum: ['pending', 'confirmed', 'failed',"paymentsuccess"],
     default: 'pending',
   },
   tran_id: {
