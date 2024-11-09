@@ -143,9 +143,9 @@ exports.verifyOtp = async (req, res) => {
 
   user.otp = undefined;
   user.isOtpVerified = true;
+  user.isemailVerify = true;
   user.status = "active";
   user.otpExpires = undefined;
-  user.isemailVerify=true;
   
 
   await user.save();
@@ -204,22 +204,83 @@ exports.SingleUser = async (req, res) => {
     res.sendStatus(400);
   }
 };
+// exports.editProfile = async (req, res) => {
+//   try {
+//     const { phone, email } = req.body;
+//     const userId = req.auth._id;
+
+//     // If phone or email are non-empty, check uniqueness
+//     if (phone || email) {
+//       const existingUser = await User.findOne({
+//         _id: { $ne: userId }, // Exclude current user
+//         $or: [{ email: email }, { phone: phone }],
+//       });
+
+//       if (existingUser) {
+//         return res.status(400).json({ message: 'Email or phone number already in use' });
+//       }
+//     }
+
+//     // Find the user by ID
+//     const user = await User.findById(userId);
+//     if (!user) {
+//       return res.status(404).json({ message: 'User not found' });
+//     }
+
+//     // Track changes for email and phone
+//     let emailChanged = false;
+//     let phoneChanged = false;
+
+//     // Update fields if they exist in req.body and are not empty strings
+//     if (req.body.fname) user.fname = req.body.fname;
+//     if (req.body.lname) user.lname = req.body.lname;
+//     if (req.body.name) user.name = req.body.name;
+
+//     if (req.body.email && req.body.email !== "") {
+//       if (user.email !== req.body.email) {
+//         user.email = req.body.email;
+//         user.isemailVerify = false; // Reset email verification status
+//         emailChanged = true;
+//       }
+//     }
+
+//     if (req.body.phone && req.body.phone !== "") {
+//       if (user.phone !== req.body.phone) {
+//         user.phone = req.body.phone;
+//         user.isPhoneVerified = false; // Reset phone verification status
+//         phoneChanged = true;
+//       }
+//     }
+//     if(req.body.about) user.about=req.body.about;
+//     if (req.body.fatherName) user.fatherName = req.body.fatherName;
+//     if (req.body.motherName) user.motherName = req.body.motherName;
+//     if (req.body.presentAddress) user.presentAddress = req.body.presentAddress;
+//     if (req.body.parmanentAddress) user.parmanentAddress = req.body.parmanentAddress;
+//     if (req.body.birth) user.birth = req.body.birth;
+//     if (req.body.profilePic) user.profilePic = req.body.profilePic;
+//     if (req.body.cover) user.cover = req.body.cover;
+
+//     // Save the updated user data
+//     await user.save();
+// // console.log(user)
+//     // If email or phone was changed, notify the user (optional)
+//     if (emailChanged) {
+//       // Send email verification logic can go here (e.g., send email)
+//     }
+//     if (phoneChanged) {
+//       // Send OTP or phone verification logic can go here (e.g., SMS OTP)
+//     }
+
+//     // Return success response
+//     res.status(200).json({ message: 'User updated successfully', user });
+//   } catch (err) {
+//     res.status(500).json({ message: 'Server error', error: err.message });
+//   }
+// };
 exports.editProfile = async (req, res) => {
   try {
-    const { phone, email } = req.body;
+    const { phone, email, fname, lname, name, about, fatherName, motherName, presentAddress, parmanentAddress, birth, profilePic, cover } = req.body;
     const userId = req.auth._id;
-
-    // If phone or email are non-empty, check uniqueness
-    if (phone || email) {
-      const existingUser = await User.findOne({
-        _id: { $ne: userId }, // Exclude current user
-        $or: [{ email: email }, { phone: phone }],
-      });
-
-      if (existingUser) {
-        return res.status(400).json({ message: 'Email or phone number already in use' });
-      }
-    }
 
     // Find the user by ID
     const user = await User.findById(userId);
@@ -227,48 +288,48 @@ exports.editProfile = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Track changes for email and phone
-    let emailChanged = false;
-    let phoneChanged = false;
-
-    // Update fields if they exist in req.body and are not empty strings
-    if (req.body.fname) user.fname = req.body.fname;
-    if (req.body.lname) user.lname = req.body.lname;
-    if (req.body.name) user.name = req.body.name;
-
-    if (req.body.email && req.body.email !== "") {
-      if (user.email !== req.body.email) {
-        user.email = req.body.email;
-        user.isemailVerify = false; // Reset email verification status
-        emailChanged = true;
+    // Check email uniqueness if email is provided and different from current email
+    if (email && email !== user.email) {
+      const existingEmailUser = await User.findOne({ email, _id: { $ne: userId } });
+      if (existingEmailUser) {
+        return res.status(400).json({ message: 'Email is already in use' });
       }
+      user.email = email;
+      user.isemailVerify = false; // Reset email verification status
     }
 
-    if (req.body.phone && req.body.phone !== "") {
-      if (user.phone !== req.body.phone) {
-        user.phone = req.body.phone;
-        user.isPhoneVerified = false; // Reset phone verification status
-        phoneChanged = true;
+    // Check phone uniqueness if phone is provided and different from current phone
+    if (phone && phone !== user.phone) {
+      const existingPhoneUser = await User.findOne({ phone, _id: { $ne: userId } });
+      if (existingPhoneUser) {
+        return res.status(400).json({ message: 'Phone number is already in use' });
       }
+      user.phone = phone;
+      user.isPhoneVerified = false; // Reset phone verification status
     }
-    if(req.body.about) user.about=req.body.about;
-    if (req.body.fatherName) user.fatherName = req.body.fatherName;
-    if (req.body.motherName) user.motherName = req.body.motherName;
-    if (req.body.presentAddress) user.presentAddress = req.body.presentAddress;
-    if (req.body.parmanentAddress) user.parmanentAddress = req.body.parmanentAddress;
-    if (req.body.birth) user.birth = req.body.birth;
-    if (req.body.profilePic) user.profilePic = req.body.profilePic;
-    if (req.body.cover) user.cover = req.body.cover;
+
+    // Update other fields
+    if (fname) user.fname = fname;
+    if (lname) user.lname = lname;
+    if (name) user.name = name;
+    if (about) user.about = about;
+    if (fatherName) user.fatherName = fatherName;
+    if (motherName) user.motherName = motherName;
+    if (presentAddress) user.presentAddress = presentAddress;
+    if (parmanentAddress) user.parmanentAddress = parmanentAddress;
+    if (birth) user.birth = birth;
+    if (profilePic) user.profilePic = profilePic;
+    if (cover) user.cover = cover;
 
     // Save the updated user data
     await user.save();
-// console.log(user)
-    // If email or phone was changed, notify the user (optional)
-    if (emailChanged) {
-      // Send email verification logic can go here (e.g., send email)
+
+    // Optional: Trigger email or phone verification steps if those fields were changed
+    if (email && email !== user.email) {
+      // Send email verification logic here
     }
-    if (phoneChanged) {
-      // Send OTP or phone verification logic can go here (e.g., SMS OTP)
+    if (phone && phone !== user.phone) {
+      // Send phone verification logic here
     }
 
     // Return success response
@@ -307,11 +368,12 @@ exports.userRole = async (req, res) => {
 exports.googleFacebookLogin = async (req, res) => {
   try {
     const { name, email,fname,lname ,profilePic} = req.body;
-    // console.log(req.body)
+    console.log(req.body)
     let user = await User.findOne({ email });
     if (!user) {
       logger.info(`User not found. Creating new user with email ${email}`);
       user = new User({
+        isemailVerify:true,
         email,
         name,
         fname,
@@ -320,12 +382,12 @@ exports.googleFacebookLogin = async (req, res) => {
         isOtpVerified: true,
         status: "active",
         isVerified: true,    
-        isemailVerify:true,
+       
       });
     }
-    await user.save();
+    // await user.save();
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
+      expiresIn: "14d",
     });
     // Send a single response
     res.json({
