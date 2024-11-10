@@ -37,6 +37,11 @@ const bookingSchema = new Schema({
   tran_id: {
     type: String,
   },
+  client: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', // Reference to the User model (Poster)
+    required: true,
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Booking', bookingSchema);
