@@ -284,7 +284,7 @@ exports.createReview = async (req, res) => {
       const newReview = new Review({
           listId: listId,
           categories: reviewData.categories,
-          user: userId, // Store user ID for population
+          client: userId, // Store user ID for population
           reviewText: reviewData.reviewText
       });
 
@@ -485,7 +485,8 @@ exports.confirmSuccess = async (req, res) => {
 exports.bookingApprovedPending = async (req, res) => {
   try {
     const hostID = req.auth._id; // Ensure hostID is assigned with `const`
-    const bookingPending = await Booking.find({ Host: hostID, status: "paymentsuccess" }).populate('property', 'propertyTitle');
+    const bookingPending = await Booking.find({ Host: hostID, status: "paymentsuccess" })
+    .populate('property', 'propertyTitle').populate('client', 'fname ');
 
     if (!bookingPending || bookingPending.length === 0) {
       return res.status(200).json({ message: "No pending bookings" });

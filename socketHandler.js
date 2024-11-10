@@ -639,7 +639,32 @@ const socketHandler = (io) => {
         console.log('User is not authenticated');
       }
     });
+// history of messege
+socket.on('getConversations', async (userId, callback) => {
+  try {
+    const conversations = await Message.aggregate([
+      {
+        $match: {
+          $or: [{ sender: userId }, { receiver: userId }],
+        },
+      },
+      {
+        $group: {
+          _id: { $cond: { if: { $eq: ['$sender', userId] }, then: '$receiver', else: '$sender' } },
+          lastMessage: { $last: '$message' },
+          timestamp: { $last: '$createdAt' },
+        },
+      },
+      { $sort: { timestamp: -1 } },
+    ]);
 
+    callback({ status: 'success', conversations });
+  } catch (error) {
+    console.error('Error fetching conversations:', error);
+    callback({ status: 'failed', message: 'Error fetching conversations' });
+  }
+});
+// end messgge logs
     // Send message handler
     socket.on('sendMessage', async ({ senderId, receiverId, message }, callback) => {
       if (!socket.user) return callback({ status: 'failed', message: 'User is not authenticated' });
@@ -679,19 +704,6 @@ const socketHandler = (io) => {
       }
     });
 
-    // Real-time booking status check for 'paymentsuccess'
-    // socket.on('checkPaymentStatus', async (userId) => {
-    //   if (!socket.user) return console.log('User is not authenticated');
-    //   try {
-    //     const bookings = await Booking.find({ Host: userId, status: 'confirmed' });
-    //     console.log(userId);
-    //     console.log(bookings)
-    //     socket.emit('paymentSuccessBookings', bookings.length > 0 ? bookings : []);
-    //   } catch (error) {
-    //     console.error('Error checking payment status:', error);
-    //     socket.emit('paymentSuccessBookings', []);
-    //   }
-    // });
     socket.on('checkPaymentStatus', async (userId) => {
       if (!socket.user) return console.log('User is not authenticated');
       try {
