@@ -117,7 +117,8 @@ exports.bookProperty=async (req, res) => {
   try {
     const propertyId = req.params.id;
     const { checkinDate, checkoutDate } = req.body;
-    // console.log(propertyId)
+    console.log(req.auth._id);
+   const BClientID=req.auth._id
     // Find the property by ID
     const property = await List.findById(propertyId);
     if (!property) {
@@ -143,7 +144,7 @@ exports.bookProperty=async (req, res) => {
       tran_id:transactionId,
       total_amount: amount,
       currency: 'BDT',
-      success_url : `http://localhost:5001/api/success-payment/${transactionId}/`,
+      success_url : `http://145.223.22.239:5001/api/success-payment/${transactionId}/`,
       fail_url: 'http://localhost:3000/fail',
       cancel_url: 'http://localhost:3000/cancel',
       ipn_url: 'http://localhost:3000/ipn',
@@ -168,7 +169,8 @@ exports.bookProperty=async (req, res) => {
     if (!GatewayPageURL) {
       return res.status(500).json({ message: 'Payment gateway initialization failed' });
     }
-    console.log(property.Postedby._id)
+    console.log(property.Postedby._id);
+    console.log(req.auth._id,)
     const newBooking = new Booking({
       user: req.auth._id,
       property: propertyId,
@@ -177,12 +179,14 @@ exports.bookProperty=async (req, res) => {
       price:property.price,
       tran_id: paymentData.tran_id,
       basePrice:property.GroundPrice,
-       Host:property.Postedby._id,
+      Host:property.Postedby._id,
+      BClientId:BClientID
     });
-    
+    // console.log("before initial ",savedBooking)
+
     // // Save the booking (in 'pending' state)
     const savedBooking = await newBooking.save();
-
+console.log(savedBooking)
     // // Add the booking's ID to the property
     property.bookings.push(savedBooking._id);
     await property.save();
