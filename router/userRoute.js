@@ -17,13 +17,15 @@ const {
     PropertyBooklist,
     handleBooking,
     confirmPayment,
-    confirmSuccess
+    confirmSuccess,
+    bookingApprovedPending,
+    bookingApproved
+
 } = require("../controlar/user.js");
 
 router.put("/favoriteslist-list/:id",requireSignin,addFavoritelist)
 router.put("/unfavoriteslist-list/:id",requireSignin,removeFavoritelist)
 router.post('/book-property/:id',requireSignin, bookProperty);
-
 
 router.get("/check-available/:id",checkAvailability);
 // public user 
@@ -40,4 +42,7 @@ router.post("/payment/confirm",confirmPayment);
 // router.post("/success-payment:/id",confirmSuccess);
 router.get("/success-payment/:id", confirmSuccess);
 router.post("/success-payment/:id", confirmSuccess);
+router.put("/approved-booking/:id",requireSignin,bookingApproved)
+
+router.get("/host-pending-booking-list",requireSignin,bookingApprovedPending)
 module.exports = router;

@@ -117,7 +117,7 @@ exports.bookProperty=async (req, res) => {
   try {
     const propertyId = req.params.id;
     const { checkinDate, checkoutDate } = req.body;
-    console.log(propertyId)
+    // console.log(propertyId)
     // Find the property by ID
     const property = await List.findById(propertyId);
     if (!property) {
@@ -143,7 +143,7 @@ exports.bookProperty=async (req, res) => {
       tran_id:transactionId,
       total_amount: amount,
       currency: 'BDT',
-      success_url : `http:///145.223.22.239:5001/api/success-payment/${transactionId}/`,
+      success_url : `http://localhost:5001/api/success-payment/${transactionId}/`,
       fail_url: 'http://localhost:3000/fail',
       cancel_url: 'http://localhost:3000/cancel',
       ipn_url: 'http://localhost:3000/ipn',
@@ -168,7 +168,7 @@ exports.bookProperty=async (req, res) => {
     if (!GatewayPageURL) {
       return res.status(500).json({ message: 'Payment gateway initialization failed' });
     }
-    console.log(property.Postedby)
+    console.log(property.Postedby._id)
     const newBooking = new Booking({
       user: req.auth._id,
       property: propertyId,
@@ -177,9 +177,9 @@ exports.bookProperty=async (req, res) => {
       price:property.price,
       tran_id: paymentData.tran_id,
       basePrice:property.GroundPrice,
-     Host:property.Postedby,
+       Host:property.Postedby._id,
     });
-
+    
     // // Save the booking (in 'pending' state)
     const savedBooking = await newBooking.save();
 
@@ -482,3 +482,38 @@ exports.confirmSuccess = async (req, res) => {
   }
 };
 
+exports.bookingApprovedPending = async (req, res) => {
+  try {
+    const hostID = req.auth._id; // Ensure hostID is assigned with `const`
+    const bookingPending = await Booking.find({ Host: hostID, status: "paymentsuccess" }).populate('property', 'propertyTitle');
+
+    if (!bookingPending || bookingPending.length === 0) {
+      return res.status(200).json({ message: "No pending bookings" });
+    }
+
+    res.status(200).json(bookingPending);
+  } catch (error) {
+    console.error("Error fetching pending bookings:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+exports.bookingApproved = async (req, res) => {
+  try {
+    const hostID = req.auth._id;
+    const id = req.params.id;
+
+    const bookingPending = await Booking.findOneAndUpdate(
+      { _id: id, Host: hostID }, 
+      { status: "confirmed" },   
+      { new: true }
+    );
+    if (!bookingPending) {
+      return res.status(400).json({ message: "Unauthorized or Booking not found" });
+    }
+    res.status(200).json({ message: "Booking approved successfully" });
+  } catch (error) {
+    console.error("Error approving booking:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
