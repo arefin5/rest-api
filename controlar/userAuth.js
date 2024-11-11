@@ -123,35 +123,75 @@ exports.generateOtp = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+// exports.verifyOtp = async (req, res) => {
+//   const { email, otp } = req.body;
+
+//   const user = await User.findOneAndUpdate({ email });
+//   if (!user) {
+//     logger.warn(`OTP verification failed: User not found with email ${email}`);
+//     return res.status(400).json({ error: "User not found with this email" });
+//   }
+//   // console.log("verifyOtp",email,otp);
+
+//   if (user.otp !== otp || user.otpExpires < Date.now()) {
+//     logger.warn(`OTP verification failed: Invalid or expired OTP for email ${email}`);
+//     return res.status(400).json({ error: "Invalid or expired OTP" });
+//   }
+ 
+
+
+//   user.otp = undefined;
+//   user.isEmailVerified = true; 
+//   user.isOtpVerified = true;
+//   user.otpExpires = undefined;
+  
+//   user.markModified('otp');
+//   user.markModified('isEmailVerified');
+//   user.markModified('isOtpVerified');
+//   user.markModified('otpExpires');
+  
+//   console.log("User object before save:", user);
+//   await user.save();
+//   console.log("User object after save:", user);
+//   const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+//     expiresIn: "7d",
+//   });
+
+//   // Send a single response
+//   res.json({
+//     message: "OTP verified successfully",
+//     token,
+//     user,
+//   });
+// };
+
+
 exports.verifyOtp = async (req, res) => {
   const { email, otp } = req.body;
-  const ipAddress = req.ip;
-
-  logger.info(`OTP verification attempted by ${email} from IP ${ipAddress}`);
-
+console.log("tasting staart ... ")
+  // Fetch the user with `findOne` to allow modifications on the document
   const user = await User.findOne({ email });
   if (!user) {
     logger.warn(`OTP verification failed: User not found with email ${email}`);
     return res.status(400).json({ error: "User not found with this email" });
   }
-  console.log("verifyOtp",email,otp);
 
-  if (user.otp !== otp || user.otpExpires < Date.now()) {
+  // Validate OTP and check expiry
+  if (user.otp !== otp ) {
     logger.warn(`OTP verification failed: Invalid or expired OTP for email ${email}`);
     return res.status(400).json({ error: "Invalid or expired OTP" });
   }
 
+  // Update the necessary fields
   user.otp = undefined;
+  user.isEmailVerified = true; 
   user.isOtpVerified = true;
-  user.isemailVerify = true;
-  user.status = "active";
   user.otpExpires = undefined;
-  
 
+  // Save changes to the database
   await user.save();
 
-  logger.info(`OTP verified successfully for ${email}`);
-
+  // Generate a JWT token
   const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
     expiresIn: "7d",
   });
@@ -163,6 +203,7 @@ exports.verifyOtp = async (req, res) => {
     user,
   });
 };
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -204,79 +245,7 @@ exports.SingleUser = async (req, res) => {
     res.sendStatus(400);
   }
 };
-// exports.editProfile = async (req, res) => {
-//   try {
-//     const { phone, email } = req.body;
-//     const userId = req.auth._id;
 
-//     // If phone or email are non-empty, check uniqueness
-//     if (phone || email) {
-//       const existingUser = await User.findOne({
-//         _id: { $ne: userId }, // Exclude current user
-//         $or: [{ email: email }, { phone: phone }],
-//       });
-
-//       if (existingUser) {
-//         return res.status(400).json({ message: 'Email or phone number already in use' });
-//       }
-//     }
-
-//     // Find the user by ID
-//     const user = await User.findById(userId);
-//     if (!user) {
-//       return res.status(404).json({ message: 'User not found' });
-//     }
-
-//     // Track changes for email and phone
-//     let emailChanged = false;
-//     let phoneChanged = false;
-
-//     // Update fields if they exist in req.body and are not empty strings
-//     if (req.body.fname) user.fname = req.body.fname;
-//     if (req.body.lname) user.lname = req.body.lname;
-//     if (req.body.name) user.name = req.body.name;
-
-//     if (req.body.email && req.body.email !== "") {
-//       if (user.email !== req.body.email) {
-//         user.email = req.body.email;
-//         user.isemailVerify = false; // Reset email verification status
-//         emailChanged = true;
-//       }
-//     }
-
-//     if (req.body.phone && req.body.phone !== "") {
-//       if (user.phone !== req.body.phone) {
-//         user.phone = req.body.phone;
-//         user.isPhoneVerified = false; // Reset phone verification status
-//         phoneChanged = true;
-//       }
-//     }
-//     if(req.body.about) user.about=req.body.about;
-//     if (req.body.fatherName) user.fatherName = req.body.fatherName;
-//     if (req.body.motherName) user.motherName = req.body.motherName;
-//     if (req.body.presentAddress) user.presentAddress = req.body.presentAddress;
-//     if (req.body.parmanentAddress) user.parmanentAddress = req.body.parmanentAddress;
-//     if (req.body.birth) user.birth = req.body.birth;
-//     if (req.body.profilePic) user.profilePic = req.body.profilePic;
-//     if (req.body.cover) user.cover = req.body.cover;
-
-//     // Save the updated user data
-//     await user.save();
-// // console.log(user)
-//     // If email or phone was changed, notify the user (optional)
-//     if (emailChanged) {
-//       // Send email verification logic can go here (e.g., send email)
-//     }
-//     if (phoneChanged) {
-//       // Send OTP or phone verification logic can go here (e.g., SMS OTP)
-//     }
-
-//     // Return success response
-//     res.status(200).json({ message: 'User updated successfully', user });
-//   } catch (err) {
-//     res.status(500).json({ message: 'Server error', error: err.message });
-//   }
-// };
 exports.editProfile = async (req, res) => {
   try {
     const { phone, email, fname, lname, name, about, fatherName, motherName, presentAddress, parmanentAddress, birth, profilePic, cover } = req.body;
@@ -295,7 +264,7 @@ exports.editProfile = async (req, res) => {
         return res.status(400).json({ message: 'Email is already in use' });
       }
       user.email = email;
-      user.isemailVerify = false; // Reset email verification status
+      user.isEmailVerified = false;
     }
 
     // Check phone uniqueness if phone is provided and different from current phone
@@ -373,7 +342,7 @@ exports.googleFacebookLogin = async (req, res) => {
     if (!user) {
       logger.info(`User not found. Creating new user with email ${email}`);
       user = new User({
-        isemailVerify:true,
+        isEmailVerified:true,
         email,
         name,
         fname,
@@ -446,7 +415,7 @@ exports.verifyForgotPasswordOtp = async (req, res) => {
     user.otp = undefined;
     user.otpExpires = undefined;
     user.isOtpVerified = true;
-
+    user.isEmailVerified = true; 
     await user.save();
     console.log("user")
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
@@ -731,7 +700,7 @@ exports.confirmEmailVerification = async (req, res) => {
     }
 
     // Update user as verified
-    user.isemailVerify = true;
+    user.isEmailVerified = true;
     user.otp = undefined; // Clear the token
     user.otpExpires = undefined; // Clear the expiration time
     await user.save();

@@ -2,39 +2,18 @@ const List = require("../models/listModel");
 const User=require("../models/userModel")
 const Booking = require("../models/bookingSchema"); 
 
+const mongoose = require('mongoose');
 
 exports.lists = async (req, res) => {
   try {
-    // Fetch lists with associated reviews and users
-    const lists = await List.find({ status: "published" })
-      .populate("Postedby", "name profilePic isVerified") // Populate Postedby field with user name
-      .populate({
-        path: 'reviews',
-        populate: {
-          path: 'user', // Populate user data in the review
-          select: 'name', // Only retrieve the name field
-        }
-      })
-      .sort({ createdAt: -1 })
-      // .limit(12);
-
-    // Optionally calculate average ratings
-    const listsWithAvgRating = lists.map(list => {
-      const reviews = list.reviews;
-      let totalRating = 0;
-      reviews.forEach(review => {
-        totalRating += review.overallRating; // Sum up the overall ratings
-      });
-      const avgRating = reviews.length ? (totalRating / reviews.length).toFixed(1) : 0;
-
-      return {
-        ...list.toObject(),
-        avgRating: avgRating, // Add average rating to each list
-      };
-    });
-
-    res.json(listsWithAvgRating);
-  } catch (err) {
+    const listsWithAvgRating = await List.find({ status: "published" })
+    .populate("Postedby", "fname lname profilePic isVerified")
+    .populate("reviews", "avgRating")
+    .sort({ createdAt: -1 })
+     
+    res.status(200).json(listsWithAvgRating)
+  }
+   catch (err) {
     console.log(err);
     res.status(500).json({ error: 'An error occurred while fetching the lists' });
   }
@@ -99,7 +78,7 @@ exports.getSingleList=async (req, res) => {
   // console.log(listId)
   try {
     const list = await List.findById(listId)
-      .populate("Postedby", "name profilePic isVerified")
+      .populate("Postedby", "fname lname profilePic isVerified")
       if (!list) {
         return res.status(404).json({ message: 'Listing not found' });
       }
@@ -108,6 +87,154 @@ exports.getSingleList=async (req, res) => {
     console.log(err);
   }
 }
+
+
+
+// exports.getSingleList = async (req, res) => {
+//   const listId = req.params.id;
+  
+//   try {
+//     const list = await List.findById(listId)
+//       .populate("Postedby", "fname lname profilePic isVerified")
+//       .populate({
+//         path: 'reviews',
+//         populate: {
+//           path: 'user',
+//           select: 'name', // Only retrieve the user's name in reviews
+//         }
+//       });
+
+//     if (!list) {
+//       return res.status(404).json({ message: 'Listing not found' });
+//     }
+
+//     // Calculate average rating
+//     const reviews = list.reviews;
+//     let totalRating = 0;
+//     reviews.forEach(review => {
+//       totalRating += review.overallRating;
+//     });
+//     const avgRating = reviews.length ? (totalRating / reviews.length).toFixed(1) : 0;
+
+//     // Return list with avgRating
+//     res.status(200).json({
+//       ...list.toObject(),
+//       avgRating: avgRating,
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: 'An error occurred while retrieving the listing' });
+//   }
+// };
+
+
+// exports.getSingleList = async (req, res) => {
+//   const listId = req.params.id;
+
+//   try {
+//     const list = await List.aggregate([
+//       { $match: { _id: mongoose.Types.ObjectId(listId) } },
+//       {
+//         $lookup: {
+//           from: 'users',
+//           localField: 'Postedby',
+//           foreignField: '_id',
+//           as: 'Postedby',
+//         },
+//       },
+//       {
+//         $lookup: {
+//           from: 'reviews',
+//           localField: '_id',
+//           foreignField: 'listId', // Assuming `listId` in the reviews collection references the list
+//           as: 'reviews',
+//         },
+//       },
+//       { $unwind: { path: "$Postedby", preserveNullAndEmptyArrays: true } },
+//       {
+//         $addFields: {
+//           avgRating: { $avg: "$reviews.overallRating" },
+//           totalReview: { $size: "$reviews" },
+//         },
+//       },
+//       {
+//         $project: {
+//           "Postedby.fname": 1,
+//           "Postedby.lname": 1,
+//           "Postedby.profilePic": 1,
+//           "Postedby.isVerified": 1,
+//           avgRating: { $ifNull: [{ $round: ["$avgRating", 1] }, 0] },
+//           totalReview: 1,
+//           // Include other fields you want to return
+//         },
+//       },
+//     ]);
+
+//     if (!list || !list.length) {
+//       return res.status(404).json({ message: 'Listing not found' });
+//     }
+
+//     res.status(200).json(list[0]);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: 'An error occurred while retrieving the listing' });
+//   }
+// };
+
+// exports.getSingleList = async (req, res) => {
+//   const listId = req.params.id;
+
+//   try {
+//     const list = await List.aggregate([
+//       { $match: { _id: new mongoose.Types.ObjectId(listId) } },
+//       {
+//         $lookup: {
+//           from: 'users',
+//           localField: 'Postedby',
+//           foreignField: '_id',
+//           as: 'Postedby',
+//         },
+//       },
+//       {
+//         $lookup: {
+//           from: 'reviews',
+//           localField: '_id',
+//           foreignField: 'listId', // Assuming `listId` in the reviews collection references the list
+//           as: 'reviews',
+//         },
+//       },
+//       { $unwind: { path: "$Postedby", preserveNullAndEmptyArrays: true } },
+//       {
+//         $addFields: {
+//           avgRating: { $avg: "$reviews.overallRating" },
+//           totalReview: { $size: "$reviews" },
+//         },
+//       },
+//       {
+//         $project: {
+//           "Postedby.fname": 1,
+//           "Postedby.lname": 1,
+//           "Postedby.profilePic": 1,
+//           "Postedby.isVerified": 1,
+//           avgRating: { $ifNull: [{ $round: ["$avgRating", 1] }, 0] },
+//           totalReview: 1,
+//           // Include other fields you want to return
+//         },
+//       },
+//     ]);
+
+//     if (!list || !list.length) {
+//       return res.status(404).json({ message: 'Listing not found' });
+//     }
+
+//     res.status(200).json(list[0]);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: 'An error occurred while retrieving the listing' });
+//   }
+// };
+
+
 exports.allListByUser = async (req, res) => {
   // console.log(req.auth._id)
   try {
@@ -246,5 +373,64 @@ exports.authorBookingDetails = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+exports.listReveiw= async (req, res) => {
+  const listId = req.params.id;
+
+  try {
+    const list = await List.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(listId) } }, 
+      {
+        $lookup: {
+          from: 'reviews',
+          localField: '_id',
+          foreignField: 'listId', 
+          as: 'reviews',
+        },
+      },
+      {
+        $addFields: {
+          avgRating: { $avg: "$reviews.overallRating" },
+          totalReview: { $size: "$reviews" },
+        },
+      },
+      {
+        $project: {
+          avgRating: { $ifNull: [{ $round: ["$avgRating", 1] }, 0] },
+          totalReview: 1,
+          // Add any other list-specific fields you want to return
+        },
+      },
+    ]);
+
+    if (!list || !list.length) {
+      return res.status(404).json({ message: 'Listing not found' });
+    }
+
+    res.status(200).json(list[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'An error occurred while retrieving the listing' });
+  }
+};
+
+exports.listReveiw= async (req, res) => {
+  const listId = req.params.id;
+
+  try {
+    const list = await List.fine()
+    
+
+    if (!list || !list.length) {
+      return res.status(404).json({ message: 'Listing not found' });
+    }
+
+    res.status(200).json(list[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'An error occurred while retrieving the listing' });
   }
 };

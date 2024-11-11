@@ -1,4 +1,3 @@
-// const express = require("express")
 const express = require("express");
 const { requireSignin ,canEditDeletePost,isHost} = require("../midleware/auth");
 const router = express.Router();
