@@ -39,7 +39,18 @@ const userSchema = new Schema(
     url: String,
     public_id: String,
   },
-   
+  varificationImage: {
+    url: String,
+    public_id: String,
+  },
+  varificationId : {
+    url: String,
+    public_id: String,
+  },
+  varificationIdType:{
+    type:String,
+    // required:true,
+  },
     birth:{
       type:String,
     },
@@ -65,7 +76,7 @@ const userSchema = new Schema(
     isPhoneVerified:{type:Boolean,default:false},
     otp: { type: String },
     otpExpires: { type: Date },
-    isVerified: { type: Boolean, default: false } ,
+    isVerified: { type: Boolean, default: true } ,
     isOtpVerified:{ type: Boolean, default: false } ,
     role: {
       type: String,
