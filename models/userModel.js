@@ -61,7 +61,7 @@ const userSchema = new Schema(
     about:{
       type:String,
     },
-    isemailVerify:{ type: Boolean, default: false },
+    isEmailVerified:{ type: Boolean, default: false},
     isPhoneVerified:{type:Boolean,default:false},
     otp: { type: String },
     otpExpires: { type: Date },

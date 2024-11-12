@@ -10,6 +10,7 @@ const {
   allListByUser,
   HostCheck,
   getSingleList,
+  listReveiw,
   authorBookingDetails
 } = require("../controlar/list.js");
 router.post('/create-list',requireSignin,isHost,createList);
@@ -22,4 +23,7 @@ router.delete("/delete-list/:id",requireSignin,canEditDeletePost,deleteSinglelis
 router.get("/all-draft",requireSignin,allListByUser);
 router.get("/all-bookind-by-author",requireSignin,authorBookingDetails)
 router.get("/host-check",requireSignin,isHost,HostCheck)
+// listReveiw
+router.get("/get-single-list-review/:id",listReveiw)
+
 module.exports = router;

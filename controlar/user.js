@@ -117,7 +117,7 @@ exports.bookProperty=async (req, res) => {
   try {
     const propertyId = req.params.id;
     const { checkinDate, checkoutDate } = req.body;
-    console.log(req.auth._id);
+    // console.log(req.auth._id);
    const BClientID=req.auth._id
     // Find the property by ID
     const property = await List.findById(propertyId);
@@ -186,7 +186,7 @@ exports.bookProperty=async (req, res) => {
 
     // // Save the booking (in 'pending' state)
     const savedBooking = await newBooking.save();
-console.log(savedBooking)
+// console.log(savedBooking)
     // // Add the booking's ID to the property
     property.bookings.push(savedBooking._id);
     await property.save();
@@ -282,28 +282,36 @@ exports.softDeleteUser = async (req, res) => {
 exports.createReview = async (req, res) => {
   try {
       const listId = req.params.id;
-      const userId = req.auth._id; // Authenticated user's ID
-      const reviewData = req.body.reviewData;
-      // Create a new review with reference to the user
+      const userId = req.auth._id; 
+    //  console.log(req.body)
+      const {
+        locationOfProperty,
+        loremIpsumRating,
+        hygieneRating,
+
+       
+        amenitiesRating,
+        communicationRating,
+        reviewText,
+        avgRating
+      }=req.body;
       const newReview = new Review({
           listId: listId,
-          categories: reviewData.categories,
-          client: userId, // Store user ID for population
-          reviewText: reviewData.reviewText
+          user: userId,
+          locationOfProperty,
+          loremIpsumRating,
+          hygieneRating,
+          amenitiesRating,
+          communicationRating,
+          reviewText,
+          avgRating
       });
-
-      // Save the review to the database
       await newReview.save();
+      await List.findByIdAndUpdate(listId, { $push: { reviews: newReview._id } });
 
-      // Populate the user details in the saved review
-      const populatedReview = await Review.findById(newReview._id).populate('user', 'name');
-      await List.findByIdAndUpdate(listId, { $push: { reviews: populatedReview._id } });
-
-      // Send the created review with populated user details
       return res.status(201).json({
           message: 'Review created successfully',
-          review: populatedReview,
-          overallRating: populatedReview.overallRating
+          review: newReview,
       });
   } catch (err) {
       console.error('Error creating review:', err);
