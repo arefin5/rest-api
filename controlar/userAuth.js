@@ -7,6 +7,7 @@ const logger = require("../utils/logger");
 const sendOTPEmail = require("../helper/email");
 const crypto = require('crypto');
 const {sendVerificationEmail} =require("../helper/sendVerificationEmail")
+const sendOtpSms = require('../helper/sendOtpSms'); // Adjust path as needed
 
 exports.register = async (req, res) => {
   // console.log("register")
@@ -248,7 +249,9 @@ exports.SingleUser = async (req, res) => {
 
 exports.editProfile = async (req, res) => {
   try {
-    const { phone, email, fname, lname, name, about, fatherName, motherName, presentAddress, parmanentAddress, birth, profilePic, cover } = req.body;
+    const { phone, email, fname, lname, name,
+      varificationImage, varificationId, varificationIdType,
+       about, fatherName, motherName, presentAddress, parmanentAddress, birth, profilePic, cover } = req.body;
     const userId = req.auth._id;
 
     // Find the user by ID
@@ -289,7 +292,10 @@ exports.editProfile = async (req, res) => {
     if (birth) user.birth = birth;
     if (profilePic) user.profilePic = profilePic;
     if (cover) user.cover = cover;
-
+    if (varificationImage) user.varificationImage = varificationImage;
+    if (varificationId) user.varificationId = varificationId;
+    if (varificationIdType) user.varificationIdType = varificationIdType;
+     
     // Save the updated user data
     await user.save();
 
@@ -350,7 +356,7 @@ exports.googleFacebookLogin = async (req, res) => {
         profilePic,
         isOtpVerified: true,
         status: "active",
-        isVerified: true,    
+        isEmailVerified: true,    
        
       });
     }
@@ -468,6 +474,42 @@ const normalizePhone = (phone) => {
 };
 
 
+// exports.generateOtpPhone = async (req, res) => {
+//   const { phone } = req.body;
+//   const normalizedPhone = normalizePhone(phone);
+//   const ipAddress = req.ip;
+
+//   logger.info(`OTP generation requested by ${normalizedPhone} from IP ${ipAddress}`);
+
+//   try {
+//     let user = await User.findOne({ phone: normalizedPhone });
+
+//     if (!user) {
+//       logger.info(`User not found. Creating new user with phone ${normalizedPhone}`);
+//       user = new User({
+//         phone: normalizedPhone,
+//       });
+//       await user.save();
+//       logger.info(`New user created with phone ${normalizedPhone}`);
+//     }
+
+//     const otp = generateOTP();
+//     user.otp = otp;
+//     user.otpExpires = Date.now() + 10 * 60 * 1000;
+
+//     await user.save();
+
+//     logger.info(`OTP generated and sent to ${normalizedPhone} ${otp}`);
+//     res.json({ message: "OTP sent successfully", phone: normalizedPhone });
+//     console.log(otp)
+//   } catch (err) {
+//     logger.error(`Error during OTP generation: ${err.message}`);
+//     return res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
+
+
 exports.generateOtpPhone = async (req, res) => {
   const { phone } = req.body;
   const normalizedPhone = normalizePhone(phone);
@@ -480,9 +522,7 @@ exports.generateOtpPhone = async (req, res) => {
 
     if (!user) {
       logger.info(`User not found. Creating new user with phone ${normalizedPhone}`);
-      user = new User({
-        phone: normalizedPhone,
-      });
+      user = new User({ phone: normalizedPhone });
       await user.save();
       logger.info(`New user created with phone ${normalizedPhone}`);
     }
@@ -490,17 +530,26 @@ exports.generateOtpPhone = async (req, res) => {
     const otp = generateOTP();
     user.otp = otp;
     user.otpExpires = Date.now() + 10 * 60 * 1000;
-
     await user.save();
 
-    logger.info(`OTP generated and sent to ${normalizedPhone} ${otp}`);
+    logger.info(`OTP generated for ${normalizedPhone}: ${otp}`);
+
+    // Use the helper to send the OTP SMS
+    const smsResponseCode = await sendOtpSms(normalizedPhone, otp);
     res.json({ message: "OTP sent successfully", phone: normalizedPhone });
-    console.log(otp)
+    // if (smsResponseCode === '202') {
+    //   logger.info(`OTP sent successfully to ${normalizedPhone}`);
+    //   res.json({ message: "OTP sent successfully", phone: normalizedPhone });
+    // } else {
+    //   logger.error(`Failed to send OTP to ${normalizedPhone}. API Response Code: ${smsResponseCode}`);
+    //   res.status(500).json({ error: "Failed to send OTP" });
+    // }
   } catch (err) {
     logger.error(`Error during OTP generation: ${err.message}`);
-    return res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 exports.verifyOtpPhone = async (req, res) => {
   const { phone, otp } = req.body;
@@ -646,7 +695,6 @@ exports.verifyRequest=async (req, res) => {
 
     // Update user password
     user.isOtpVerified = true; // Reset OTP verification status
-    user.isVerified=true;
     await user.save();
     user.password=null 
     res.json({ message: "Password updated successfully",user });
