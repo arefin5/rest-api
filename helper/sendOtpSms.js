@@ -1,148 +1,187 @@
+
+// // // const axios = require('axios');
+
+
+
+// // // const sendOtpSms = async (phone, otp) => {
+// // //   console.log("test statart............")
+// // //   const SMS_API_KEY = 'eIRUl6dShD7VJ0sZ1q1f';
+// // // const SENDER_ID = '8809617618398';
+// // //   const message = `Bed Bd  OTP is ${otp}`;
+// // //   const encodedMessage = encodeURIComponent(message);
+// // //   console.log(phone)
+// // //   const numbers=await `+phone`
+// // //   console.log(numbers)
+
+// // //   const apiUrl = `http://bulksmsbd.net/api/smsapi?api_key=${SMS_API_KEY}&type=text&number=${phone}&senderid=${SENDER_ID}&message=${encodedMessage}`;
+
+// // //   try {
+// // //     const response = await axios.get(apiUrl);
+// // //     console.log(response)
+// // //     return response.data;
+// // //   } catch (error) {
+// // //     console.error(`Error sending OTP SMS: ${error.message}`);
+// // //     throw new Error("Failed to send OTP SMS");
+// // //   }
+// // // };
+
+// // // module.exports = sendOtpSms;
+// // const axios = require('axios');
+
+// // const sendOtpSms = async (phone, otp) => {
+// //   console.log("Starting SMS send...");
+
+// //   const SMS_API_KEY = 'eIRUl6dShD7VJ0sZ1q1f';
+// //   const SENDER_ID = '8809617618398';
+// //   const message = `Bed Bd OTP is ${otp}`;
+// //   const encodedMessage = encodeURIComponent(message);
+
+// //   // Ensure phone number is correctly formatted with +88 prefix
+// //   const formattedPhone = phone.startsWith('+88') ? phone : `+88${phone.replace(/^0+/, '')}`;
+
+// //   console.log(`Formatted phone number: ${formattedPhone}`);
+
+// //   const apiUrl = `http://bulksmsbd.net/api/smsapi?api_key=${SMS_API_KEY}&type=text&number=${formattedPhone}&senderid=${SENDER_ID}&message=${encodedMessage}`;
+
+// //   try {
+// //     const response = await axios.get(apiUrl);
+// //     // console.log(response.data); // Print only response data
+// //     return response.data;
+// //   } catch (error) {
+// //     console.error(`Error sending OTP SMS: ${error.message}`);
+// //     throw new Error("Failed to send OTP SMS");
+// //   }
+// // };
+
+// // module.exports = sendOtpSms;
 // const axios = require('axios');
 
-// // Set your API key and sender ID
+// const sendOtpSms = async (phone, otp) => {
+//   console.log("Starting SMS send...");
 
-// // id:mdalmamun
-// // pass: AS2SQBBN
-// // Cr85EGZ5kSEDbGKhpzSJ
-// // Send OTP function
-// async function sendOtp(req, res) {
-//      const apiKey = 'Cr85EGZ5kSEDbGKhpzSJ';
-//      const senderId = '8809617618398';
-//     // Extract OTP and recipient number from the request
-//     const { otp, number } = req.body;
+//   const SMS_API_KEY = 'eIRUl6dShD7VJ0sZ1q1f';
+//   const SENDER_ID = '8809617618398';
+//   const message = `Bed Bd OTP is ${otp}`;
+//   const encodedMessage = encodeURIComponent(message);
 
-//     if (!otp || !number) {
-//         return res.status(400).json({ error: 'OTP and number are required.' });
+//   // Ensure phone number is formatted as +880XXXXXXXXX
+//   let formattedPhone = phone;
+//   if (!formattedPhone.startsWith('+88')) {
+//     formattedPhone = `+880${formattedPhone.replace(/^0+/, '')}`;
+//   }
+
+//   console.log(`Formatted phone number: ${formattedPhone}`);
+
+//   const apiUrl = `http://bulksmsbd.net/api/smsapi?api_key=${SMS_API_KEY}&type=text&number=${formattedPhone}&senderid=${SENDER_ID}&message=${encodedMessage}`;
+
+//   try {
+//     const response = await axios.get(apiUrl);
+
+//     // Log the entire response object for debugging
+//     console.log('API Response:', response.data);
+
+//     return response.data;
+//   } catch (error) {
+//     // Capture detailed error info
+//     if (error.response) {
+//       console.error('Error Response Data:', error.response.data);
+//       console.error('Error Status Code:', error.response.status);
+//     } else if (error.request) {
+//       console.error('No response received:', error.request);
+//     } else {
+//       console.error('Error in setting up request:', error.message);
 //     }
+//     throw new Error("Failed to send OTP SMS");
+//   }
+// };
 
-//     // Construct the message with OTP
-//     const message = `Your CompanyName OTP is ${otp}`;
-//     const encodedMessage = encodeURIComponent(message); // Encode message for URL
-
-//     // Construct the API URL
-//     const apiUrl = `http://bulksmsbd.net/api/smsapi?api_key=${apiKey}&type=text&number=${number}&senderid=${senderId}&message=${encodedMessage}`;
-
-//     try {
-//         // Send the OTP via SMS API
-//         const response = await axios.get(apiUrl);
-
-//         // Handle different response codes from the API
-//         const responseCode = response.data;
-//         let message;
-
-//         switch (responseCode) {
-//             case '202':
-//                 message = 'SMS Submitted Successfully';
-//                 res.status(200).json({ success: true, message });
-//                 break;
-//             case '1001':
-//                 message = 'Invalid Number';
-//                 res.status(400).json({ success: false, message });
-//                 break;
-//             case '1002':
-//                 message = 'Sender ID not correct or is disabled';
-//                 res.status(400).json({ success: false, message });
-//                 break;
-//             case '1003':
-//                 message = 'All fields required / Contact Administrator';
-//                 res.status(400).json({ success: false, message });
-//                 break;
-//             case '1007':
-//                 message = 'Balance Insufficient';
-//                 res.status(400).json({ success: false, message });
-//                 break;
-//             default:
-//                 message = 'An unknown error occurred';
-//                 res.status(500).json({ success: false, message });
-//                 break;
-//         }
-//     } catch (error) {
-//         console.error('Error sending SMS:', error);
-//         res.status(500).json({ success: false, message: 'Failed to send SMS' });
-//     }
-// }
-
-// module.exports = sendOtp;
+// module.exports = sendOtpSms;
 // const axios = require('axios');
 
-// // Set your API key and sender ID
-// const apiKey = 'eIRUl6dShD7VJ0sZ1q1f';
-// const senderId = '8809617618398';
+// const sendOtpSms = async (phone, otp) => {
+//   console.log("Starting SMS send...");
 
-// // Send OTP function
-// async function sendOtp(req, res) {
-//     // Extract OTP and recipient number from the request
-//     const { otp, number } = req.body;
+//   const SMS_API_KEY = 'eIRUl6dShD7VJ0sZ1q1f';
+//   const SENDER_ID = '8809617618398';
+//   const message = `Bed Bd OTP is ${otp}`;
+//   const encodedMessage = encodeURIComponent(message);
 
-//     if (!otp || !number) {
-//         return res.status(400).json({ error: 'OTP and number are required.' });
+//   // Ensure phone number is formatted as +880XXXXXXXXX
+//   let formattedPhone = phone;
+//   if (!formattedPhone.startsWith('+88')) {
+//     formattedPhone = `+880${formattedPhone.replace(/^0+/, '')}`;
+//   }
+
+//   console.log(`Formatted phone number: ${formattedPhone}`);
+
+//   const apiUrl = `http://bulksmsbd.net/api/smsapi?api_key=${SMS_API_KEY}&type=text&number=${formattedPhone}&senderid=${SENDER_ID}&message=${encodedMessage}`;
+
+//   try {
+//     const response = await axios.get(apiUrl);
+
+//     // Log the full response for debugging
+//     console.log('API Response:', response.data);
+
+//     // Check the response code explicitly
+//     if (response.data.response_code === 202) {
+//       console.log(`OTP sent successfully to ${phone}.`);
+//       return response.data;
+//     } else {
+//       // Log error message if response code is not 202
+//       console.error(`Failed to send OTP to ${phone}. API Response Code: ${response.data.response_code}, Message: ${response.data.error_message || 'Unknown error'}`);
+//       throw new Error("Failed to send OTP SMS");
 //     }
-
-//     // Construct the message with OTP
-//     const message = `Your CompanyName OTP is ${otp}`;
-//     const encodedMessage = encodeURIComponent(message); // Encode message for URL
-
-//     // Construct the API URL
-//     const apiUrl = `http://bulksmsbd.net/api/smsapi?api_key=${apiKey}&type=text&number=${number}&senderid=${senderId}&message=${encodedMessage}`;
-
-//     try {
-//         // Send the OTP via SMS API
-//         const response = await axios.get(apiUrl);
-
-//         // Handle different response codes from the API
-//         const responseCode = response.data;
-//         let message;
-
-//         switch (responseCode) {
-//             case '202':
-//                 message = 'SMS Submitted Successfully';
-//                 res.status(200).json({ success: true, message });
-//                 break;
-//             case '1001':
-//                 message = 'Invalid Number';
-//                 res.status(400).json({ success: false, message });
-//                 break;
-//             case '1002':
-//                 message = 'Sender ID not correct or is disabled';
-//                 res.status(400).json({ success: false, message });
-//                 break;
-//             case '1003':
-//                 message = 'All fields required / Contact Administrator';
-//                 res.status(400).json({ success: false, message });
-//                 break;
-//             case '1007':
-//                 message = 'Balance Insufficient';
-//                 res.status(400).json({ success: false, message });
-//                 break;
-//             default:
-//                 message = 'An unknown error occurred';
-//                 res.status(500).json({ success: false, message });
-//                 break;
-//         }
-//     } catch (error) {
-//         console.error('Error sending SMS:', error);
-//         res.status(500).json({ success: false, message: 'Failed to send SMS' });
+//   } catch (error) {
+//     // Detailed error handling
+//     if (error.response) {
+//       console.error('Error Response Data:', error.response.data);
+//       console.error('Error Status Code:', error.response.status);
+//     } else if (error.request) {
+//       console.error('No response received:', error.request);
+//     } else {
+//       console.error('Error in setting up request:', error.message);
 //     }
-// }
+//     throw new Error("Failed to send OTP SMS");
+//   }
+// };
 
-// module.exports = sendOtp;
+// module.exports = sendOtpSms;
 const axios = require('axios');
 
-
-
 const sendOtpSms = async (phone, otp) => {
-  const SMS_API_KEY = 'qeZjQsThGc859sUCh3jw';
-const SENDER_ID = '8809617618398';
-  const message = `Bed Bd  OTP is ${otp}`;
+  console.log("Starting SMS send...");
+
+  const SMS_API_KEY = 'eIRUl6dShD7VJ0sZ1q1f';
+  const SENDER_ID = '8809617618398';
+  const message = `Bed Bd OTP is ${otp}`;
   const encodedMessage = encodeURIComponent(message);
-  const apiUrl = `http://bulksmsbd.net/api/smsapi?api_key=${SMS_API_KEY}&type=text&number=${phone}&senderid=${SENDER_ID}&message=${encodedMessage}`;
+
+  // Ensure phone number is formatted as +880XXXXXXXXX
+  let formattedPhone = phone;
+  if (!formattedPhone.startsWith('+88')) {
+    formattedPhone = `+880${formattedPhone.replace(/^0+/, '')}`;
+  }
+
+  // console.log(`Formatted phone number: ${formattedPhone}`);
+
+  const apiUrl = `http://bulksmsbd.net/api/smsapi?api_key=${SMS_API_KEY}&type=text&number=${formattedPhone}&senderid=${SENDER_ID}&message=${encodedMessage}`;
 
   try {
     const response = await axios.get(apiUrl);
-    return response.data; // Returns the response code
+
+    // Log the full response for debugging
+    // console.log('API Response:', response.data);
+
+    // Check the response code explicitly
+    if (response.data.response_code === 202) {
+      // console.log(`OTP sent successfully to ${phone}.`);
+      return response.data.response_code;  // Return only response_code
+    } else {
+      console.error(`Failed to send OTP. Response: ${JSON.stringify(response.data)}`);
+      return response.data.response_code;  // Return response_code for error handling
+    }
   } catch (error) {
-    console.error(`Error sending OTP SMS: ${error.message}`);
+    console.error('Error sending OTP SMS:', error.message);
     throw new Error("Failed to send OTP SMS");
   }
 };
