@@ -434,3 +434,40 @@ exports.listReveiw= async (req, res) => {
     res.status(500).json({ message: 'An error occurred while retrieving the listing' });
   }
 };
+// sortList 
+exports.SortLocation=async (req,res) => {
+  try {
+    // Extract query parameters
+    console.log(req.query)
+    const { latitude, longitude, maxDistance = 5000 } = req.query;
+
+    // Validate inputs
+    if (!latitude || !longitude) {
+      return res.status(400).json({ error: 'Latitude and Longitude are required' });
+    }
+
+    // Geospatial query
+    const midpoint = {
+      type: "Point",
+      coordinates: [parseFloat(longitude), parseFloat(latitude)],
+    };
+
+    const results = await List.aggregate([
+      {
+        $geoNear: {
+          near: midpoint,
+          distanceField: "distance",
+          spherical: true,
+          maxDistance: parseInt(maxDistance), // Convert to meters
+          query: { status: "published" }, // Optional filter
+        },
+      },
+      { $sort: { distance: 1 } }, // Sort by proximity
+    ]);
+
+    res.status(200).json(results);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'An error occurred while fetching data' });
+  }
+}
