@@ -2,6 +2,7 @@
 const express = require("express");
 const { requireSignin ,canEditDeletePost,isHost} = require("../midleware/auth");
 const router = express.Router();
+
 const {
   createList,
   lists,
@@ -11,6 +12,7 @@ const {
   HostCheck,
   getSingleList,
   listReveiw,
+  SortLocation,
   authorBookingDetails
 } = require("../controlar/list.js");
 router.post('/create-list',requireSignin,isHost,createList);
@@ -25,5 +27,6 @@ router.get("/all-bookind-by-author",requireSignin,authorBookingDetails)
 router.get("/host-check",requireSignin,isHost,HostCheck)
 // listReveiw
 router.get("/get-single-list-review/:id",listReveiw)
+router.get('/sort-by-location', SortLocation);
 
 module.exports = router;
