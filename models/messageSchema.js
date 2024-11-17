@@ -13,11 +13,16 @@ const messageSchema = new Schema(
       ref: 'User', // Reference to the User model
       required: true,
     },
+    // message: {
+    //   type: String,
+    //   required: true,
+    //   trim: true,
+    // },
     message: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+  type: String,
+  required: [true, 'Message content is required'],
+  trim: true,
+},
     isRead: {
       type: Boolean,
       default: false, // Track if the message has been read
@@ -29,5 +34,6 @@ const messageSchema = new Schema(
   },
   { timestamps: true } // Automatically adds `createdAt` and `updatedAt`
 );
+messageSchema.index({ sender: 1, receiver: 1 });
 
 module.exports = mongoose.model('Message', messageSchema);
