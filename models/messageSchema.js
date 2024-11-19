@@ -13,11 +13,6 @@ const messageSchema = new Schema(
       ref: 'User', // Reference to the User model
       required: true,
     },
-    // message: {
-    //   type: String,
-    //   required: true,
-    //   trim: true,
-    // },
     message: {
   type: String,
   required: [true, 'Message content is required'],
