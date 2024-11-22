@@ -450,9 +450,7 @@ exports.generateOtpPhone = async (req, res) => {
   const { phone } = req.body;
   const normalizedPhone = normalizePhone(phone);
   const ipAddress = req.ip;
-
   logger.info(`OTP generation requested by ${normalizedPhone} from IP ${ipAddress}`);
-
   try {
     let user = await User.findOne({ phone: normalizedPhone });
 
@@ -462,12 +460,11 @@ exports.generateOtpPhone = async (req, res) => {
       await user.save();
       logger.info(`New user created with phone ${normalizedPhone}`);
     }
-
     const otp = generateOTP();
     user.otp = otp;
     user.otpExpires = Date.now() + 10 * 60 * 1000;
     await user.save();
-
+     console.log(otp)
     // logger.info(`OTP generated for ${normalizedPhone}: ${otp}`);
 
     // Send the OTP SMS

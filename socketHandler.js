@@ -17,15 +17,26 @@ const socketHandler = (io) => {
     let unreadMessages = 0;
 
 
+    // function updateUnreadMessages(userId) {
+    //   Message.countDocuments({ receiver: userId, isRead: false })
+    //     .then((count) => {
+    //       // console.log(`Unread messages for user ${userId}: ${count}`);
+    //       unreadMessages = count;
+    //       io.to(userId).emit('unreadMessagesCount', unreadMessages);
+    //     })
+    //     .catch((error) => console.error('Error fetching unread messages:', error));
+    // }
     function updateUnreadMessages(userId) {
+      if (!userId) return; // Ensure userId is valid before proceeding
+    
       Message.countDocuments({ receiver: userId, isRead: false })
         .then((count) => {
-          // console.log(`Unread messages for user ${userId}: ${count}`);
-          unreadMessages = count;
-          io.to(userId).emit('unreadMessagesCount', unreadMessages);
+          // Emit updated unread message count to the specific user's socket room
+          io.to(userId).emit('unreadMessagesCount', count);
         })
         .catch((error) => console.error('Error fetching unread messages:', error));
     }
+    
     // Authenticate user
     socket.on('authenticate', (token, callback) => {
       try {
@@ -164,29 +175,38 @@ const socketHandler = (io) => {
         callback({ status: 'Message delivery failed' });
       }
     });
-// Retrieve message history between two users
+
     socket.on('getMessageHistory', async ({ userId, otherUserId }, callback) => {
       try {
-
         const userObjectId = new mongoose.Types.ObjectId(userId);
         const otherUserObjectId = new mongoose.Types.ObjectId(otherUserId);
-        //  console.log(otherUserObjectId);
-
+    
+        // Mark messages as read
+        await Message.updateMany(
+          {
+            $or: [
+              { sender: userObjectId, receiver: otherUserObjectId },
+              { sender: otherUserObjectId, receiver: userObjectId },
+            ],
+          },
+          { $set: { isRead: true } }
+        );
+    
         // Fetch message history
         const messages = await Message.find({
           $or: [
             { sender: userObjectId, receiver: otherUserObjectId },
             { sender: otherUserObjectId, receiver: userObjectId },
           ],
-        }).sort({ createdAt: 1 }); // Sort by timestamp in ascending order
-        console.log(messages)
+        }).sort({ createdAt: 1 });
+          console.log(messages)
         callback({ status: 'success', messages });
       } catch (error) {
         console.error('Error fetching message history:', error);
         callback({ status: 'failed', message: 'Error fetching message history' });
       }
     });
-
+    
     socket.on('messageRead', async (messageId) => {
       if (!socket.user) return console.log('User is not authenticated');
 

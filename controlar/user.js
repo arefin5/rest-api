@@ -115,15 +115,24 @@ exports.UserBooklist=async(req,res)=>{
 }
 exports.bookProperty=async (req, res) => {
   try {
-    const propertyId = req.params.id;
-    const { checkinDate, checkoutDate } = req.body;
-    // console.log(req.auth._id);
-   const BClientID=req.auth._id
-    // Find the property by ID
-    const property = await List.findById(propertyId);
+    // const propertyId = req.params.id;
+  //   const { checkinDate, checkoutDate ,guestCount} = req.body;
+   const BClientID=req.auth._id;
+  //  console.log(req.body)
+  //    const totalNights=req.body.totalNights
+
+  const propertyId = req.params.id;
+    const { checkinDate, checkoutDate, guestCount, totalNights } = req.body;
+
+    if (!checkinDate || !checkoutDate || !totalNights || totalNights <= 0) {
+      return res.status(400).json({ message: 'Invalid input data' });
+    }
+
+   const property = await List.findById(propertyId);
     if (!property) {
       return res.status(404).json({ message: 'Property not found' });
     }
+
     const isBooked = await Booking.findOne({
       property: propertyId,
       $or: [
@@ -135,16 +144,20 @@ exports.bookProperty=async (req, res) => {
     if (isBooked) {
       return res.status(400).json({ message: 'The selected dates are already booked' });
     }
-    // Calculate the length of stay in days
-    // success_url : `http://145.223.22.239:5001/api/success-payment/${transactionId}/`,
 
-  const  amount=property.price;
-  const transactionId = `TRANS_${uuid.v4()}`;
-    const paymentData = {
+    // Calculate the length of stay in days
+    const serviceFee = property.serviceFee * totalNights || 0;
+    const tax = property.tax * totalNights || 0;
+    const basePrice = property.GroundPrice * totalNights || 0;
+    const amount = serviceFee + tax + basePrice;
+     const transactionId = `TRANS_${uuid.v4()}`;
+     const paymentData = {
       tran_id:transactionId,
       total_amount: amount,
       currency: 'BDT',
       success_url : `http://145.223.22.239:5001/api/success-payment/${transactionId}/`,
+      // success_url : `http://localhost:3000/success/${transactionId}/`,
+
       fail_url: 'http://localhost:3000/fail',
       cancel_url: 'http://localhost:3000/cancel',
       ipn_url: 'http://localhost:3000/ipn',
@@ -169,8 +182,8 @@ exports.bookProperty=async (req, res) => {
     if (!GatewayPageURL) {
       return res.status(500).json({ message: 'Payment gateway initialization failed' });
     }
-    console.log(property.Postedby._id);
-    console.log(req.auth._id,)
+    // console.log(property.Postedby._id);
+    // console.log(req.auth._id,)
     const newBooking = new Booking({
       user: req.auth._id,
       property: propertyId,
@@ -180,7 +193,8 @@ exports.bookProperty=async (req, res) => {
       tran_id: paymentData.tran_id,
       basePrice:property.GroundPrice,
       Host:property.Postedby._id,
-      BClientId:BClientID
+      BClientId:BClientID,
+      guest:guestCount
     });
     // console.log("before initial ",savedBooking)
 
