@@ -19,7 +19,8 @@ const {
     confirmSuccess,
     bookingApprovedPending,
     bookingApproved,
-    
+    allBookingListForHost,
+    bookingPaymentClaim
 
 } = require("../controlar/user.js");
 
@@ -43,6 +44,9 @@ router.post("/payment/confirm",confirmPayment);
 router.get("/success-payment/:id", confirmSuccess);
 router.post("/success-payment/:id", confirmSuccess);
 router.put("/approved-booking/:id",requireSignin,bookingApproved)
+router.put("/claim-booking-payment/:id",requireSignin,bookingPaymentClaim)
 
-router.get("/host-pending-booking-list",requireSignin,bookingApprovedPending)
+router.get("/host-pending-booking-list",requireSignin,bookingApprovedPending);
+router.get("/host-all-booking-list",requireSignin,allBookingListForHost)
+
 module.exports = router;

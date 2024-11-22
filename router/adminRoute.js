@@ -13,7 +13,8 @@ const {
     getAlluser,
     getAllList,
     blockuser,
-    aprovedListPublished
+    aprovedListPublished,
+    allBookingList
 } = require("../controlar/admin.js");
 router.get('/admin/failed-booking-all',requireSignin,checkAdmin,getFailedBookings);
 router.get('/admin/all-booking',requireSignin,checkAdmin,getAllBooking);
@@ -27,6 +28,7 @@ router.get("/admin/get-pending/",requireSignin,checkAdmin,getAllPanding);
 
 router.put("/block-user/:id",requireSignin,checkAdmin,blockuser);
 router.put("/admin/published-from-host/:id",canEditDeletePost,aprovedListPublished)
+router.get("/all-booking",requireSignin,checkAdmin,allBookingList);
 
 
 module.exports = router;

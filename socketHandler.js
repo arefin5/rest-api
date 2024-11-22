@@ -199,7 +199,7 @@ const socketHandler = (io) => {
             { sender: otherUserObjectId, receiver: userObjectId },
           ],
         }).sort({ createdAt: 1 });
-          console.log(messages)
+          // console.log(messages)
         callback({ status: 'success', messages });
       } catch (error) {
         console.error('Error fetching message history:', error);
@@ -236,7 +236,7 @@ const socketHandler = (io) => {
 
     // Handle disconnections
     socket.on('disconnect', () => {
-      console.log('Client disconnected:', socket.id);
+      // console.log('Client disconnected:', socket.id);
     });
   });
 };
