@@ -510,14 +510,16 @@ exports.confirmSuccess = async (req, res) => {
 
 exports.bookingApprovedPending = async (req, res) => {
   try {
-    const hostID = req.auth._id; // Ensure hostID is assigned with `const`
+    const hostID = req.auth._id; 
+    console.log("start");
+    
     const bookingPending = await Booking.find({ Host: hostID, status: "paymentsuccess" })
-    .populate('property', 'propertyTitle').populate('client', 'fname ');
-
+    .populate('property', 'propertyTitle').populate('BClientId', 'fname ');
+          
     if (!bookingPending || bookingPending.length === 0) {
       return res.status(200).json({ message: "No pending bookings" });
     }
-
+       // console.log(bookingPending)
     res.status(200).json(bookingPending);
   } catch (error) {
     console.error("Error fetching pending bookings:", error);
