@@ -115,11 +115,8 @@ exports.UserBooklist=async(req,res)=>{
 }
 exports.bookProperty=async (req, res) => {
   try {
-    // const propertyId = req.params.id;
-  //   const { checkinDate, checkoutDate ,guestCount} = req.body;
+ 
    const BClientID=req.auth._id;
-  //  console.log(req.body)
-  //    const totalNights=req.body.totalNights
 
   const propertyId = req.params.id;
     const { checkinDate, checkoutDate, guestCount, totalNights } = req.body;
@@ -189,9 +186,9 @@ exports.bookProperty=async (req, res) => {
       property: propertyId,
       checkinDate: new Date(checkinDate),
       checkoutDate: new Date(checkoutDate),
-      price:property.price,
+      price:amount,
       tran_id: paymentData.tran_id,
-      basePrice:property.GroundPrice,
+      basePrice:basePrice,
       Host:property.Postedby._id,
       BClientId:BClientID,
       guest:guestCount
@@ -243,8 +240,6 @@ exports.paymentFail = async (req, res) => {
     if (!booking) {
       return res.status(404).json({ message: 'Booking not found' });
     }
-
-    // Save the failed booking details in the FailedBooking collection
     const failedBooking = new FailedBooking({
       user: booking.user,
       property: booking.property,
@@ -354,98 +349,7 @@ exports.PropertyBooklist=async(req,res)=>{
 }
 
 
-// Unified route handler for booking property and handling payment status
-exports.handleBooking = async (req, res) => {
-  const { action } = req.query;
-  console.log(req.body);
-   const amount =req.body.totalCost;
-  try {
-    switch (action) {
-      case 'book': // Booking initiation
-        const propertyId = req.params.id;
-        const { checkinDate, checkoutDate } = req.body;
 
-        // Find the property by ID
-        const property = await List.findById(propertyId);
-        if (!property) return res.status(404).json({ message: 'Property not found' });
-
-        // Check for date conflicts
-        const isBooked = await Booking.findOne({
-          property: propertyId,
-          $or: [
-            { checkinDate: { $lte: new Date(checkoutDate), $gte: new Date(checkinDate) } },
-            { checkoutDate: { $gte: new Date(checkinDate), $lte: new Date(checkoutDate) } }
-          ],
-        });
-        if (isBooked) return res.status(400).json({ message: 'The selected dates are already booked' });
-
-        const paymentData = {
-          total_amount: amount,
-          currency: 'BDT',
-          success_url: '',
-          fail_url: 'http://localhost:3000/booking?action=fail',
-          cancel_url: 'http://localhost:3000/cancel',
-          ipn_url: 'http://localhost:3000/ipn',
-          cus_name: "testrest",
-          cus_email:  "testrest",
-          cus_phone: "testrest",
-          cus_add1:  "testrest",
-          shipping_method: 'NO',
-          product_name: 'Property Booking',
-          product_category: 'Real Estate',
-          product_profile: 'travel-vertical',
-          hotel_name: "bed bd",
-          length_of_stay: `2 days`,
-          check_in_time: "12:00 PM", 
-          hotel_city: property.location.thana,
-        };
-        // console.log("after paymentData chck")
-        const apiResponse = await initPayment(paymentData);
-        const GatewayPageURL = apiResponse.GatewayPageURL;
-        if (!GatewayPageURL) return res.status(500).json({ message: 'Payment gateway initialization failed' });
-
-        // Create a new booking with status 'pending'
-        const newBooking = new Booking({
-          user: req.auth._id,
-          property: propertyId,
-          checkinDate: checkinDate,
-          checkoutDate:checkoutDate,
-          price: property.price,
-          tran_id: paymentData.tran_id,
-          status:"pending",
-        });
-        const savedBooking = await newBooking.save();
-        property.bookings.push(savedBooking._id);
-        await property.save();
-
-        return res.json({ GatewayPageURL, message: 'Redirecting to payment gateway' });
-
-      // case 'success': // Payment success
-      //   const { tran_id: successTranId } = req.body;
-      //   const successBooking = await Booking.findOne({ tran_id: successTranId });
-      //   if (!successBooking) return res.status(404).json({ message: 'Booking not found' });
-
-      //   successBooking.status = 'confirmed';
-      //   await successBooking.save();
-      //   return res.status(200).json({ message: 'Payment successful, booking confirmed', booking: successBooking });
-
-      // case 'fail': // Payment failure
-      //   const { tran_id: failTranId } = req.body;
-      //   const failedBooking = await Booking.findOne({ tran_id: failTranId });
-      //   if (!failedBooking) return res.status(404).json({ message: 'Booking not found' });
-
-      //   failedBooking.status = 'failed';
-      //   await failedBooking.save();
-      //   return res.status(400).json({ message: 'Payment failed, booking canceled' });
-
-      default:
-        return res.status(400).json({ message: 'Invalid action specified' });
-    }
-  } catch (error) {
-    console.error('Error in booking handler:', error);
-    res.status(500).json({ message: 'Error processing booking request', error });
-  }
-};
 
 exports.confirmPayment = async (req, res) => {
   try {
@@ -511,7 +415,7 @@ exports.confirmSuccess = async (req, res) => {
 exports.bookingApprovedPending = async (req, res) => {
   try {
     const hostID = req.auth._id; 
-    console.log("start");
+    // console.log("start");
     
     const bookingPending = await Booking.find({ Host: hostID, status: "paymentsuccess" })
     .populate('property', 'propertyTitle').populate('BClientId', 'fname ');
@@ -535,6 +439,39 @@ exports.bookingApproved = async (req, res) => {
     const bookingPending = await Booking.findOneAndUpdate(
       { _id: id, Host: hostID }, 
       { status: "confirmed" },   
+      { new: true }
+    );
+    if (!bookingPending) {
+      return res.status(400).json({ message: "Unauthorized or Booking not found" });
+    }
+    res.status(200).json({ message: "Booking approved successfully" });
+  } catch (error) {
+    console.error("Error approving booking:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+exports.allBookingListForHost = async (req, res) => {
+  try {
+    const hostID = req.auth._id; 
+    const bookingPending = await Booking.find({ Host: hostID})
+    .populate('property', 'propertyTitle').populate('BClientId', 'fname ');
+    if (!bookingPending || bookingPending.length === 0) {
+      return res.status(200).json({ message: "No pending bookings" });
+    }
+    res.status(200).json(bookingPending);
+  } catch (error) {
+    console.error("Error fetching pending bookings:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+exports.bookingPaymentClaim = async (req, res) => {
+  try {
+    const hostID = req.auth._id;
+    const id = req.params.id;
+
+    const bookingPending = await Booking.findOneAndUpdate(
+      { _id: id, Host: hostID }, 
+      { paymentClaim: "confirmed" },   
       { new: true }
     );
     if (!bookingPending) {

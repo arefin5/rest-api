@@ -180,3 +180,19 @@ exports.getAlluser=async(req,res)=>{
         res.status(500).json({ error: 'Internal Server Error' });
     }
   };
+  // allbooking
+  exports.allBookingList = async (req, res) => {
+    try {
+      const hostID = req.auth._id; 
+      const bookinglist = await Booking.find()
+      .populate('property', 'propertyTitle').populate('BClientId', 'fname ');
+      if (!bookinglist || bookinglist.length === 0) {
+        return res.status(200).json({ message: "No pending bookings" });
+      }
+      res.status(200).json(bookinglist);
+    } catch (error) {
+      console.error("Error fetching pending bookings:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  };
+  

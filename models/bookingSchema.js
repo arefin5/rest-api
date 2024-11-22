@@ -37,9 +37,15 @@ const bookingSchema = new Schema({
     type: Number,
     required: true,
   },
+  
   status: {
     type: String,
     enum: ['pending', 'confirmed', 'failed',"paymentsuccess"],
+    default: 'pending',
+  },
+  paymentClaim: {
+    type: String,
+    enum: ['pending', 'confirmed', 'rejected',"paymentsuccess"],
     default: 'pending',
   },
   tran_id: {
