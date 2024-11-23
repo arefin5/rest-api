@@ -435,39 +435,88 @@ exports.listReveiw= async (req, res) => {
   }
 };
 // sortList 
-exports.SortLocation=async (req,res) => {
+// exports.SortLocation=async (req,res) => {
+//   try {
+//     // Extract query parameters
+//     // console.log(req.query);
+// //     console.log(req.body);
+
+// //     // const { latitude, longitude, maxDistance = 500 } = req.query;
+// //     const maxDistance = 500
+// // const latitude=await req.body.location.latitude;
+// // const longitude=await req.body.location.longitude
+
+//     const { latitude, longitude, maxDistance = 500 } = req.body.locations || {};
+//     const { checkinDate, checkoutDate } = req.body;
+//    console.log(req.body);
+   
+
+//     // Validate inputs
+//     if (!latitude || !longitude) {
+//       return res.status(400).json({ error: 'Latitude and Longitude are required' });
+//     }
+
+//     // Geospatial query
+//     const midpoint = {
+//       type: "Point",
+//       coordinates: [parseFloat(longitude), parseFloat(latitude)],
+//     };
+
+//     const results = await List.aggregate([
+//       {
+//         $geoNear: {
+//           near: midpoint,
+//           distanceField: "distance",
+//           spherical: true,
+//           maxDistance: parseInt(maxDistance), 
+//           query: { status: "published" },
+//         },
+//       },
+//       { $sort: { distance: 1 } }, // Sort by proximity
+//     ]);
+//    console.log(results)
+//     res.status(200).json(results);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'An error occurred while fetching data' });
+//   }
+// }
+
+exports.SortLocation = async (req, res) => {
   try {
-    // Extract query parameters
-    console.log(req.query)
-    const { latitude, longitude, maxDistance = 5000 } = req.query;
+      // Extract query parameters
+      const { latitude, longitude, maxDistance = 500, checkinDate, checkoutDate } = req.query;
 
-    // Validate inputs
-    if (!latitude || !longitude) {
-      return res.status(400).json({ error: 'Latitude and Longitude are required' });
-    }
+      console.log(req.query); // Check query parameters
 
-    // Geospatial query
-    const midpoint = {
-      type: "Point",
-      coordinates: [parseFloat(longitude), parseFloat(latitude)],
-    };
+      // Validate inputs
+      if (!latitude || !longitude) {
+          return res.status(400).json({ error: 'Latitude and Longitude are required' });
+      }
 
-    const results = await List.aggregate([
-      {
-        $geoNear: {
-          near: midpoint,
-          distanceField: "distance",
-          spherical: true,
-          maxDistance: parseInt(maxDistance), // Convert to meters
-          query: { status: "published" }, // Optional filter
-        },
-      },
-      { $sort: { distance: 1 } }, // Sort by proximity
-    ]);
+      // Geospatial query
+      const midpoint = {
+          type: "Point",
+          coordinates: [parseFloat(longitude), parseFloat(latitude)],
+      };
 
-    res.status(200).json(results);
+      const results = await List.aggregate([
+          {
+              $geoNear: {
+                  near: midpoint,
+                  distanceField: "distance",
+                  spherical: true,
+                  maxDistance: parseInt(maxDistance),
+                  query: { status: "published" },
+              },
+          },
+          { $sort: { distance: 1 } }, // Sort by proximity
+      ]);
+
+      console.log(results);
+      res.status(200).json(results);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'An error occurred while fetching data' });
+      console.error(error);
+      res.status(500).json({ error: 'An error occurred while fetching data' });
   }
-}
+};

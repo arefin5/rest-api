@@ -20,14 +20,14 @@ const {
     bookingApprovedPending,
     bookingApproved,
     allBookingListForHost,
-    bookingPaymentClaim
-
+    bookingPaymentClaim,
+    bookPropertyPayment
 } = require("../controlar/user.js");
 
 router.put("/favoriteslist-list/:id",requireSignin,addFavoritelist)
 router.put("/unfavoriteslist-list/:id",requireSignin,removeFavoritelist)
 router.post('/book-property/:id',requireSignin, bookProperty);
-
+router.post ("/payment-property/:id",requireSignin,bookPropertyPayment )
 router.get("/check-available/:id",checkAvailability);
 // public user 
 router.get("/get-single-user/:id",requireSignin,getCurrentUser);
