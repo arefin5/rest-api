@@ -459,8 +459,6 @@ const normalizePhone = (phone) => {
   return phone.replace(/\D/g, '');
 };
 
-
-
 exports.generateOtpPhone = async (req, res) => {
   const { phone } = req.body;
   const normalizedPhone = normalizePhone(phone);

@@ -106,108 +106,76 @@ exports.UserBooklist=async(req,res)=>{
       select: 'propertyTitle description image',
     })
     .exec();
-
     res.status(200).json({ bookings });
   } catch (error) {
     console.error('Error fetching user booking list:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }
-// exports.bookProperty=async (req, res) => {
-//   try {
-//    const BClientID=req.auth._id;
-//   const propertyId = req.params.id;
-//     const { checkinDate, checkoutDate, guestCount, totalNights } = req.body;
+exports.bookPropertyPayment=async (req, res) => {
 
-//     if (!checkinDate || !checkoutDate || !totalNights || totalNights <= 0) {
-//       return res.status(400).json({ message: 'Invalid input data' });
-//     }
 
-//    const property = await List.findById(propertyId);
-//     if (!property) {
-//       return res.status(404).json({ message: 'Property not found' });
-//     }
+  try {
+    const bookingId = req.params.id; // This refers to the booking ID
+    console.log(bookingId);
 
-//     const isBooked = await Booking.findOne({
-//       property: propertyId,
-//       $or: [
-//         { checkinDate: { $lte: new Date(checkoutDate), $gte: new Date(checkinDate) } },
-//         { checkoutDate: { $gte: new Date(checkinDate), $lte: new Date(checkoutDate) } }
-//       ],
-//     });
+    // Find the booking by its ID
+    const booking = await Booking.findById(bookingId).populate('property'); // Populate the property reference
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
 
-//     if (isBooked) {
-//       return res.status(400).json({ message: 'The selected dates are already booked' });
-//     }
+    console.log(booking);
 
-//     // Calculate the length of stay in days
-//     const serviceFee = property.serviceFee * totalNights || 0;
-//     const tax = property.tax * totalNights || 0;
-//     const basePrice = property.GroundPrice * totalNights || 0;
-//     const amount = serviceFee + tax + basePrice;
-//      const transactionId = `TRANS_${uuid.v4()}`;
-//      const paymentData = {
-//       tran_id:transactionId,
-//       total_amount: amount,
-//       currency: 'BDT',
-//       success_url : `http://145.223.22.239:5001/api/success-payment/${transactionId}/`,
-//       // success_url : `http://localhost:3000/success/${transactionId}/`,
+    // Ensure the associated property exists
+    const property = booking.property;
+    if (!property) {
+      return res.status(400).json({ message: 'Associated property not found for this booking' });
+    }
+    const transactionId = `TRANS_${uuid.v4()}`;
+    booking.tran_id = transactionId;
 
-//       fail_url: 'http://localhost:3000/fail',
-//       cancel_url: 'http://localhost:3000/cancel',
-//       ipn_url: 'http://localhost:3000/ipn',
-//       cus_name: "testrest",
-//       cus_email:  "testrest",
-//       cus_phone: "testrest",
-//       cus_add1:  "testrest",
-//       shipping_method: 'NO',
-//       product_name: 'Property Booking',
-//       product_category: 'Real Estate',
-//       product_profile: 'travel-vertical',
-//       hotel_name: "bed bd",
-//       length_of_stay: `2 days`,
-//       check_in_time: "12:00 PM", 
-//       hotel_city: property.location.thana,
-//     };
+    // Save the updated booking with the transaction ID
+    await booking.save();
+    console.log(booking)
+   
+     const paymentData = {
+      tran_id:transactionId,
+      total_amount: booking.price,
+      currency: 'BDT',
+      success_url : `http://145.223.22.239:5001/api/success-payment/${transactionId}/`,
+      fail_url: 'http://localhost:3000/fail',
+      cancel_url: 'http://localhost:3000/cancel',
+      ipn_url: 'http://localhost:3000/ipn',
+      cus_name: "testrest",
+      cus_email:  "testrest",
+      cus_phone: "testrest",
+      cus_add1:  "testrest",
+      shipping_method: 'NO',
+      product_name: 'Property Booking',
+      product_category: 'Real Estate',
+      product_profile: 'travel-vertical',
+      hotel_name: "bed bd",
+      length_of_stay: `2 days`,
+      check_in_time: "12:00 PM", 
+      hotel_city: property.location.thana,
+    };
 
-//     // Step 1: Initialize Payment
-//     const apiResponse = await initPayment(paymentData);
-//     const GatewayPageURL = apiResponse.GatewayPageURL;
-  
-//     if (!GatewayPageURL) {
-//       return res.status(500).json({ message: 'Payment gateway initialization failed' });
-//     }
-//     // console.log(property.Postedby._id);
-//     // console.log(req.auth._id,)
-//     const newBooking = new Booking({
-//       user: req.auth._id,
-//       property: propertyId,
-//       checkinDate: new Date(checkinDate),
-//       checkoutDate: new Date(checkoutDate),
-//       price:amount,
-//       tran_id: paymentData.tran_id,
-//       basePrice:basePrice,
-//       Host:property.Postedby._id,
-//       BClientId:BClientID,
-//       guest:guestCount
-//     });
-//     // console.log("before initial ",savedBooking)
+    // Step 1: Initialize Payment
+    const apiResponse = await initPayment(paymentData);
+    const GatewayPageURL = apiResponse.GatewayPageURL;
+     
+    if (!GatewayPageURL) {
+      return res.status(500).json({ message: 'Payment gateway initialization failed' });
+    }
 
-//     // // Save the booking (in 'pending' state)
-//     const savedBooking = await newBooking.save();
-// // console.log(savedBooking)
-//     // // Add the booking's ID to the property
-//     property.bookings.push(savedBooking._id);
-//     await property.save();
-
-//     // Step 3: Redirect the user to the payment gateway for payment
-//     res.json({ GatewayPageURL, message: 'Redirecting to payment gateway' });
-//   //  after payment success then how can find tran_id here and use this into front end 
-//   } catch (error) {
-//     console.error('Error booking the property:', error);
-//     res.status(500).json({ message: 'Error booking the property', error });
-//   }
-// };
+    res.json({ GatewayPageURL, message: 'Redirecting to payment gateway' });
+  //  after payment success then how can find tran_id here and use this into front end 
+  } catch (error) {
+    console.error('Error booking the property:', error);
+    res.status(500).json({ message: 'Error booking the property', error });
+  }
+};
 
 exports.bookProperty=async (req, res) => {
   try {
@@ -247,8 +215,6 @@ exports.bookProperty=async (req, res) => {
       guest:guestCount
     });
     const savedBooking = await newBooking.save();
-    property.bookings.push(savedBooking._id);
-    await property.save();
     res.json({  message: 'Your Booking Request is Success .waiting for Host Aproved'});
 
   } catch (error) {
@@ -342,8 +308,6 @@ exports.createReview = async (req, res) => {
         locationOfProperty,
         loremIpsumRating,
         hygieneRating,
-
-       
         amenitiesRating,
         communicationRating,
         reviewText,
@@ -424,45 +388,94 @@ exports.confirmPayment = async (req, res) => {
 
 
 
+// exports.confirmSuccess = async (req, res) => {
+//   try {
+//       const tran_id = req.params.id;
+//       console.log("tran_id success page", tran_id);
+        
+//       const booking = await Booking.findOne({ tran_id });
+
+//       if (!booking) {
+//           return res.status(404).json({ message: 'Booking not found' });
+//       }
+//        const property=await ()
+//       booking.status = "paymentsuccess";
+//       await booking.save();
+//       property.bookings.push(booking._id);
+//       await property.save();
+//       // Send an HTML response with JavaScript for popup and redirect
+//       res.send(`
+//           <html>
+//               <body>
+//                   <script>
+//                       alert("Your payment was successful");
+//                       setTimeout(function() {
+//                           window.location.href = "http://www.bedbd.com/success/${tran_id}";
+//                       }, 2000);
+//                   </script>
+//               </body>
+//           </html>
+//       `);
+//   } catch (error) {
+//       console.error("Error processing payment success:", error);
+//       res.status(500).json({ message: 'Error processing payment success', error: error.message || error });
+//   }
+// };
+
+
 exports.confirmSuccess = async (req, res) => {
   try {
-      const tran_id = req.params.id;
-      console.log("tran_id success page", tran_id);
+    const tran_id = req.params.id;
+    console.log("tran_id success page", tran_id);
 
-      const booking = await Booking.findOne({ tran_id });
+    // Find the booking with the given transaction ID
+    const booking = await Booking.findOne({ tran_id }).populate('property'); // Populate property details
 
-      if (!booking) {
-          return res.status(404).json({ message: 'Booking not found' });
-      }
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
 
-      booking.status = "paymentsuccess";
-      await booking.save();
+    // Find the associated property
+    const property = await List.findById(booking.property);
 
-      // Send an HTML response with JavaScript for popup and redirect
-      res.send(`
-          <html>
-              <body>
-                  <script>
-                      alert("Your payment was successful");
-                      setTimeout(function() {
-                          window.location.href = "http://www.bedbd.com/success/${tran_id}";
-                      }, 2000);
-                  </script>
-              </body>
-          </html>
-      `);
+    if (!property) {
+      return res.status(404).json({ message: 'Property not found' });
+    }
+
+    // Update booking status
+    booking.status = "paymentsuccess";
+    await booking.save();
+
+    // Add the booking to the property bookings array
+    property.bookings.push(booking._id);
+    await property.save();
+
+    // Send an HTML response with JavaScript for popup and redirect
+    res.send(`
+      <html>
+        <body>
+          <script>
+            alert("Your payment was successful");
+            setTimeout(function() {
+              window.location.href = "http://www.bedbd.com/success/${tran_id}";
+            }, 2000);
+          </script>
+        </body>
+      </html>
+    `);
   } catch (error) {
-      console.error("Error processing payment success:", error);
-      res.status(500).json({ message: 'Error processing payment success', error: error.message || error });
+    console.error("Error processing payment success:", error);
+    res.status(500).json({ message: 'Error processing payment success', error: error.message || error });
   }
 };
+
 
 exports.bookingApprovedPending = async (req, res) => {
   try {
     const hostID = req.auth._id; 
     // console.log("start");
     
-    const bookingPending = await Booking.find({ Host: hostID, status: "paymentsuccess" })
+    const bookingPending = await Booking.find({ Host: hostID, status: "pending" })
     .populate('property', 'propertyTitle').populate('BClientId', 'fname ');
           
     if (!bookingPending || bookingPending.length === 0) {
@@ -483,7 +496,7 @@ exports.bookingApproved = async (req, res) => {
 
     const bookingPending = await Booking.findOneAndUpdate(
       { _id: id, Host: hostID }, 
-      { status: "confirmed" },   
+      { status: "hostApproved" },   
       { new: true }
     );
     if (!bookingPending) {

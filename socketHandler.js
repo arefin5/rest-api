@@ -226,7 +226,7 @@ const socketHandler = (io) => {
     socket.on('checkPaymentStatus', async (userId) => {
       if (!socket.user) return console.log('User is not authenticated');
       try {
-        const bookings = await Booking.find({ Host: userId, status: 'paymentsuccess' });
+        const bookings = await Booking.find({ Host: userId, status: 'pending' });
         socket.emit('paymentSuccessBookings', bookings.length > 0 ? bookings : []);
       } catch (error) {
         console.error('Error checking payment status:', error);
