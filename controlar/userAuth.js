@@ -325,7 +325,22 @@ exports.userRole = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
+exports.userRoleUser = async (req, res) => {
+  const userId = req.auth._id;
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    user.role = 'user';
+    await user.save();
+    user.password = undefined;
+    res.json({ message: 'Role updated to host successfully', user });
+  } catch (error) {
+    // console.error('Error updating role:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
 exports.googleFacebookLogin = async (req, res) => {
   try {
     const { name, email,fname,lname ,profilePic} = req.body;
