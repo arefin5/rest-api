@@ -277,17 +277,89 @@ exports.HostCheck=async(req,res)=>{
   }
 }
 
+// exports.createList = async (req, res) => {
+//   try {
+ 
+//     //  console.log(req.body.aprovingmethod)
+//     const {
+//       typeOfproperty,
+//       propertyCondition,
+//       propertyTitle,
+//       description,
+//       outdoorShower,
+//       propertyFeature, 
+//       location,
+//       price,
+//       tax,
+//       serviceFee,
+//       GroundPrice,
+//       aprovingmethod,
+//       gender,
+//       image,
+//       amenities,
+//       bookingtype,
+//       Guest,
+//       totalroom,
+//       totalBed,
+//       availablecheck,
+//       checkInTime,
+//       checkOutTime,
+//       homerule
+//     } = req.body;
+//     if (!typeOfproperty || !propertyTitle || !price) {
+//       return res.status(400).json({ message: "Required fields are missing." });
+//     }
+//      let status="published"
+//  if(aprovingmethod==="instant") {
+//    status="published"
+//  }else{
+//   status="draft"
+//  }
+//  console.log(req.body)
+//     const newList = new List({
+//       typeOfproperty,
+//       propertyCondition,
+//       propertyFeature: { features: propertyFeature },
+//       homerule:{homesRoules:homerule},
+//       propertyTitle,
+//       bookingtype:{bookingTypes:bookingtype},
+//       description,
+//       outdoorShower,
+//       location,
+//       price,
+//       gender,
+//       tax,
+//       images:image,
+//       serviceFee,
+//       GroundPrice,
+//       Guest,
+//       totalroom,
+//       totalBed,
+//       availablecheck,
+//       checkInTime,
+//       checkOutTime,
+//       status,
+//       Postedby: req.auth._id, 
+//     });
+//     // Save the list in the database
+//     const savedList = await newList.save();
+//     console.log(savedList)
+//     // Send response
+//     res.status(201).json(savedList);
+//   } catch (error) {
+//     console.error('Error creating list:', error);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// };
 exports.createList = async (req, res) => {
   try {
- 
-    //  console.log(req.body.aprovingmethod)
     const {
       typeOfproperty,
       propertyCondition,
       propertyTitle,
       description,
       outdoorShower,
-      propertyFeature, 
+      propertyFeature,
       location,
       price,
       tax,
@@ -304,32 +376,38 @@ exports.createList = async (req, res) => {
       availablecheck,
       checkInTime,
       checkOutTime,
-      homerule
+      homerule,
     } = req.body;
+
     if (!typeOfproperty || !propertyTitle || !price) {
       return res.status(400).json({ message: "Required fields are missing." });
     }
-     let status="published"
- if(aprovingmethod==="instant") {
-   status="published"
- }else{
-  status="draft"
- }
+
+    let status = aprovingmethod === "instant" ? "published" : "draft";
+
+    // Filter propertyFeature to include only true values
+    const filteredFeatures = {};
+    for (const key in propertyFeature) {
+      const feature = propertyFeature[key];
+      if (feature.value) {
+        filteredFeatures[key] = feature;
+      }
+    }
+
     const newList = new List({
       typeOfproperty,
       propertyCondition,
-      propertyFeature: { features: propertyFeature },
-    
-      homerule:{homesRoules:homerule},
+      propertyFeature: { features: filteredFeatures },
+      homerule: { homesRoules: homerule },
       propertyTitle,
-      bookingtype:{bookingTypes:bookingtype},
+      bookingtype: { bookingTypes: bookingtype },
       description,
       outdoorShower,
       location,
       price,
       gender,
       tax,
-      images:image,
+      images: image,
       serviceFee,
       GroundPrice,
       Guest,
@@ -339,18 +417,21 @@ exports.createList = async (req, res) => {
       checkInTime,
       checkOutTime,
       status,
-      Postedby: req.auth._id, 
+      Postedby: req.auth._id,
     });
+
     // Save the list in the database
     const savedList = await newList.save();
-    // console.log(savedList)
+    console.log(savedList);
+
     // Send response
     res.status(201).json(savedList);
   } catch (error) {
-    // console.error('Error creating list:', error);
+    console.error('Error creating list:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 exports.authorBookingDetails = async (req, res) => {
   try {
     const bookings = await Booking.find()
