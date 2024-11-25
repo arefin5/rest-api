@@ -89,152 +89,6 @@ exports.getSingleList=async (req, res) => {
 }
 
 
-
-// exports.getSingleList = async (req, res) => {
-//   const listId = req.params.id;
-  
-//   try {
-//     const list = await List.findById(listId)
-//       .populate("Postedby", "fname lname profilePic isVerified")
-//       .populate({
-//         path: 'reviews',
-//         populate: {
-//           path: 'user',
-//           select: 'name', // Only retrieve the user's name in reviews
-//         }
-//       });
-
-//     if (!list) {
-//       return res.status(404).json({ message: 'Listing not found' });
-//     }
-
-//     // Calculate average rating
-//     const reviews = list.reviews;
-//     let totalRating = 0;
-//     reviews.forEach(review => {
-//       totalRating += review.overallRating;
-//     });
-//     const avgRating = reviews.length ? (totalRating / reviews.length).toFixed(1) : 0;
-
-//     // Return list with avgRating
-//     res.status(200).json({
-//       ...list.toObject(),
-//       avgRating: avgRating,
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: 'An error occurred while retrieving the listing' });
-//   }
-// };
-
-
-// exports.getSingleList = async (req, res) => {
-//   const listId = req.params.id;
-
-//   try {
-//     const list = await List.aggregate([
-//       { $match: { _id: mongoose.Types.ObjectId(listId) } },
-//       {
-//         $lookup: {
-//           from: 'users',
-//           localField: 'Postedby',
-//           foreignField: '_id',
-//           as: 'Postedby',
-//         },
-//       },
-//       {
-//         $lookup: {
-//           from: 'reviews',
-//           localField: '_id',
-//           foreignField: 'listId', // Assuming `listId` in the reviews collection references the list
-//           as: 'reviews',
-//         },
-//       },
-//       { $unwind: { path: "$Postedby", preserveNullAndEmptyArrays: true } },
-//       {
-//         $addFields: {
-//           avgRating: { $avg: "$reviews.overallRating" },
-//           totalReview: { $size: "$reviews" },
-//         },
-//       },
-//       {
-//         $project: {
-//           "Postedby.fname": 1,
-//           "Postedby.lname": 1,
-//           "Postedby.profilePic": 1,
-//           "Postedby.isVerified": 1,
-//           avgRating: { $ifNull: [{ $round: ["$avgRating", 1] }, 0] },
-//           totalReview: 1,
-//           // Include other fields you want to return
-//         },
-//       },
-//     ]);
-
-//     if (!list || !list.length) {
-//       return res.status(404).json({ message: 'Listing not found' });
-//     }
-
-//     res.status(200).json(list[0]);
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: 'An error occurred while retrieving the listing' });
-//   }
-// };
-
-// exports.getSingleList = async (req, res) => {
-//   const listId = req.params.id;
-
-//   try {
-//     const list = await List.aggregate([
-//       { $match: { _id: new mongoose.Types.ObjectId(listId) } },
-//       {
-//         $lookup: {
-//           from: 'users',
-//           localField: 'Postedby',
-//           foreignField: '_id',
-//           as: 'Postedby',
-//         },
-//       },
-//       {
-//         $lookup: {
-//           from: 'reviews',
-//           localField: '_id',
-//           foreignField: 'listId', // Assuming `listId` in the reviews collection references the list
-//           as: 'reviews',
-//         },
-//       },
-//       { $unwind: { path: "$Postedby", preserveNullAndEmptyArrays: true } },
-//       {
-//         $addFields: {
-//           avgRating: { $avg: "$reviews.overallRating" },
-//           totalReview: { $size: "$reviews" },
-//         },
-//       },
-//       {
-//         $project: {
-//           "Postedby.fname": 1,
-//           "Postedby.lname": 1,
-//           "Postedby.profilePic": 1,
-//           "Postedby.isVerified": 1,
-//           avgRating: { $ifNull: [{ $round: ["$avgRating", 1] }, 0] },
-//           totalReview: 1,
-//           // Include other fields you want to return
-//         },
-//       },
-//     ]);
-
-//     if (!list || !list.length) {
-//       return res.status(404).json({ message: 'Listing not found' });
-//     }
-
-//     res.status(200).json(list[0]);
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: 'An error occurred while retrieving the listing' });
-//   }
-// };
-
-
 exports.allListByUser = async (req, res) => {
   // console.log(req.auth._id)
   try {
@@ -277,80 +131,7 @@ exports.HostCheck=async(req,res)=>{
   }
 }
 
-// exports.createList = async (req, res) => {
-//   try {
- 
-//     //  console.log(req.body.aprovingmethod)
-//     const {
-//       typeOfproperty,
-//       propertyCondition,
-//       propertyTitle,
-//       description,
-//       outdoorShower,
-//       propertyFeature, 
-//       location,
-//       price,
-//       tax,
-//       serviceFee,
-//       GroundPrice,
-//       aprovingmethod,
-//       gender,
-//       image,
-//       amenities,
-//       bookingtype,
-//       Guest,
-//       totalroom,
-//       totalBed,
-//       availablecheck,
-//       checkInTime,
-//       checkOutTime,
-//       homerule
-//     } = req.body;
-//     if (!typeOfproperty || !propertyTitle || !price) {
-//       return res.status(400).json({ message: "Required fields are missing." });
-//     }
-//      let status="published"
-//  if(aprovingmethod==="instant") {
-//    status="published"
-//  }else{
-//   status="draft"
-//  }
-//  console.log(req.body)
-//     const newList = new List({
-//       typeOfproperty,
-//       propertyCondition,
-//       propertyFeature: { features: propertyFeature },
-//       homerule:{homesRoules:homerule},
-//       propertyTitle,
-//       bookingtype:{bookingTypes:bookingtype},
-//       description,
-//       outdoorShower,
-//       location,
-//       price,
-//       gender,
-//       tax,
-//       images:image,
-//       serviceFee,
-//       GroundPrice,
-//       Guest,
-//       totalroom,
-//       totalBed,
-//       availablecheck,
-//       checkInTime,
-//       checkOutTime,
-//       status,
-//       Postedby: req.auth._id, 
-//     });
-//     // Save the list in the database
-//     const savedList = await newList.save();
-//     console.log(savedList)
-//     // Send response
-//     res.status(201).json(savedList);
-//   } catch (error) {
-//     console.error('Error creating list:', error);
-//     res.status(500).json({ message: 'Server error' });
-//   }
-// };
+
 exports.createList = async (req, res) => {
   try {
     const {
@@ -380,6 +161,7 @@ exports.createList = async (req, res) => {
     } = req.body;
 
     if (!typeOfproperty || !propertyTitle || !price) {
+      console.log(req.body);
       return res.status(400).json({ message: "Required fields are missing." });
     }
 
@@ -432,6 +214,23 @@ exports.createList = async (req, res) => {
   }
 };
 
+// exports.createList = async (req, res) => {
+//   try {
+//     console.log(req.body);
+
+//     // Save the list in the database
+//     const savedList = {
+//       _id:"12222"
+//     }
+//     // console.log(savedList);
+
+//     // Send response
+//     res.status(201).json(savedList);
+//   } catch (error) {
+//     console.error('Error creating list:', error);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// };
 exports.authorBookingDetails = async (req, res) => {
   try {
     const bookings = await Booking.find()
@@ -563,41 +362,294 @@ exports.listReveiw= async (req, res) => {
 //   }
 // }
 
+// exports.SortLocation = async (req, res) => {
+//   try {
+//       // Extract query parameters
+//       const { latitude, longitude, maxDistance = 500, checkinDate, checkoutDate } = req.query;
+
+//       console.log(req.query); // Check query parameters
+
+//       // Validate inputs
+//       if (!latitude || !longitude) {
+//           return res.status(400).json({ error: 'Latitude and Longitude are required' });
+//       }
+
+//       // Geospatial query
+//       const midpoint = {
+//           type: "Point",
+//           coordinates: [parseFloat(longitude), parseFloat(latitude)],
+//       };
+
+//       const results = await List.aggregate([
+//           {
+//               $geoNear: {
+//                   near: midpoint,
+//                   distanceField: "distance",
+//                   spherical: true,
+//                   maxDistance: parseInt(maxDistance),
+//                   query: { status: "published" },
+//               },
+//           },
+//           { $sort: { distance: 1 } }, // Sort by proximity
+//       ]);
+
+//       console.log(results);
+//       res.status(200).json(results);
+//   } catch (error) {
+//       console.error(error);
+//       res.status(500).json({ error: 'An error occurred while fetching data' });
+//   }
+// };
+// exports.SortLocation = async (req, res) => {
+//   try {
+//     // Extract query parameters
+//     const { latitude, longitude, maxDistance = 500, checkinDate, checkoutDate } = req.query;
+
+//     console.log(req.query); // Debug query parameters
+
+//     // Validate required inputs
+//     if (!latitude || !longitude) {
+//       return res.status(400).json({ error: 'Latitude and Longitude are required' });
+//     }
+//     if (!checkinDate || !checkoutDate) {
+//       return res.status(400).json({ error: 'Check-in and check-out dates are required' });
+//     }
+
+//     // Parse input dates
+//     const checkin = new Date(checkinDate);
+//     const checkout = new Date(checkoutDate);
+
+//     if (isNaN(checkin) || isNaN(checkout)) {
+//       return res.status(400).json({ error: 'Invalid date format for check-in or check-out' });
+//     }
+
+//     // Geospatial query
+//     const midpoint = {
+//       type: "Point",
+//       coordinates: [parseFloat(longitude), parseFloat(latitude)],
+//     };
+
+//     const results = await List.aggregate([
+//       {
+//         $geoNear: {
+//           near: midpoint,
+//           distanceField: "distance",
+//           spherical: true,
+//           maxDistance: parseInt(maxDistance),
+//           query: { status: "published" },
+//         },
+//       },
+//       // Filter properties with conflicting bookings
+//       {
+//         $match: {
+//           $or: [
+//             { "bookings": { $exists: false } }, // No bookings
+//             { "bookings": { $size: 0 } }, // Empty bookings array
+//             {
+//               "bookings": {
+//                 $not: {
+//                   $elemMatch: {
+//                     checkinDate: { $lt: checkout }, // Booking overlaps with the given date range
+//                     checkoutDate: { $gt: checkin },
+//                   },
+//                 },
+//               },
+//             },
+//           ],
+//         },
+//       },
+//       { $sort: { distance: 1 } }, // Sort by proximity
+//     ]);
+
+//     console.log(results);
+//     res.status(200).json(results);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'An error occurred while fetching data' });
+//   }
+// };
+
+// exports.SortLocation = async (req, res) => {
+//   try {
+//     // Extract query parameters
+//     const { latitude, longitude, maxDistance = 500, checkinDate, checkoutDate ,guestCount} = req.query;
+
+//     console.log(req.query); // Debug query parameters
+
+//     // Validate required inputs
+//     if (!latitude || !longitude) {
+//       return res.status(400).json({ error: 'Latitude and Longitude are required' });
+//     }
+//     if (!checkinDate || !checkoutDate) {
+//       return res.status(400).json({ error: 'Check-in and check-out dates are required' });
+//     }
+
+//     // Parse input dates
+//     const checkin = new Date(checkinDate);
+//     const checkout = new Date(checkoutDate);
+
+//     if (isNaN(checkin) || isNaN(checkout)) {
+//       return res.status(400).json({ error: 'Invalid date format for check-in or check-out' });
+//     }
+
+//     // Geospatial query
+//     const midpoint = {
+//       type: "Point",
+//       coordinates: [parseFloat(longitude), parseFloat(latitude)],
+//     };
+
+//     const results = await List.aggregate([
+//       {
+//         $geoNear: {
+//           near: midpoint,
+//           distanceField: "distance",
+//           spherical: true,
+//           maxDistance: parseInt(maxDistance),
+//           query: { status: "published" },
+//         },
+//       },
+//       // Lookup bookings for each property
+//       {
+//         $lookup: {
+//           from: "bookings", // MongoDB collection name (case-sensitive)
+//           localField: "_id",
+//           foreignField: "property",
+//           as: "bookings",
+//         },
+//       },
+//       // Filter properties with conflicting bookings
+//       {
+//         $match: {
+//           $or: [
+//             { "bookings": { $exists: false } }, // No bookings
+//             { "bookings": { $size: 0 } }, // Empty bookings array
+//             {
+//               "bookings": {
+//                 $not: {
+//                   $elemMatch: {
+//                     checkinDate: { $lt: checkout }, // Booking overlaps with the given date range
+//                     checkoutDate: { $gt: checkin },
+//                   },
+//                 },
+//               },
+//             },
+//           ],
+//         },
+//       },
+//       { $sort: { distance: 1 } }, // Sort by proximity
+//     ]);
+
+//     // console.log(results);
+//     res.status(200).json(results);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'An error occurred while fetching data' });
+//   }
+// };
+
 exports.SortLocation = async (req, res) => {
   try {
-      // Extract query parameters
-      const { latitude, longitude, maxDistance = 500, checkinDate, checkoutDate } = req.query;
+    // Extract query parameters
+    const {
+      latitude,
+      longitude,
+      maxDistance = 500,
+      checkinDate,
+      checkoutDate,
+      guestCount,
+    } = req.query;
 
-      console.log(req.query); // Check query parameters
+    // console.log(req.query); // Debug query parameters
 
-      // Validate inputs
-      if (!latitude || !longitude) {
-          return res.status(400).json({ error: 'Latitude and Longitude are required' });
-      }
+    // Validate required inputs
+    if (!latitude || !longitude) {
+      return res.status(400).json({ error: "Latitude and Longitude are required" });
+    }
+    if (!checkinDate || !checkoutDate) {
+      return res.status(400).json({ error: "Check-in and check-out dates are required" });
+    }
 
-      // Geospatial query
-      const midpoint = {
-          type: "Point",
-          coordinates: [parseFloat(longitude), parseFloat(latitude)],
-      };
+    // Parse input dates
+    const checkin = new Date(checkinDate);
+    const checkout = new Date(checkoutDate);
 
-      const results = await List.aggregate([
-          {
-              $geoNear: {
-                  near: midpoint,
-                  distanceField: "distance",
-                  spherical: true,
-                  maxDistance: parseInt(maxDistance),
-                  query: { status: "published" },
-              },
-          },
-          { $sort: { distance: 1 } }, // Sort by proximity
-      ]);
+    if (isNaN(checkin) || isNaN(checkout)) {
+      return res.status(400).json({ error: "Invalid date format for check-in or check-out" });
+    }
+    const totalGuests = parseInt(guestCount, 10);
+    if (isNaN(totalGuests) || totalGuests < 0) {
+      return res.status(400).json({ error: 'Invalid guest count' });
+    }
+    const midpoint = {
+      type: "Point",
+      coordinates: [parseFloat(longitude), parseFloat(latitude)],
+    };
 
-      console.log(results);
-      res.status(200).json(results);
+    const results = await List.aggregate([
+      {
+        $geoNear: {
+          near: midpoint,
+          distanceField: "distance",
+          spherical: true,
+          maxDistance: parseInt(maxDistance),
+          query: { status: "published" },
+        },
+      },
+      // Lookup bookings for each property
+      {
+        $lookup: {
+          from: "bookings", // MongoDB collection name (case-sensitive)
+          localField: "_id",
+          foreignField: "property",
+          as: "bookings",
+        },
+      },
+      // Filter properties based on bookings and guest capacity
+      {
+        $match: {
+          $and: [
+            {
+              $or: [
+                { bookings: { $exists: false } }, // No bookings
+                { bookings: { $size: 0 } }, // Empty bookings array
+                {
+                  bookings: {
+                    $not: {
+                      $elemMatch: {
+                        checkinDate: { $lt: checkout }, // Booking overlaps with the given date range
+                        checkoutDate: { $gt: checkin },
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+            // Ensure the property can accommodate the required number of guests
+            {
+              
+                $expr: {
+                  $gte: [
+                    {
+                      $add: [
+                        { $ifNull: ["$Guest.adultGuest", 0] },
+                        { $ifNull: ["$Guest.childrenGuest", 0] },
+                      ],
+                    },
+                    totalGuests, // Required guest count from query
+                  ],
+                },
+               
+            },
+          ],
+        },
+      },
+      { $sort: { distance: 1 } }, // Sort by proximity
+    ]);
+
+    res.status(200).json(results);
   } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'An error occurred while fetching data' });
+    console.error(error);
+    res.status(500).json({ error: "An error occurred while fetching data" });
   }
 };
+
