@@ -203,10 +203,69 @@ exports.getAlluser=async(req,res)=>{
         console.log('No ServiceAndVat document found.');
         return null;
       }
-      console.log('ServiceAndVat document:', serviceAndVat);
-      return serviceAndVat;
+      // console.log('ServiceAndVat document:', serviceAndVat);
+      res.status(200).json(serviceAndVat);
+      
     } catch (error) {
       console.error('Error fetching ServiceAndVat document:', error);
       throw error;
     }
   }
+
+  exports.createVat= async (req, res) => {
+
+    try {
+      const { taxRate, serviceFee } = req.body;
+  
+      // Check if a document already exists
+      const existingDocument = await ServiceAndVat.findOne();
+      if (existingDocument) {
+        return res.status(400).json({
+          message: 'ServiceAndVat document already exists',
+          data: existingDocument,
+        });
+      }
+  
+      // Create the first document with provided parameters
+      const newDocument = new ServiceAndVat({
+        taxRate: taxRate ?? 0.06, // Default to 0.06 if not provided
+        serviceFee: serviceFee ?? 0.10, // Default to 0.10 if not provided
+      });
+      const savedDocument = await newDocument.save();
+  
+      return res.status(201).json({
+        message: 'ServiceAndVat document created successfully',
+        data: savedDocument,
+      });
+    } catch (error) {
+      console.error('Error creating ServiceAndVat document:', error);
+      return res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+  }
+  exports.updateVat=async (req, res) => {
+  try {
+    const { taxRate, serviceFee } = req.body;
+
+    // Check if the document exists
+    const existingDocument = await ServiceAndVat.findOne();
+    if (!existingDocument) {
+      return res.status(404).json({
+        message: 'ServiceAndVat document not found. Please create one first.',
+      });
+    }
+
+    // Update the document with provided values
+    existingDocument.taxRate = taxRate ?? existingDocument.taxRate; // Only update if taxRate is provided
+    existingDocument.serviceFee = serviceFee ?? existingDocument.serviceFee; // Only update if serviceFee is provided
+
+    const updatedDocument = await existingDocument.save();
+
+    return res.status(200).json({
+      message: 'ServiceAndVat document updated successfully',
+      data: updatedDocument,
+    });
+  } catch (error) {
+    console.error('Error updating ServiceAndVat document:', error);
+    return res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  }
+}
