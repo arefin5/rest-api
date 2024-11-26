@@ -4,6 +4,7 @@ const Booking = require("../models/bookingSchema");
 const FailedBooking = require('../models/failedBookingSchema'); 
 
 const { initPayment } = require('../service/payment');
+const ServiceAndVat = require("../models/ServiceAndVat");
 
 exports.getFailedBookings = async (req, res) => {
     try {
@@ -195,4 +196,17 @@ exports.getAlluser=async(req,res)=>{
       res.status(500).json({ error: "Server error" });
     }
   };
-  
+  exports.getRateOfService=async(req,res)=>{
+    try {
+      const serviceAndVat = await ServiceAndVat.findOne();
+      if (!serviceAndVat) {
+        console.log('No ServiceAndVat document found.');
+        return null;
+      }
+      console.log('ServiceAndVat document:', serviceAndVat);
+      return serviceAndVat;
+    } catch (error) {
+      console.error('Error fetching ServiceAndVat document:', error);
+      throw error;
+    }
+  }
