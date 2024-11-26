@@ -15,7 +15,9 @@ const {
     blockuser,
     aprovedListPublished,
     allBookingList,
-    getRateOfService
+    getRateOfService,
+    createVat,
+    updateVat
 } = require("../controlar/admin.js");
 router.get('/admin/failed-booking-all',requireSignin,checkAdmin,getFailedBookings);
 router.get('/admin/all-booking',requireSignin,checkAdmin,getAllBooking);
@@ -32,4 +34,6 @@ router.put("/admin/published-from-host/:id",canEditDeletePost,aprovedListPublish
 router.get("/all-booking",requireSignin,checkAdmin,allBookingList);
 
 router.get("/service-rate",getRateOfService)
+router.post('/service-and-vat', createVat)
+router.put("/admin/update-vat",updateVat)
 module.exports = router;
