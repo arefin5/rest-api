@@ -14,7 +14,8 @@ const {
     getAllList,
     blockuser,
     aprovedListPublished,
-    allBookingList
+    allBookingList,
+    getRateOfService
 } = require("../controlar/admin.js");
 router.get('/admin/failed-booking-all',requireSignin,checkAdmin,getFailedBookings);
 router.get('/admin/all-booking',requireSignin,checkAdmin,getAllBooking);
@@ -30,5 +31,5 @@ router.put("/block-user/:id",requireSignin,checkAdmin,blockuser);
 router.put("/admin/published-from-host/:id",canEditDeletePost,aprovedListPublished)
 router.get("/all-booking",requireSignin,checkAdmin,allBookingList);
 
-
+router.get("/service-rate",getRateOfService)
 module.exports = router;
