@@ -343,8 +343,8 @@ exports.userRoleUser = async (req, res) => {
 };
 exports.googleFacebookLogin = async (req, res) => {
   try {
-    const { name, email,fname,lname ,profilePic} = req.body;
-    console.log(req.body)
+    const { name, email} = req.body;
+    // console.log(req.body)
     let user = await User.findOne({ email });
     if (!user) {
       logger.info(`User not found. Creating new user with email ${email}`);
@@ -352,23 +352,22 @@ exports.googleFacebookLogin = async (req, res) => {
         isEmailVerified:true,
         email,
         name,
-        fname,
-        lname ,
-        profilePic,
         isOtpVerified: true,
         status: "active",
-        isEmailVerified: true,    
-       
+        isEmailVerified: true,
       });
     }
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "14d",
     });
+    console.log("user",user)
     res.json({
       token,
       user,
     });
-  } catch (error) {
+    
+  } 
+  catch (error) {
     return res.status(400).send("Error. Try again.");
   }
 

@@ -26,7 +26,7 @@
     "express-fingerprint": "^1.2.2",
     "express-formidable": "^1.2.0",
     "express-jwt": "^8.4.1",
-    "express-session": "^1.17.3",
+    "express-session": "^1.18.1",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^8.5.2",

@@ -1,5 +1,6 @@
 const formidableMiddleware = require('express-formidable');
 
+// const configurePassport = require('./passport'); // This imports your custom configuration
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -28,6 +29,12 @@ app.use(Fingerprint({
 const store_id =process.env.StoreID
 const store_passwd =process.env.StorePassword
 const is_live = false; // Change to true for live environment
+
+
+
+// Initialize Passport
+
+
 app.use((req, res, next) => {
   req.sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
   next();
@@ -92,6 +99,97 @@ app.get('/mongodb-data', async (req, res) => {
     res.status(500).send('Server Error');
   }
 });
+
+
+const session = require("express-session");
+const passport = require("passport");
+const OAuth2Strategy = require("passport-google-oauth2").Strategy;
+// const userdb = require("./model/userSchema")
+
+// setup session
+app.use(session({
+    secret:"YOUR SECRET KEY",
+    resave:false,
+    saveUninitialized:true
+}))
+
+// setuppassport
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(
+    new OAuth2Strategy({
+        // clientID:clientid,
+        // clientSecret:clientsecret,
+        // callbackURL:"/auth/google/callback",
+        // scope:["profile","email"]
+        clientID:process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
+        callbackURL: "www.bedbd.com/auth/google/callback",
+        passReqToCallback: true,
+		scope: ["email", "profile"]
+    },
+    async(accessToken,refreshToken,profile,done)=>{
+        try {
+            // const user=profile.id;
+            const user = {
+          googleId: profile.id,
+          displayName: profile.displayName,
+          email: profile.emails[0].value,
+          image: profile.photos[0].value,
+        };
+        return done(null, user);
+          
+
+            return done(null,user)
+        } catch (error) {
+            return done(error,null)
+        }
+    }
+    )
+)
+
+passport.serializeUser((user,done)=>{
+    done(null,user);
+})
+
+passport.deserializeUser((user,done)=>{
+    done(null,user);
+});
+
+// initial google ouath login
+app.get("/auth/google",passport.authenticate("google",{scope:["profile","email"]}));
+
+app.get("/auth/google/callback",passport.authenticate("google",{
+    successRedirect:"www.bedbd.com/success",
+    failureRedirect:"www.bedbd.com/login"
+}))
+
+app.get("/login/sucess",async(req,res)=>{
+
+    if(req.user){
+        res.status(200).json({message:"user Login",user:req.user})
+    }else{
+        res.status(400).json({message:"Not Authorized"})
+    }
+})
+
+app.get("/logout",(req,res,next)=>{
+    req.logout(function(err){
+        if(err){return next(err)}
+        res.redirect("www.bedbd.com");
+    })
+})
+
+
+
+
+
+
+
+
+
+
 const io = socketIO(server, {
   cors: {
     origin: '*', // Allow any origin (or restrict to your frontend origin)
