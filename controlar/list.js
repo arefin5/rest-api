@@ -314,105 +314,27 @@ exports.listReveiw= async (req, res) => {
     res.status(500).json({ message: 'An error occurred while retrieving the listing' });
   }
 };
-// sortList 
-// exports.SortLocation=async (req,res) => {
-//   try {
-//     // Extract query parameters
-//     // console.log(req.query);
-// //     console.log(req.body);
-
-// //     // const { latitude, longitude, maxDistance = 500 } = req.query;
-// //     const maxDistance = 500
-// // const latitude=await req.body.location.latitude;
-// // const longitude=await req.body.location.longitude
-
-//     const { latitude, longitude, maxDistance = 500 } = req.body.locations || {};
-//     const { checkinDate, checkoutDate } = req.body;
-//    console.log(req.body);
-   
-
-//     // Validate inputs
-//     if (!latitude || !longitude) {
-//       return res.status(400).json({ error: 'Latitude and Longitude are required' });
-//     }
-
-//     // Geospatial query
-//     const midpoint = {
-//       type: "Point",
-//       coordinates: [parseFloat(longitude), parseFloat(latitude)],
-//     };
-
-//     const results = await List.aggregate([
-//       {
-//         $geoNear: {
-//           near: midpoint,
-//           distanceField: "distance",
-//           spherical: true,
-//           maxDistance: parseInt(maxDistance), 
-//           query: { status: "published" },
-//         },
-//       },
-//       { $sort: { distance: 1 } }, // Sort by proximity
-//     ]);
-//    console.log(results)
-//     res.status(200).json(results);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'An error occurred while fetching data' });
-//   }
-// }
 
 // exports.SortLocation = async (req, res) => {
 //   try {
-//       // Extract query parameters
-//       const { latitude, longitude, maxDistance = 500, checkinDate, checkoutDate } = req.query;
-
-//       console.log(req.query); // Check query parameters
-
-//       // Validate inputs
-//       if (!latitude || !longitude) {
-//           return res.status(400).json({ error: 'Latitude and Longitude are required' });
-//       }
-
-//       // Geospatial query
-//       const midpoint = {
-//           type: "Point",
-//           coordinates: [parseFloat(longitude), parseFloat(latitude)],
-//       };
-
-//       const results = await List.aggregate([
-//           {
-//               $geoNear: {
-//                   near: midpoint,
-//                   distanceField: "distance",
-//                   spherical: true,
-//                   maxDistance: parseInt(maxDistance),
-//                   query: { status: "published" },
-//               },
-//           },
-//           { $sort: { distance: 1 } }, // Sort by proximity
-//       ]);
-
-//       console.log(results);
-//       res.status(200).json(results);
-//   } catch (error) {
-//       console.error(error);
-//       res.status(500).json({ error: 'An error occurred while fetching data' });
-//   }
-// };
-// exports.SortLocation = async (req, res) => {
-//   try {
 //     // Extract query parameters
-//     const { latitude, longitude, maxDistance = 500, checkinDate, checkoutDate } = req.query;
+//     const {
+//       latitude,
+//       longitude,
+//       maxDistance = 500,
+//       checkinDate,
+//       checkoutDate,
+//       guestCount,
+//     } = req.query;
 
-//     console.log(req.query); // Debug query parameters
+//     // console.log(req.query); // Debug query parameters
 
 //     // Validate required inputs
 //     if (!latitude || !longitude) {
-//       return res.status(400).json({ error: 'Latitude and Longitude are required' });
+//       return res.status(400).json({ error: "Latitude and Longitude are required" });
 //     }
 //     if (!checkinDate || !checkoutDate) {
-//       return res.status(400).json({ error: 'Check-in and check-out dates are required' });
+//       return res.status(400).json({ error: "Check-in and check-out dates are required" });
 //     }
 
 //     // Parse input dates
@@ -420,79 +342,12 @@ exports.listReveiw= async (req, res) => {
 //     const checkout = new Date(checkoutDate);
 
 //     if (isNaN(checkin) || isNaN(checkout)) {
-//       return res.status(400).json({ error: 'Invalid date format for check-in or check-out' });
+//       return res.status(400).json({ error: "Invalid date format for check-in or check-out" });
 //     }
-
-//     // Geospatial query
-//     const midpoint = {
-//       type: "Point",
-//       coordinates: [parseFloat(longitude), parseFloat(latitude)],
-//     };
-
-//     const results = await List.aggregate([
-//       {
-//         $geoNear: {
-//           near: midpoint,
-//           distanceField: "distance",
-//           spherical: true,
-//           maxDistance: parseInt(maxDistance),
-//           query: { status: "published" },
-//         },
-//       },
-//       // Filter properties with conflicting bookings
-//       {
-//         $match: {
-//           $or: [
-//             { "bookings": { $exists: false } }, // No bookings
-//             { "bookings": { $size: 0 } }, // Empty bookings array
-//             {
-//               "bookings": {
-//                 $not: {
-//                   $elemMatch: {
-//                     checkinDate: { $lt: checkout }, // Booking overlaps with the given date range
-//                     checkoutDate: { $gt: checkin },
-//                   },
-//                 },
-//               },
-//             },
-//           ],
-//         },
-//       },
-//       { $sort: { distance: 1 } }, // Sort by proximity
-//     ]);
-
-//     console.log(results);
-//     res.status(200).json(results);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'An error occurred while fetching data' });
-//   }
-// };
-
-// exports.SortLocation = async (req, res) => {
-//   try {
-//     // Extract query parameters
-//     const { latitude, longitude, maxDistance = 500, checkinDate, checkoutDate ,guestCount} = req.query;
-
-//     console.log(req.query); // Debug query parameters
-
-//     // Validate required inputs
-//     if (!latitude || !longitude) {
-//       return res.status(400).json({ error: 'Latitude and Longitude are required' });
+//     const totalGuests = parseInt(guestCount, 10);
+//     if (isNaN(totalGuests) || totalGuests < 0) {
+//       return res.status(400).json({ error: 'Invalid guest count' });
 //     }
-//     if (!checkinDate || !checkoutDate) {
-//       return res.status(400).json({ error: 'Check-in and check-out dates are required' });
-//     }
-
-//     // Parse input dates
-//     const checkin = new Date(checkinDate);
-//     const checkout = new Date(checkoutDate);
-
-//     if (isNaN(checkin) || isNaN(checkout)) {
-//       return res.status(400).json({ error: 'Invalid date format for check-in or check-out' });
-//     }
-
-//     // Geospatial query
 //     const midpoint = {
 //       type: "Point",
 //       coordinates: [parseFloat(longitude), parseFloat(latitude)],
@@ -517,21 +372,41 @@ exports.listReveiw= async (req, res) => {
 //           as: "bookings",
 //         },
 //       },
-//       // Filter properties with conflicting bookings
+//       // Filter properties based on bookings and guest capacity
 //       {
 //         $match: {
-//           $or: [
-//             { "bookings": { $exists: false } }, // No bookings
-//             { "bookings": { $size: 0 } }, // Empty bookings array
+//           $and: [
 //             {
-//               "bookings": {
-//                 $not: {
-//                   $elemMatch: {
-//                     checkinDate: { $lt: checkout }, // Booking overlaps with the given date range
-//                     checkoutDate: { $gt: checkin },
+//               $or: [
+//                 { bookings: { $exists: false } }, // No bookings
+//                 { bookings: { $size: 0 } }, // Empty bookings array
+//                 {
+//                   bookings: {
+//                     $not: {
+//                       $elemMatch: {
+//                         checkinDate: { $lt: checkout }, // Booking overlaps with the given date range
+//                         checkoutDate: { $gt: checkin },
+//                       },
+//                     },
 //                   },
 //                 },
-//               },
+//               ],
+//             },
+//             // Ensure the property can accommodate the required number of guests
+//             {
+              
+//                 $expr: {
+//                   $gte: [
+//                     {
+//                       $add: [
+//                         { $ifNull: ["$Guest.adultGuest", 0] },
+//                         { $ifNull: ["$Guest.childrenGuest", 0] },
+//                       ],
+//                     },
+//                     totalGuests, // Required guest count from query
+//                   ],
+//                 },
+               
 //             },
 //           ],
 //         },
@@ -539,11 +414,10 @@ exports.listReveiw= async (req, res) => {
 //       { $sort: { distance: 1 } }, // Sort by proximity
 //     ]);
 
-//     // console.log(results);
 //     res.status(200).json(results);
 //   } catch (error) {
 //     console.error(error);
-//     res.status(500).json({ error: 'An error occurred while fetching data' });
+//     res.status(500).json({ error: "An error occurred while fetching data" });
 //   }
 // };
 
@@ -558,8 +432,6 @@ exports.SortLocation = async (req, res) => {
       checkoutDate,
       guestCount,
     } = req.query;
-
-    // console.log(req.query); // Debug query parameters
 
     // Validate required inputs
     if (!latitude || !longitude) {
@@ -576,23 +448,26 @@ exports.SortLocation = async (req, res) => {
     if (isNaN(checkin) || isNaN(checkout)) {
       return res.status(400).json({ error: "Invalid date format for check-in or check-out" });
     }
+
     const totalGuests = parseInt(guestCount, 10);
     if (isNaN(totalGuests) || totalGuests < 0) {
       return res.status(400).json({ error: 'Invalid guest count' });
     }
+
     const midpoint = {
       type: "Point",
       coordinates: [parseFloat(longitude), parseFloat(latitude)],
     };
 
+    // Aggregation to fetch properties within the defined distance, considering bookings and guest count
     const results = await List.aggregate([
       {
         $geoNear: {
           near: midpoint,
-          distanceField: "distance",
-          spherical: true,
-          maxDistance: parseInt(maxDistance),
-          query: { status: "published" },
+          distanceField: "distance",  // Field for storing distance from the point
+          spherical: true,            // Enable spherical geometry for distance calculations
+          maxDistance: parseInt(maxDistance),  // Max allowed distance in meters
+          query: { status: "published" },  // Only consider published properties
         },
       },
       // Lookup bookings for each property
@@ -608,10 +483,11 @@ exports.SortLocation = async (req, res) => {
       {
         $match: {
           $and: [
+            // Check if bookings overlap with the given date range
             {
               $or: [
                 { bookings: { $exists: false } }, // No bookings
-                { bookings: { $size: 0 } }, // Empty bookings array
+                { bookings: { $size: 0 } },       // Empty bookings array
                 {
                   bookings: {
                     $not: {
@@ -626,30 +502,28 @@ exports.SortLocation = async (req, res) => {
             },
             // Ensure the property can accommodate the required number of guests
             {
-              
-                $expr: {
-                  $gte: [
-                    {
-                      $add: [
-                        { $ifNull: ["$Guest.adultGuest", 0] },
-                        { $ifNull: ["$Guest.childrenGuest", 0] },
-                      ],
-                    },
-                    totalGuests, // Required guest count from query
-                  ],
-                },
-               
+              $expr: {
+                $gte: [
+                  {
+                    $add: [
+                      { $ifNull: ["$Guest.adultGuest", 4] },
+                      { $ifNull: ["$Guest.childrenGuest", 4] },
+                    ],
+                  },
+                  totalGuests, // Required guest count from query
+                ],
+              },
             },
           ],
         },
       },
-      { $sort: { distance: 1 } }, // Sort by proximity
+      { $sort: { distance: 1 } }, // Sort by proximity (ascending distance)
     ]);
 
+    // Send the results back to the client
     res.status(200).json(results);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "An error occurred while fetching data" });
   }
 };
-
