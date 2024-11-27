@@ -360,7 +360,7 @@ exports.googleFacebookLogin = async (req, res) => {
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "14d",
     });
-    console.log("user",user)
+    // console.log("user",user)
     res.json({
       token,
       user,
