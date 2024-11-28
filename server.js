@@ -118,13 +118,12 @@ app.use(passport.initialize());
 app.use(passport.session());
 // const googleIDClient=process.env.GOOGLE_CLIENT_ID;
 // const googleSecrate=process.env.GOOGLE_CLIENT_SECRET;
-const GOOGLE_CLIENT_ID="836370823354-m9ku1ntb5jrcf1o0fkp57nr34ud67lfo.apps.googleusercontent.com"
-const GOOGLE_CLIENT_SECRET="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"
+
 passport.use(
   new OAuth2Strategy({
 
-    clientID:GOOGLE_CLIENT_ID,
-    clientSecret:GOOGLE_CLIENT_SECRET,
+    clientID:process.env.GOOGLE_CLIENT_ID,
+    clientSecret:process.env.GOOGLE_CLIENT_SECRET,
     // callbackURL: "https://www.bedbd.com/auth/google/callback",
     callbackURL: "http://localhost:3000/auth/google/callback",
     passReqToCallback: true,
