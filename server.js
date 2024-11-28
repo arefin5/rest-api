@@ -1,5 +1,5 @@
 const formidableMiddleware = require('express-formidable');
-
+require('dotenv').config();
 // const configurePassport = require('./passport'); // This imports your custom configuration
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -8,10 +8,10 @@ const yaml = require('yamljs');
 const swaggerUI = require('swagger-ui-express');
 const helmet = require('helmet');
 const Fingerprint = require("express-fingerprint");
- const db = require('./mongodb-connection');
- const SSLCommerzPayment = require('sslcommerz-lts')
- const socketIO = require('socket.io');
- const http = require('http');
+const db = require('./mongodb-connection');
+const SSLCommerzPayment = require('sslcommerz-lts')
+const socketIO = require('socket.io');
+const http = require('http');
 // Initialize Express app
 const app = express();
 
@@ -26,8 +26,8 @@ app.use(Fingerprint({
   parameters: [Fingerprint.useragent, Fingerprint.acceptHeaders, Fingerprint.geoip],
 }));
 // SSLCOMMERZ credentials
-const store_id =process.env.StoreID
-const store_passwd =process.env.StorePassword
+const store_id = process.env.StoreID
+const store_passwd = process.env.StorePassword
 const is_live = false; // Change to true for live environment
 
 
@@ -49,7 +49,7 @@ app.use('/api', require('./router/authRouter'));
 app.use('/api', require('./router/hostRoute'));
 app.use('/api', require('./router/adminRoute'));
 
-app.use("/api",require('./router/userRoute'))
+app.use("/api", require('./router/userRoute'))
 app.use('/api', require('./router/getImage'));
 const imageRouter = require('./router/imageRouter');
 
@@ -108,74 +108,80 @@ const OAuth2Strategy = require("passport-google-oauth2").Strategy;
 
 // setup session
 app.use(session({
-    secret:"YOUR SECRET KEY",
-    resave:false,
-    saveUninitialized:true
+  secret: "GSDGRREREGDSA",
+  resave: false,
+  saveUninitialized: true
 }))
 
 // setuppassport
 app.use(passport.initialize());
 app.use(passport.session());
-
+// const googleIDClient=process.env.GOOGLE_CLIENT_ID;
+// const googleSecrate=process.env.GOOGLE_CLIENT_SECRET;
+const GOOGLE_CLIENT_ID="836370823354-m9ku1ntb5jrcf1o0fkp57nr34ud67lfo.apps.googleusercontent.com"
+const GOOGLE_CLIENT_SECRET="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"
 passport.use(
-    new OAuth2Strategy({
-       
-        clientID:process.env.CLIENT_ID,
-        clientSecret: process.env.CLIENT_SECRET,
-        callbackURL: "www.bedbd.com/auth/google/callback",
-        passReqToCallback: true,
-		scope: ["email", "profile"]
-    },
-    async(accessToken,refreshToken,profile,done)=>{
-        try {
-            // const user=profile.id;
-            const user = {
+  new OAuth2Strategy({
+
+    clientID:GOOGLE_CLIENT_ID,
+    clientSecret:GOOGLE_CLIENT_SECRET,
+    // callbackURL: "https://www.bedbd.com/auth/google/callback",
+    callbackURL: "http://localhost:3000/auth/google/callback",
+    passReqToCallback: true,
+    scope: ["email", "profile"]
+  },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        // const user=profile.id;
+        const user = {
           googleId: profile.id,
           displayName: profile.displayName,
           email: profile.emails[0].value,
           image: profile.photos[0].value,
         };
         return done(null, user);
-          
 
-            
-        } catch (error) {
-            return done(error,null)
-        }
+
+
+      } catch (error) {
+        return done(error, null)
+      }
     }
-    )
+  )
 )
 
-passport.serializeUser((user,done)=>{
-    done(null,user);
+passport.serializeUser((user, done) => {
+  done(null, user);
 })
 
-passport.deserializeUser((user,done)=>{
-    done(null,user);
+passport.deserializeUser((user, done) => {
+  done(null, user);
 });
 
 // initial google ouath login
-app.get("/auth/google",passport.authenticate("google",{scope:["profile","email"]}));
+app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
-app.get("/auth/google/callback",passport.authenticate("google",{
-    successRedirect:"www.bedbd.com/success",
-    failureRedirect:"www.bedbd.com/login"
+app.get("/auth/google/callback", passport.authenticate("google", {
+  // successRedirect: "https://www.bedbd.com//success",
+  // failureRedirect: "https://www.bedbd.com//login"
+  successRedirect: "http://localhost:3000/success",
+  failureRedirect: "http://localhost:3000/login"
 }))
 
-app.get("/login/sucess",async(req,res)=>{
+app.get("/login/sucess", async (req, res) => {
 
-    if(req.user){
-        res.status(200).json({message:"user Login",user:req.user})
-    }else{
-        res.status(400).json({message:"Not Authorized"})
-    }
+  if (req.user) {
+    res.status(200).json({ message: "user Login", user: req.user })
+  } else {
+    res.status(400).json({ message: "Not Authorized" })
+  }
 })
 
-app.get("/logout",(req,res,next)=>{
-    req.logout(function(err){
-        if(err){return next(err)}
-        res.redirect("www.bedbd.com");
-    })
+app.get("/logout", (req, res, next) => {
+  req.logout(function (err) {
+    if (err) { return next(err) }
+    res.redirect("https://www.bedbd.com/");
+  })
 })
 
 
