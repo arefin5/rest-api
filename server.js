@@ -119,10 +119,7 @@ app.use(passport.session());
 
 passport.use(
     new OAuth2Strategy({
-        // clientID:clientid,
-        // clientSecret:clientsecret,
-        // callbackURL:"/auth/google/callback",
-        // scope:["profile","email"]
+       
         clientID:process.env.CLIENT_ID,
         clientSecret: process.env.CLIENT_SECRET,
         callbackURL: "www.bedbd.com/auth/google/callback",
@@ -141,7 +138,7 @@ passport.use(
         return done(null, user);
           
 
-            return done(null,user)
+            
         } catch (error) {
             return done(error,null)
         }
