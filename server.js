@@ -116,8 +116,6 @@ app.use(session({
 // setuppassport
 app.use(passport.initialize());
 app.use(passport.session());
-// const googleIDClient=process.env.GOOGLE_CLIENT_ID;
-// const googleSecrate=process.env.GOOGLE_CLIENT_SECRET;
 
 passport.use(
   new OAuth2Strategy({
@@ -182,14 +180,6 @@ app.get("/logout", (req, res, next) => {
     res.redirect("https://www.bedbd.com/");
   })
 })
-
-
-
-
-
-
-
-
 
 
 const io = socketIO(server, {
