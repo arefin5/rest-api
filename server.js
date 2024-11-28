@@ -123,7 +123,7 @@ passport.use(
     clientID:process.env.GOOGLE_CLIENT_ID,
     clientSecret:process.env.GOOGLE_CLIENT_SECRET,
     // callbackURL: "https://www.bedbd.com/auth/google/callback",
-    callbackURL: "http://localhost:3000/auth/google/callback",
+    callbackURL: "https://www.bedbd.com/auth/google/callback",
     passReqToCallback: true,
     scope: ["email", "profile"]
   },
@@ -159,10 +159,10 @@ passport.deserializeUser((user, done) => {
 app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
 app.get("/auth/google/callback", passport.authenticate("google", {
-  // successRedirect: "https://www.bedbd.com//success",
-  // failureRedirect: "https://www.bedbd.com//login"
-  successRedirect: "http://localhost:3000/success",
-  failureRedirect: "http://localhost:3000/login"
+  successRedirect: "https://www.bedbd.com//success",
+  failureRedirect: "https://www.bedbd.com//login"
+  // successRedirect: "http://localhost:3000/success",
+  // failureRedirect: "http://localhost:3000/login"
 }))
 
 app.get("/login/sucess", async (req, res) => {
