@@ -159,8 +159,8 @@ passport.deserializeUser((user, done) => {
 app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
 app.get("/auth/google/callback", passport.authenticate("google", {
-  successRedirect: "https://www.bedbd.com//success",
-  failureRedirect: "https://www.bedbd.com//login"
+  successRedirect: "https://www.bedbd.com/success",
+  failureRedirect: "https://www.bedbd.com/login"
   // successRedirect: "http://localhost:3000/success",
   // failureRedirect: "http://localhost:3000/login"
 }))
