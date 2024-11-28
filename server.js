@@ -117,13 +117,15 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+const googleClientID="20226538185-hd0nr2ach4fmrut1gfj2e1b66ijh1e3c.apps.googleusercontent.com"
+const googleCientSecrate="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"
 passport.use(
   new OAuth2Strategy({
 
-    clientID:process.env.GOOGLE_CLIENT_ID,
-    clientSecret:process.env.GOOGLE_CLIENT_SECRET,
-    // callbackURL: "https://www.bedbd.com/auth/google/callback",
+    clientID:googleClientID,
+    clientSecret:googleCientSecrate,
     callbackURL: "https://www.bedbd.com/auth/google/callback",
+    // callbackURL: "http://localhost:3000/auth/google/callback",
     passReqToCallback: true,
     scope: ["email", "profile"]
   },
@@ -177,7 +179,7 @@ app.get("/login/sucess", async (req, res) => {
 app.get("/logout", (req, res, next) => {
   req.logout(function (err) {
     if (err) { return next(err) }
-    res.redirect("https://www.bedbd.com/");
+    res.redirect("http://localhost:3000");
   })
 })
 
