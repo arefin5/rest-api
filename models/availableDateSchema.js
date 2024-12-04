@@ -5,7 +5,7 @@ const { Schema } = mongoose;
 const availableDateSchema = new Schema({
     checkInStart:{
         type:String,
-        enum: ['asap'], 
+        
         required:true
     },
     allowExtend:{

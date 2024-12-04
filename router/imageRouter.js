@@ -11,7 +11,8 @@ const {
   uploadImage,
   UplodadSinglePrivete,
   GetImage,
-  uploadVerifyImages
+  uploadVerifyImages,
+  uploadImagesMultiples
 } = require("../controlar/imageControlar");
 
 
@@ -32,5 +33,9 @@ router.post("/single-image-upload",
 // router.post('/upload-privet',requireAuth,UplodadSinglePrivete);
 router.post('/upload-verify',requireAuth,uploadVerifyImages)
 // router.get('/privet-image/:public_id',GetImage);
+router.post(
+  "/upload-image-edit",
 
+  uploadImagesMultiples
+);
 module.exports = router;

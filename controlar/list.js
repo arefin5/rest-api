@@ -161,7 +161,7 @@ exports.createList = async (req, res) => {
     } = req.body;
 
     if (!typeOfproperty || !propertyTitle || !price) {
-      console.log(req.body);
+      console.log(req.body.availablecheck);
       return res.status(400).json({ message: "Required fields are missing." });
     }
 
@@ -175,7 +175,11 @@ exports.createList = async (req, res) => {
         filteredFeatures[key] = feature;
       }
     }
-
+    if(location?.coordinates){
+      location.coordinates=[90.388964,23.764287]
+    }
+// console.log(amenities);
+// console.log(location);
     const newList = new List({
       typeOfproperty,
       propertyCondition,
@@ -183,6 +187,7 @@ exports.createList = async (req, res) => {
       homerule: { homesRoules: homerule },
       propertyTitle,
       bookingtype: { bookingTypes: bookingtype },
+      amenities:amenities,
       description,
       outdoorShower,
       location,
@@ -204,7 +209,7 @@ exports.createList = async (req, res) => {
 
     // Save the list in the database
     const savedList = await newList.save();
-    console.log(savedList);
+    // console.log(savedList);
 
     // Send response
     res.status(201).json(savedList);
