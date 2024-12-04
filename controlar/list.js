@@ -426,6 +426,112 @@ exports.listReveiw= async (req, res) => {
 //   }
 // };
 
+// exports.SortLocation = async (req, res) => {
+//   try {
+//     // Extract query parameters
+//     const {
+//       latitude,
+//       longitude,
+//       maxDistance = 500,
+//       checkinDate,
+//       checkoutDate,
+//       guestCount,
+//     } = req.query;
+
+//     // Validate required inputs
+//     if (!latitude || !longitude) {
+//       return res.status(400).json({ error: "Latitude and Longitude are required" });
+//     }
+//     if (!checkinDate || !checkoutDate) {
+//       return res.status(400).json({ error: "Check-in and check-out dates are required" });
+//     }
+
+//     // Parse input dates
+//     const checkin = new Date(checkinDate);
+//     const checkout = new Date(checkoutDate);
+
+//     if (isNaN(checkin) || isNaN(checkout)) {
+//       return res.status(400).json({ error: "Invalid date format for check-in or check-out" });
+//     }
+
+//     const totalGuests = parseInt(guestCount, 10);
+//     if (isNaN(totalGuests) || totalGuests < 0) {
+//       return res.status(400).json({ error: 'Invalid guest count' });
+//     }
+
+//     const midpoint = {
+//       type: "Point",
+//       coordinates: [parseFloat(longitude), parseFloat(latitude)],
+//     };
+
+//     // Aggregation to fetch properties within the defined distance, considering bookings and guest count
+//     const results = await List.aggregate([
+//       {
+//         $geoNear: {
+//           near: midpoint,
+//           distanceField: "distance",  // Field for storing distance from the point
+//           spherical: true,            // Enable spherical geometry for distance calculations
+//           maxDistance: parseInt(maxDistance),  // Max allowed distance in meters
+//           query: { status: "published" },  // Only consider published properties
+//         },
+//       },
+//       // Lookup bookings for each property
+//       {
+//         $lookup: {
+//           from: "bookings", // MongoDB collection name (case-sensitive)
+//           localField: "_id",
+//           foreignField: "property",
+//           as: "bookings",
+//         },
+//       },
+//       // Filter properties based on bookings and guest capacity
+//       {
+//         $match: {
+//           $and: [
+//             // Check if bookings overlap with the given date range
+//             {
+//               $or: [
+//                 { bookings: { $exists: false } }, // No bookings
+//                 { bookings: { $size: 0 } },       // Empty bookings array
+//                 {
+//                   bookings: {
+//                     $not: {
+//                       $elemMatch: {
+//                         checkinDate: { $lt: checkout }, // Booking overlaps with the given date range
+//                         checkoutDate: { $gt: checkin },
+//                       },
+//                     },
+//                   },
+//                 },
+//               ],
+//             },
+//             // Ensure the property can accommodate the required number of guests
+//             {
+//               $expr: {
+//                 $gte: [
+//                   {
+//                     $add: [
+//                       { $ifNull: ["$Guest.adultGuest", 4] },
+//                       { $ifNull: ["$Guest.childrenGuest", 4] },
+//                     ],
+//                   },
+//                   totalGuests, // Required guest count from query
+//                 ],
+//               },
+//             },
+//           ],
+//         },
+//       },
+//       { $sort: { distance: 1 } }, // Sort by proximity (ascending distance)
+//     ]);
+
+//     // Send the results back to the client
+//     res.status(200).json(results);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: "An error occurred while fetching data" });
+//   }
+// };
 exports.SortLocation = async (req, res) => {
   try {
     // Extract query parameters
@@ -464,40 +570,37 @@ exports.SortLocation = async (req, res) => {
       coordinates: [parseFloat(longitude), parseFloat(latitude)],
     };
 
-    // Aggregation to fetch properties within the defined distance, considering bookings and guest count
+    // Aggregation to fetch properties within the defined distance
     const results = await List.aggregate([
       {
         $geoNear: {
           near: midpoint,
-          distanceField: "distance",  // Field for storing distance from the point
-          spherical: true,            // Enable spherical geometry for distance calculations
-          maxDistance: parseInt(maxDistance),  // Max allowed distance in meters
-          query: { status: "published" },  // Only consider published properties
+          distanceField: "distance",
+          spherical: true,
+          maxDistance: parseInt(maxDistance),
+          query: { status: "published" },
         },
       },
-      // Lookup bookings for each property
       {
         $lookup: {
-          from: "bookings", // MongoDB collection name (case-sensitive)
+          from: "bookings",
           localField: "_id",
           foreignField: "property",
           as: "bookings",
         },
       },
-      // Filter properties based on bookings and guest capacity
       {
         $match: {
           $and: [
-            // Check if bookings overlap with the given date range
             {
               $or: [
-                { bookings: { $exists: false } }, // No bookings
-                { bookings: { $size: 0 } },       // Empty bookings array
+                { bookings: { $exists: false } },
+                { bookings: { $size: 0 } },
                 {
                   bookings: {
                     $not: {
                       $elemMatch: {
-                        checkinDate: { $lt: checkout }, // Booking overlaps with the given date range
+                        checkinDate: { $lt: checkout },
                         checkoutDate: { $gt: checkin },
                       },
                     },
@@ -505,27 +608,27 @@ exports.SortLocation = async (req, res) => {
                 },
               ],
             },
-            // Ensure the property can accommodate the required number of guests
             {
               $expr: {
                 $gte: [
                   {
                     $add: [
-                      { $ifNull: ["$Guest.adultGuest", 4] },
-                      { $ifNull: ["$Guest.childrenGuest", 4] },
+                      { $ifNull: ["$Guest.adultGuest", 0] },
+                      { $ifNull: ["$Guest.childrenGuest", 0] },
                     ],
                   },
-                  totalGuests, // Required guest count from query
+                  totalGuests,
                 ],
               },
             },
           ],
         },
       },
-      { $sort: { distance: 1 } }, // Sort by proximity (ascending distance)
+      { $sort: { distance: 1 } },
     ]);
 
-    // Send the results back to the client
+    // Send the results as an array
+    // console.log(results)
     res.status(200).json(results);
   } catch (error) {
     console.error(error);
