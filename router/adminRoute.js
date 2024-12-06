@@ -17,7 +17,8 @@ const {
     allBookingList,
     getRateOfService,
     createVat,
-    updateVat
+    updateVat,
+    getAllhost
 } = require("../controlar/admin.js");
 router.get('/admin/failed-booking-all',requireSignin,checkAdmin,getFailedBookings);
 router.get('/admin/all-booking',requireSignin,checkAdmin,getAllBooking);
@@ -25,6 +26,7 @@ router.put("/admin/published-list/:id",requireSignin,checkAdmin,aprovedList);
 router.put("/admin/booking-confirm/:id",requireSignin,checkAdmin,aprovedBooking);
 router.put("/admin/create-admin/:id",requireSignin,checkAdmin,aprovedAdmin)
 router.get("/admin/all-user",requireSignin,checkAdmin,getAlluser);
+router.get("/admin/all-host",requireSignin,checkAdmin,getAllhost)
 router.get("/admin/all-list",requireSignin,checkAdmin,getAllList);
 
 router.get("/admin/get-pending/",requireSignin,checkAdmin,getAllPanding);

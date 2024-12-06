@@ -117,7 +117,21 @@ exports.getFailedBookings = async (req, res) => {
   // admin
 exports.getAlluser=async(req,res)=>{
     try {
-      const users = await User.find();
+      const users = await User.find({role:"user"});
+      if (!users) {
+        return res.status(400).json({ message: 'This user not found' });
+      }
+      res.status(200).json({
+        users,
+        message:"all user"
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Error checking availability', error });
+    }
+  }
+  exports.getAllhost=async(req,res)=>{
+    try {
+      const users = await User.find({role:"host"});
       if (!users) {
         return res.status(400).json({ message: 'This user not found' });
       }
