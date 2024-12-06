@@ -20,10 +20,98 @@ exports.lists = async (req, res) => {
 };
 
 
+// exports.updateList = async (req, res) => {
+//   try {
+//     const listId = req.params.id;
+//     const updateData = req.body;
+//     console.log(listId);
+//     console.log(updateData);
+//     // Find the document by ID
+//     const list = await List.findById(listId);
+// console.log(list);
+
+//     if (!list) {
+//       return res.status(404).json({ message: 'Listing not found' });
+//     }
+
+//     // Loop over the request body and update only provided fields
+//     Object.keys(updateData).forEach((key) => {
+//       if (updateData[key] !== undefined) {
+//         // Update fields in nested objects (deep update)
+//         if (typeof updateData[key] === 'object' && !Array.isArray(updateData[key])) {
+//           Object.keys(updateData[key]).forEach((nestedKey) => {
+//             list[key][nestedKey] = updateData[key][nestedKey];
+//           });
+//         } else {
+//           list[key] = updateData[key];
+//         }
+//       }
+//     });
+
+//     // Save the updated document
+//     const updatedList = await list.save();
+
+//     res.status(200).json(updatedList);
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+
+// exports.updateList = async (req, res) => {
+//   try {
+//     const listId = req.params.id;
+//     const updateData = req.body;
+// const homesRules=req.body.homesRules
+//     // Log the inputs
+//     // console.log(homesRules);
+//     // console.log(updateData);
+
+//     // Find the document by ID
+//     const list = await List.findById(listId);
+
+//     if (!list) {
+//       return res.status(404).json({ message: 'Listing not found' });
+//     }
+
+//     // Loop over the request body and update only provided fields
+//     Object.keys(updateData).forEach((key) => {
+//       if (updateData[key] !== undefined) {
+//         if (typeof updateData[key] === 'object' && !Array.isArray(updateData[key])) {
+//           // Handle nested objects
+//           if (!list[key]) {
+//             list[key] = {}; // Initialize the nested object if it doesn't exist
+//           }
+//           Object.keys(updateData[key]).forEach((nestedKey) => {
+//             list[key][nestedKey] = updateData[key][nestedKey];
+//           });
+//         } else {
+//           // Update simple fields
+//           list[key] = updateData[key];
+//         }
+//       }
+//     });
+// if(homesRules){
+//   console.log("list.homerule=>",list.homerule);
+//   console.log("homerule=>",homesRules);
+//   // console.log("list.homerule.homesRules",list.homerule.homesRules)
+
+//   list.homerule=  homesRules
+// }
+//     // Save the updated document
+//     const updatedList = await list.save();
+
+//     // res.status(200).json(updatedList);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 exports.updateList = async (req, res) => {
   try {
     const listId = req.params.id;
     const updateData = req.body;
+    const homesRules = req.body.homesRules;
 
     // Find the document by ID
     const list = await List.findById(listId);
@@ -32,11 +120,13 @@ exports.updateList = async (req, res) => {
       return res.status(404).json({ message: 'Listing not found' });
     }
 
-    // Loop over the request body and update only provided fields
+    // Update flat fields from updateData
     Object.keys(updateData).forEach((key) => {
       if (updateData[key] !== undefined) {
-        // Update fields in nested objects (deep update)
         if (typeof updateData[key] === 'object' && !Array.isArray(updateData[key])) {
+          if (!list[key]) {
+            list[key] = {};
+          }
           Object.keys(updateData[key]).forEach((nestedKey) => {
             list[key][nestedKey] = updateData[key][nestedKey];
           });
@@ -46,11 +136,32 @@ exports.updateList = async (req, res) => {
       }
     });
 
+    // Handle `homesRules` update
+    if (homesRules) {
+      console.log("list.homerule (before)=>", list.homerule);
+      console.log("homesRules (input)=>", homesRules);
+
+      // Ensure `list.homerule.homesRules` is properly initialized
+      if (!list.homerule || typeof list.homerule !== 'object') {
+        list.homerule = { homesRules: new Map() };
+      }
+      if (!list.homerule.homesRules || !(list.homerule.homesRules instanceof Map)) {
+        list.homerule.homesRules = new Map();
+      }
+
+      // Merge or update the `homesRules` map
+      Object.entries(homesRules).forEach(([key, value]) => {
+        list.homerule.homesRules.set(key, value);
+      });
+
+      console.log("list.homerule (after)=>", list.homerule);
+    }
+
     // Save the updated document
     const updatedList = await list.save();
-
     res.status(200).json(updatedList);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -219,23 +330,7 @@ exports.createList = async (req, res) => {
   }
 };
 
-// exports.createList = async (req, res) => {
-//   try {
-//     console.log(req.body);
 
-//     // Save the list in the database
-//     const savedList = {
-//       _id:"12222"
-//     }
-//     // console.log(savedList);
-
-//     // Send response
-//     res.status(201).json(savedList);
-//   } catch (error) {
-//     console.error('Error creating list:', error);
-//     res.status(500).json({ message: 'Server error' });
-//   }
-// };
 exports.authorBookingDetails = async (req, res) => {
   try {
     const bookings = await Booking.find()
@@ -320,218 +415,7 @@ exports.listReveiw= async (req, res) => {
   }
 };
 
-// exports.SortLocation = async (req, res) => {
-//   try {
-//     // Extract query parameters
-//     const {
-//       latitude,
-//       longitude,
-//       maxDistance = 500,
-//       checkinDate,
-//       checkoutDate,
-//       guestCount,
-//     } = req.query;
 
-//     // console.log(req.query); // Debug query parameters
-
-//     // Validate required inputs
-//     if (!latitude || !longitude) {
-//       return res.status(400).json({ error: "Latitude and Longitude are required" });
-//     }
-//     if (!checkinDate || !checkoutDate) {
-//       return res.status(400).json({ error: "Check-in and check-out dates are required" });
-//     }
-
-//     // Parse input dates
-//     const checkin = new Date(checkinDate);
-//     const checkout = new Date(checkoutDate);
-
-//     if (isNaN(checkin) || isNaN(checkout)) {
-//       return res.status(400).json({ error: "Invalid date format for check-in or check-out" });
-//     }
-//     const totalGuests = parseInt(guestCount, 10);
-//     if (isNaN(totalGuests) || totalGuests < 0) {
-//       return res.status(400).json({ error: 'Invalid guest count' });
-//     }
-//     const midpoint = {
-//       type: "Point",
-//       coordinates: [parseFloat(longitude), parseFloat(latitude)],
-//     };
-
-//     const results = await List.aggregate([
-//       {
-//         $geoNear: {
-//           near: midpoint,
-//           distanceField: "distance",
-//           spherical: true,
-//           maxDistance: parseInt(maxDistance),
-//           query: { status: "published" },
-//         },
-//       },
-//       // Lookup bookings for each property
-//       {
-//         $lookup: {
-//           from: "bookings", // MongoDB collection name (case-sensitive)
-//           localField: "_id",
-//           foreignField: "property",
-//           as: "bookings",
-//         },
-//       },
-//       // Filter properties based on bookings and guest capacity
-//       {
-//         $match: {
-//           $and: [
-//             {
-//               $or: [
-//                 { bookings: { $exists: false } }, // No bookings
-//                 { bookings: { $size: 0 } }, // Empty bookings array
-//                 {
-//                   bookings: {
-//                     $not: {
-//                       $elemMatch: {
-//                         checkinDate: { $lt: checkout }, // Booking overlaps with the given date range
-//                         checkoutDate: { $gt: checkin },
-//                       },
-//                     },
-//                   },
-//                 },
-//               ],
-//             },
-//             // Ensure the property can accommodate the required number of guests
-//             {
-              
-//                 $expr: {
-//                   $gte: [
-//                     {
-//                       $add: [
-//                         { $ifNull: ["$Guest.adultGuest", 0] },
-//                         { $ifNull: ["$Guest.childrenGuest", 0] },
-//                       ],
-//                     },
-//                     totalGuests, // Required guest count from query
-//                   ],
-//                 },
-               
-//             },
-//           ],
-//         },
-//       },
-//       { $sort: { distance: 1 } }, // Sort by proximity
-//     ]);
-
-//     res.status(200).json(results);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "An error occurred while fetching data" });
-//   }
-// };
-
-// exports.SortLocation = async (req, res) => {
-//   try {
-//     // Extract query parameters
-//     const {
-//       latitude,
-//       longitude,
-//       maxDistance = 500,
-//       checkinDate,
-//       checkoutDate,
-//       guestCount,
-//     } = req.query;
-
-//     // Validate required inputs
-//     if (!latitude || !longitude) {
-//       return res.status(400).json({ error: "Latitude and Longitude are required" });
-//     }
-//     if (!checkinDate || !checkoutDate) {
-//       return res.status(400).json({ error: "Check-in and check-out dates are required" });
-//     }
-
-//     // Parse input dates
-//     const checkin = new Date(checkinDate);
-//     const checkout = new Date(checkoutDate);
-
-//     if (isNaN(checkin) || isNaN(checkout)) {
-//       return res.status(400).json({ error: "Invalid date format for check-in or check-out" });
-//     }
-
-//     const totalGuests = parseInt(guestCount, 10);
-//     if (isNaN(totalGuests) || totalGuests < 0) {
-//       return res.status(400).json({ error: 'Invalid guest count' });
-//     }
-
-//     const midpoint = {
-//       type: "Point",
-//       coordinates: [parseFloat(longitude), parseFloat(latitude)],
-//     };
-
-//     // Aggregation to fetch properties within the defined distance, considering bookings and guest count
-//     const results = await List.aggregate([
-//       {
-//         $geoNear: {
-//           near: midpoint,
-//           distanceField: "distance",  // Field for storing distance from the point
-//           spherical: true,            // Enable spherical geometry for distance calculations
-//           maxDistance: parseInt(maxDistance),  // Max allowed distance in meters
-//           query: { status: "published" },  // Only consider published properties
-//         },
-//       },
-//       // Lookup bookings for each property
-//       {
-//         $lookup: {
-//           from: "bookings", // MongoDB collection name (case-sensitive)
-//           localField: "_id",
-//           foreignField: "property",
-//           as: "bookings",
-//         },
-//       },
-//       // Filter properties based on bookings and guest capacity
-//       {
-//         $match: {
-//           $and: [
-//             // Check if bookings overlap with the given date range
-//             {
-//               $or: [
-//                 { bookings: { $exists: false } }, // No bookings
-//                 { bookings: { $size: 0 } },       // Empty bookings array
-//                 {
-//                   bookings: {
-//                     $not: {
-//                       $elemMatch: {
-//                         checkinDate: { $lt: checkout }, // Booking overlaps with the given date range
-//                         checkoutDate: { $gt: checkin },
-//                       },
-//                     },
-//                   },
-//                 },
-//               ],
-//             },
-//             // Ensure the property can accommodate the required number of guests
-//             {
-//               $expr: {
-//                 $gte: [
-//                   {
-//                     $add: [
-//                       { $ifNull: ["$Guest.adultGuest", 4] },
-//                       { $ifNull: ["$Guest.childrenGuest", 4] },
-//                     ],
-//                   },
-//                   totalGuests, // Required guest count from query
-//                 ],
-//               },
-//             },
-//           ],
-//         },
-//       },
-//       { $sort: { distance: 1 } }, // Sort by proximity (ascending distance)
-//     ]);
-
-//     // Send the results back to the client
-//     res.status(200).json(results);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "An error occurred while fetching data" });
-//   }
-// };
 exports.SortLocation = async (req, res) => {
   try {
     // Extract query parameters
