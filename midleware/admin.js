@@ -1,9 +1,12 @@
-const checkAdmin = (req, res, next) => {
-    console.log("user", req.user);
+const User = require("../models/userModel");
+
+const checkAdmin = async(req, res, next) => {
+    console.log("user", req.auth);
   
     try {
-      const user = req.user;
-  
+      const userId = req.auth._id;
+      const user = await User.findById(userId);
+      console.log(user)
       if (user.role !== "admin") {
         return res.status(403).send("Permission denied: Admin access required");
       }

@@ -131,10 +131,11 @@ exports.getAlluser=async(req,res)=>{
   }
   exports.getAllList=async(req,res)=>{
     try {
-      const list = await List.find();
+      const list = await List.find()
       if (!list) {
         return res.status(400).json({ message: 'there are no list found' });
       }
+      console.log("list")
       res.status(200).json({
         list,
         message:"all List"
@@ -142,6 +143,41 @@ exports.getAlluser=async(req,res)=>{
     } catch (error) {
       res.status(500).json({ message: 'Error checking availability', error });
     }
+
+
+  //   try {
+  //   // Retrieve and sort `List` by price (ascending order)
+  //   const sortedLists = await List.find()
+  //     .sort({ price: 1 }); // Replace `price` with your desired field if needed.
+
+  //   // Retrieve and sort `Booking` by check-in date (ascending order)
+  //   const sortedBookings = await Booking.find()
+  //     .populate("property", "propertyTitle") // Populate property details
+  //     .populate("Host", "name email") // Populate host details
+  //     .populate("BClientId", "name email") // Populate client details
+  //     .sort({ checkinDate: 1 }); // Replace `checkinDate` with the desired field.
+
+  //   // Check if data exists
+  //   if (!sortedLists.length && !sortedBookings.length) {
+  //     return res.status(404).json({ message: "No lists or bookings found" });
+  //   }
+
+  //   // Combine both results and respond
+  //   res.status(200).json({
+  //     message: "Sorted lists and bookings retrieved successfully",
+  //     data: {
+  //       lists: sortedLists,
+  //       bookings: sortedBookings,
+  //     },
+  //   });
+  //   console.log(res)
+  // } catch (error) {
+  //   console.error("Error retrieving lists and bookings:", error);
+  //   res.status(500).json({
+  //     message: "Error retrieving sorted data",
+  //     error: error.message,
+  //   });
+  // }
   }
   exports.blockuser=async (req, res) => {
     try{
