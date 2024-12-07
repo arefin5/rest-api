@@ -11,7 +11,7 @@ const secret = process.env.JWT_SECRET;
 
 const socketHandler = (io) => {
   io.on('connection', (socket) => {
-    // console.log('New client connected:', socket.id);
+    console.log('New client connected:', socket.id);
 
     // Unread message count handler
     let unreadMessages = 0;
@@ -27,8 +27,7 @@ const socketHandler = (io) => {
     //     .catch((error) => console.error('Error fetching unread messages:', error));
     // }
     function updateUnreadMessages(userId) {
-      if (!userId) return; // Ensure userId is valid before proceeding
-    
+      if (!userId) return;
       Message.countDocuments({ receiver: userId, isRead: false })
         .then((count) => {
           // Emit updated unread message count to the specific user's socket room
@@ -43,7 +42,7 @@ const socketHandler = (io) => {
         // Verify token using jsonwebtoken
         const decoded = jwt.verify(token, secret);
         socket.user = decoded; // Store user info on socket for later use
-
+        console.error('Authenticati success:');
         // Send back the authenticated user object
         callback({ status: 'success', message: 'Authenticated successfully', user: decoded });
       } catch (err) {
@@ -142,7 +141,7 @@ const socketHandler = (io) => {
         },
       },
     ]);
-
+console.log("conversations",conversations)
     callback({ status: 'success', conversations });
   } catch (error) {
     console.error('Error fetching conversations:', error);
@@ -168,7 +167,7 @@ const socketHandler = (io) => {
 
         // Update unread message count
         updateUnreadMessages(receiver);
-
+       console.log("success message")
         callback({ status: 'Message delivered' });
       } catch (error) {
         console.error('Error saving message:', error);

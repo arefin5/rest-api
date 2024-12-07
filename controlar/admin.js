@@ -143,6 +143,20 @@ exports.getAlluser=async(req,res)=>{
       res.status(500).json({ message: 'Error checking availability', error });
     }
   }
+  exports.allBookingPayment=async(req,res)=>{
+    try {
+      const booking = await Booking.find({status:"paymentsuccess"});
+      if (!booking) {
+        return res.status(400).json({ message: 'This user not found' });
+      }
+      res.status(200).json({
+        booking,
+        message:"all booking"
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Error checking availability', error });
+    }
+  }
   exports.getAllList=async(req,res)=>{
     try {
       const list = await List.find()
