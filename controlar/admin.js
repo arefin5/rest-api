@@ -143,6 +143,28 @@ exports.getAlluser=async(req,res)=>{
       res.status(500).json({ message: 'Error checking availability', error });
     }
   }
+  exports.allBookingPaymentHost = async (req, res) => {
+    try {
+      const hostID = req.auth._id;
+  
+      // Fetch bookings for the specific host with successful payment status
+      const bookings = await Booking.find({ Host: hostID, status: "paymentsuccess" });
+  
+      // If no bookings are found
+      if (bookings.length === 0) {
+        return res.status(404).json({ message: 'No bookings found for this host' });
+      }
+  
+      // Return the found bookings
+      res.status(200).json({
+        bookings,
+        message: "All bookings for this host with successful payments"
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Error checking booking availability', error });
+    }
+  };
+  
   exports.allBookingPayment=async(req,res)=>{
     try {
       const booking = await Booking.find({status:"paymentsuccess"});
