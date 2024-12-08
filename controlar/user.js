@@ -181,7 +181,10 @@ exports.bookProperty=async (req, res) => {
   try {
    const BClientID=req.auth._id;
   const propertyId = req.params.id;
+  
     const { checkinDate, checkoutDate, guestCount, totalNights } = req.body;
+    console.log(checkinDate);
+  console.log(checkoutDate)
     if (!checkinDate || !checkoutDate || !totalNights || totalNights <= 0) {
       return res.status(400).json({ message: 'Invalid input data' });
     }

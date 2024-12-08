@@ -54,6 +54,7 @@ const userSchema = new Schema(
     birth:{
       type:String,
     },
+   
     fatherName:{
         type:String,
     },
@@ -85,6 +86,9 @@ const userSchema = new Schema(
       "user","host","admin"
     ],
     default: "user",
+  },
+  age:{
+    type:Number
   },
   favoritelist: [
     {
