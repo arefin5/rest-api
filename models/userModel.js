@@ -54,6 +54,9 @@ const userSchema = new Schema(
     birth:{
       type:String,
     },
+    age:{
+      type:Number
+    }
     fatherName:{
         type:String,
     },

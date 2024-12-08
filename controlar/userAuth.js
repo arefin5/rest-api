@@ -245,7 +245,7 @@ exports.editProfile = async (req, res) => {
   try {
     const { phone, email, fname, lname, name,
       varificationImage, varificationId, varificationIdType,
-       about, fatherName, motherName, presentAddress, parmanentAddress, birth, profilePic, cover } = req.body;
+       about, fatherName, motherName, presentAddress, parmanentAddress, birth, profilePic, cover ,age} = req.body;
     const userId = req.auth._id;
 
     // Find the user by ID
@@ -288,7 +288,7 @@ exports.editProfile = async (req, res) => {
     if (varificationImage) user.varificationImage = varificationImage;
     if (varificationId) user.varificationId = varificationId;
     if (varificationIdType) user.varificationIdType = varificationIdType;
-     
+     if(age)user.age=age;
     // Save the updated user data
     await user.save();
 
