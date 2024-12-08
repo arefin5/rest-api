@@ -5,7 +5,9 @@ const FailedBooking = require('../models/failedBookingSchema');
 const Review=require("../models/Review")
 const { initPayment } = require('../service/payment');
 const uuid = require('uuid'); // To generate unique transaction IDs
-const ServiceAndVat =require("../models/ServiceAndVat")
+const ServiceAndVat =require("../models/ServiceAndVat");
+const requestEmail=require("../helper/requestEmail");
+// const paymentEmail=require("../")
 exports.addFavoritelist = async (req, res) => {
   const id = req.params.id;
   try {
@@ -181,7 +183,7 @@ exports.bookProperty=async (req, res) => {
   try {
    const BClientID=req.auth._id;
   const propertyId = req.params.id;
-  
+ 
     const { checkinDate, checkoutDate, guestCount, totalNights } = req.body;
     console.log(checkinDate);
   console.log(checkoutDate)
@@ -208,6 +210,10 @@ exports.bookProperty=async (req, res) => {
     const serviceFee = TaxAndFee.serviceFee * totalNights*basePrice|| 0;
     const tax = TaxAndFee.tax * totalNights*basePrice || 0;
     const amount = serviceFee + tax + basePrice;
+    const hostEmailID=property.Postedby._id
+    const host=User.findById(hostEmailID)
+       const toEmail=host.email;
+
     const newBooking = new Booking({
       user: req.auth._id,
       property: propertyId,
@@ -219,7 +225,11 @@ exports.bookProperty=async (req, res) => {
       BClientId:BClientID,
       guest:guestCount
     });
+
     const savedBooking = await newBooking.save();
+   const subjectTestMeesage=`Your Proparty  has New Booking Requested please ,
+   please check bed bd account go to www.bedbd.com for comfirmation`
+    requestEmail(toEmail,subjectTestMeesage)
     res.json({  message: 'Your Booking Request is Success .waiting for Host Aproved'});
 
   } catch (error) {
@@ -237,7 +247,7 @@ exports.paymentSuccess = async (req, res) => {
     }
 
     if (status === 'success') {
-      booking.status = 'confirmed'; // Update booking status to 'confirmed'
+      booking.status = 'confirmed';
       await booking.save();
       res.status(200).json({ message: 'Payment successful, booking confirmed', booking });
     } else {
@@ -432,10 +442,18 @@ exports.confirmSuccess = async (req, res) => {
   try {
     const tran_id = req.params.id;
     console.log("tran_id success page", tran_id);
-
+       
     // Find the booking with the given transaction ID
-    const booking = await Booking.findOne({ tran_id }).populate('property'); // Populate property details
+    const booking = await Booking.findOne({ tran_id }).populate('property'); 
+       const client = await User.findById(booking.BClientId);
+      const toEmail = client?.email;
+      const subjectTestMeesage=`Your Payment Success ..Receipt`
+      requestEmail(toEmail,subjectTestMeesage)
 
+      const host = await User.findById(booking.Host);
+      const toEmailhost = host?.email;
+      const subjectTestMeesagehost=`Your Property Received Payment ..Receipt`
+      requestEmail(toEmailhost,subjectTestMeesagehost)
     if (!booking) {
       return res.status(404).json({ message: 'Booking not found' });
     }
