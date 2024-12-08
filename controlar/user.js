@@ -5,7 +5,7 @@ const FailedBooking = require('../models/failedBookingSchema');
 const Review=require("../models/Review")
 const { initPayment } = require('../service/payment');
 const uuid = require('uuid'); // To generate unique transaction IDs
-
+const ServiceAndVat =require("../models/ServiceAndVat")
 exports.addFavoritelist = async (req, res) => {
   const id = req.params.id;
   try {
@@ -202,9 +202,11 @@ exports.bookProperty=async (req, res) => {
     if (isBooked) {
       return res.status(400).json({ message: 'The selected dates are already booked' });
     }
-    const serviceFee = property.serviceFee * totalNights || 0;
-    const tax = property.tax * totalNights || 0;
+    const TaxAndFee=await ServiceAndVat.find()
+
     const basePrice = property.GroundPrice * totalNights || 0;
+    const serviceFee = TaxAndFee.serviceFee * totalNights*basePrice|| 0;
+    const tax = TaxAndFee.tax * totalNights*basePrice || 0;
     const amount = serviceFee + tax + basePrice;
     const newBooking = new Booking({
       user: req.auth._id,
