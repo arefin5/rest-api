@@ -119,15 +119,14 @@ exports.bookPropertyPayment=async (req, res) => {
 
   try {
     const bookingId = req.params.id; // This refers to the booking ID
-    console.log(bookingId);
+    // console.log(bookingId);
 
     // Find the booking by its ID
     const booking = await Booking.findById(bookingId).populate('property'); // Populate the property reference
     if (!booking) {
       return res.status(404).json({ message: 'Booking not found' });
     }
-
-    console.log(booking);
+    // console.log(booking);
 
     // Ensure the associated property exists
     const property = booking.property;
@@ -139,7 +138,7 @@ exports.bookPropertyPayment=async (req, res) => {
 
     // Save the updated booking with the transaction ID
     await booking.save();
-    console.log(booking)
+    // console.log(booking)
    
      const paymentData = {
       tran_id:transactionId,
@@ -231,9 +230,7 @@ exports.bookProperty=async (req, res) => {
 
     const savedBooking = await newBooking.save();
     const host = await User.findById(savedBooking.Host);
-    console.log(host)
       const toEmailhost =await  host.email;
-      console.log(toEmailhost)
      
    const subjectTestMeesage=`Your Proparty  has New Booking Requested please ,
    please check bed bd account go to www.bedbd.com for comfirmation`
@@ -394,6 +391,8 @@ exports.confirmPayment = async (req, res) => {
       // Update booking status in your database (e.g., to 'confirmed')
       const booking = await Booking.findOne({ tran_id });
       if (booking) {
+        booking.paymentDate="today";
+
         booking.status = 'confirmed'; // Or any other status you define
         await booking.save();
         return res.status(200).json({ message: 'Payment confirmed', booking });
@@ -407,44 +406,6 @@ exports.confirmPayment = async (req, res) => {
     res.status(500).json({ message: 'Error confirming payment', error });
   }
 };
-
-
-
-
-// exports.confirmSuccess = async (req, res) => {
-//   try {
-//       const tran_id = req.params.id;
-//       console.log("tran_id success page", tran_id);
-        
-//       const booking = await Booking.findOne({ tran_id });
-
-//       if (!booking) {
-//           return res.status(404).json({ message: 'Booking not found' });
-//       }
-//        const property=await ()
-//       booking.status = "paymentsuccess";
-//       await booking.save();
-//       property.bookings.push(booking._id);
-//       await property.save();
-//       // Send an HTML response with JavaScript for popup and redirect
-//       res.send(`
-//           <html>
-//               <body>
-//                   <script>
-//                       alert("Your payment was successful");
-//                       setTimeout(function() {
-//                           window.location.href = "http://www.bedbd.com/success/${tran_id}";
-//                       }, 2000);
-//                   </script>
-//               </body>
-//           </html>
-//       `);
-//   } catch (error) {
-//       console.error("Error processing payment success:", error);
-//       res.status(500).json({ message: 'Error processing payment success', error: error.message || error });
-//   }
-// };
-
 
 exports.confirmSuccess = async (req, res) => {
   try {
@@ -474,6 +435,7 @@ exports.confirmSuccess = async (req, res) => {
     }
 
     // Update booking status
+    booking.PaymentReceivedFromHost=new Date();
     booking.status = "paymentsuccess";
     await booking.save();
 
@@ -488,7 +450,7 @@ exports.confirmSuccess = async (req, res) => {
           <script>
             alert("Your payment was successful");
             setTimeout(function() {
-              window.location.href = "http://www.bedbd.com/success/${tran_id}";
+              window.location.href = "https://www.bedbd.com/success/${tran_id}";
             }, 2000);
           </script>
         </body>

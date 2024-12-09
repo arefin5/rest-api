@@ -48,6 +48,14 @@ const bookingSchema = new Schema({
     enum: ['pending', 'confirmed', 'rejected',"paymentsuccess"],
     default: 'pending',
   },
+  PaymentReceivedFromHost: {
+      type: Date, // New field for payment received date
+      default: null,
+    },
+    PaymentReceivedByHost:{
+      type: Date, // New field for payment received date
+      default: null,
+    },
   tran_id: {
     type: String,
   },
