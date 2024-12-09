@@ -397,23 +397,23 @@ exports.listReveiw= async (req, res) => {
   }
 };
 
-exports.listReveiw= async (req, res) => {
-  const listId = req.params.id;
+// exports.listReveiw= async (req, res) => {
+//   const listId = req.params.id;
 
-  try {
-    const list = await List.fine()
+//   try {
+//     const list = await List.fine()
     
 
-    if (!list || !list.length) {
-      return res.status(404).json({ message: 'Listing not found' });
-    }
+//     if (!list || !list.length) {
+//       return res.status(404).json({ message: 'Listing not found' });
+//     }
 
-    res.status(200).json(list[0]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'An error occurred while retrieving the listing' });
-  }
-};
+//     res.status(200).json(list[0]);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: 'An error occurred while retrieving the listing' });
+//   }
+// };
 
 
 exports.SortLocation = async (req, res) => {
