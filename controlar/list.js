@@ -107,20 +107,172 @@ exports.lists = async (req, res) => {
 //     res.status(500).json({ message: error.message });
 //   }
 // };
+// exports.updateList = async (req, res) => {
+//   try {
+//     const listId = req.params.id;
+//     const updateData = req.body;
+//     const homesRules = req.body.homesRules;
+//     console.log(req.body.propertyFeature);
+//     //  const 
+//     // Find the document by ID
+//     const list = await List.findById(listId);
+//        console.log(list.propertyFeature)
+//     if (!list) {
+//       return res.status(404).json({ message: 'Listing not found' });
+//     }
+
+//     // Update flat fields from updateData
+//     Object.keys(updateData).forEach((key) => {
+//       if (updateData[key] !== undefined) {
+//         if (typeof updateData[key] === 'object' && !Array.isArray(updateData[key])) {
+//           if (!list[key]) {
+//             list[key] = {};
+//           }
+//           Object.keys(updateData[key]).forEach((nestedKey) => {
+//             list[key][nestedKey] = updateData[key][nestedKey];
+//           });
+//         } else {
+//           list[key] = updateData[key];
+//         }
+//       }
+//     });
+
+//     // Handle `homesRules` update
+//     if (homesRules) {
+//       console.log("list.homerule (before)=>", list.homerule);
+//       console.log("homesRules (input)=>", homesRules);
+
+//       // Ensure `list.homerule.homesRules` is properly initialized
+//       if (!list.homerule || typeof list.homerule !== 'object') {
+//         list.homerule = { homesRules: new Map() };
+//       }
+//       if (!list.homerule.homesRules || !(list.homerule.homesRules instanceof Map)) {
+//         list.homerule.homesRules = new Map();
+//       }
+
+//       // Merge or update the `homesRules` map
+//       Object.entries(homesRules).forEach(([key, value]) => {
+//         list.homerule.homesRules.set(key, value);
+//       });
+
+//       console.log("list.homerule (after)=>", list.homerule);
+//     }
+
+//     // Save the updated document
+//     const updatedList = await list.save();
+//     res.status(200).json(updatedList);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+// exports.updateList = async (req, res) => {
+//   try {
+//     const listId = req.params.id;
+//     const updateData = req.body;
+//     const homesRules = req.body.homesRules;
+
+//     console.log(req.body.propertyFeature);
+//     const list = await List.findById(listId);
+
+//     if (!list) {
+//       return res.status(404).json({ message: 'Listing not found' });
+//     }
+
+//     // Transform propertyFeature into the desired structure
+    
+
+//     // Update flat fields from updateData
+//     Object.keys(updateData).forEach((key) => {
+//       if (updateData[key] !== undefined) {
+//         if (typeof updateData[key] === 'object' && !Array.isArray(updateData[key])) {
+//           if (!list[key]) {
+//             list[key] = {};
+//           }
+//           Object.keys(updateData[key]).forEach((nestedKey) => {
+//             list[key][nestedKey] = updateData[key][nestedKey];
+//           });
+//         } else {
+//           list[key] = updateData[key];
+//         }
+//       }
+//     });
+//     if (req.body.propertyFeature) {
+//       const propertyFeature = req.body.propertyFeature;
+//       const formattedFeatures = {};
+
+//       // Loop through each feature
+//       Object.entries(propertyFeature).forEach(([key, value]) => {
+//         // If it's an object with 'name' and 'value', leave it as is
+//         if (value && typeof value === 'object' && value.name && value.value !== undefined) {
+//           formattedFeatures[key] = value;
+//         } else {
+//           // Otherwise, it's just a boolean value, create a feature with the name and boolean value
+//           formattedFeatures[key] = { name: key, value };
+//         }
+//       });
+
+//       // Update propertyFeature with the formatted data
+//       updateData.propertyFeature = {
+//         features: formattedFeatures
+//       };
+//     }
+//     // Handle `homesRules` update
+//     if (homesRules) {
+//       if (!list.homerule || typeof list.homerule !== 'object') {
+//         list.homerule = { homesRules: new Map() };
+//       }
+//       if (!list.homerule.homesRules || !(list.homerule.homesRules instanceof Map)) {
+//         list.homerule.homesRules = new Map();
+//       }
+
+//       Object.entries(homesRules).forEach(([key, value]) => {
+//         list.homerule.homesRules.set(key, value);
+//       });
+//     }
+
+//     // Save the updated document
+//     const updatedList = await list.save();
+//     res.status(200).json(updatedList);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 exports.updateList = async (req, res) => {
   try {
     const listId = req.params.id;
     const updateData = req.body;
     const homesRules = req.body.homesRules;
 
-    // Find the document by ID
     const list = await List.findById(listId);
-
     if (!list) {
       return res.status(404).json({ message: 'Listing not found' });
     }
 
-    // Update flat fields from updateData
+    // Transform propertyFeature into the desired structure
+    if (req.body.propertyFeature) {
+      const propertyFeature = req.body.propertyFeature;
+      const formattedFeatures = new Map();
+
+      // Loop through each feature and format it
+      Object.entries(propertyFeature).forEach(([key, value]) => {
+        if (value && typeof value === 'object' && value.name && value.value !== undefined) {
+          // If the value is an object with name and value, use it as is
+          formattedFeatures.set(key, { name: value.name, value: value.value });
+        } else {
+          // Otherwise, it's a boolean value, use the key as name and the value as boolean
+          formattedFeatures.set(key, { name: key, value });
+        }
+      });
+
+      // Update propertyFeature with the formatted data (converted to a Map)
+      updateData.propertyFeature = {
+        features: formattedFeatures
+      };
+    }
+
+    // Update other fields in the list
     Object.keys(updateData).forEach((key) => {
       if (updateData[key] !== undefined) {
         if (typeof updateData[key] === 'object' && !Array.isArray(updateData[key])) {
@@ -136,12 +288,8 @@ exports.updateList = async (req, res) => {
       }
     });
 
-    // Handle `homesRules` update
+    // Handle `homesRules` update if provided
     if (homesRules) {
-      console.log("list.homerule (before)=>", list.homerule);
-      console.log("homesRules (input)=>", homesRules);
-
-      // Ensure `list.homerule.homesRules` is properly initialized
       if (!list.homerule || typeof list.homerule !== 'object') {
         list.homerule = { homesRules: new Map() };
       }
@@ -149,15 +297,12 @@ exports.updateList = async (req, res) => {
         list.homerule.homesRules = new Map();
       }
 
-      // Merge or update the `homesRules` map
       Object.entries(homesRules).forEach(([key, value]) => {
         list.homerule.homesRules.set(key, value);
       });
-
-      console.log("list.homerule (after)=>", list.homerule);
     }
 
-    // Save the updated document
+    // Save the updated document to the database
     const updatedList = await list.save();
     res.status(200).json(updatedList);
   } catch (error) {
