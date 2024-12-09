@@ -156,10 +156,8 @@ exports.getAlluser=async(req,res)=>{
       }
   
       // Return the found bookings
-      res.status(200).json({
-        bookings,
-        message: "All bookings for this host with successful payments"
-      });
+      console.log(bookings)
+      res.status(200).json({bookings});
     } catch (error) {
       res.status(500).json({ message: 'Error checking booking availability', error });
     }

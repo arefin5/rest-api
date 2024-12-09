@@ -27,7 +27,7 @@ router.get('/admin/all-booking',requireSignin,checkAdmin,getAllBooking);
 router.put("/admin/published-list/:id",requireSignin,checkAdmin,aprovedList);
 router.put("/admin/booking-confirm/:id",requireSignin,checkAdmin,aprovedBooking);
 router.get("/admin/book-list",allBookingPayment);
-router.get("/host/book-list",requireSignin,allBookingPaymentHost)
+router.get("/payment-book-list",requireSignin,allBookingPaymentHost)
 // /host/book-list
 router.put("/admin/create-admin/:id",requireSignin,checkAdmin,aprovedAdmin)
 router.get("/admin/all-user",requireSignin,checkAdmin,getAlluser);
