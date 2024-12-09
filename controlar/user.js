@@ -186,7 +186,8 @@ exports.bookProperty=async (req, res) => {
  
     const { checkinDate, checkoutDate, guestCount, totalNights } = req.body;
     console.log(checkinDate);
-  console.log(checkoutDate)
+  console.log(checkoutDate);
+  
     if (!checkinDate || !checkoutDate || !totalNights || totalNights <= 0) {
       return res.status(400).json({ message: 'Invalid input data' });
     }
@@ -210,9 +211,11 @@ exports.bookProperty=async (req, res) => {
     const serviceFee = TaxAndFee.serviceFee * totalNights*basePrice|| 0;
     const tax = TaxAndFee.tax * totalNights*basePrice || 0;
     const amount = serviceFee + tax + basePrice;
-    const hostEmailID=property.Postedby._id
-    const host=User.findById(hostEmailID)
-       const toEmail=host.email;
+//     const hostEmailID=property.Postedby._id
+//     const host=User.findById(hostEmailID);
+//     console.log(host)
+//        const toEmail=host.email;
+// console.log(toEmail);
 
     const newBooking = new Booking({
       user: req.auth._id,
@@ -227,9 +230,14 @@ exports.bookProperty=async (req, res) => {
     });
 
     const savedBooking = await newBooking.save();
+    const host = await User.findById(savedBooking.Host);
+    console.log(host)
+      const toEmailhost =await  host.email;
+      console.log(toEmailhost)
+     
    const subjectTestMeesage=`Your Proparty  has New Booking Requested please ,
    please check bed bd account go to www.bedbd.com for comfirmation`
-    requestEmail(toEmail,subjectTestMeesage)
+    requestEmail(toEmailhost,subjectTestMeesage)
     res.json({  message: 'Your Booking Request is Success .waiting for Host Aproved'});
 
   } catch (error) {
