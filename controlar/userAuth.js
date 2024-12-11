@@ -206,14 +206,16 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
-      return res.json({
+      // console.log("no u")
+      return res.status(400).json({
         error: "no user found",
       });
     }
     // check password
     const match = await comparePassword(password, user.password);
     if (!match) {
-      return res.json({
+      // console.log("not match")
+      return res.status(404).json({
         error: "Wrong password",
       });
     }
