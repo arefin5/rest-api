@@ -54,7 +54,7 @@ exports.signup = async (req, res) => {
     const users = await User.findOne({ email });
     // console.log(user);
     if (users) {
-      return res.status(400).json({ error: "User already  is exist in there " });
+      return res.status(400).json({ error: "User already  is exist in there please re set your password " });
     }
     //  console.log(users);
 
@@ -208,7 +208,7 @@ exports.login = async (req, res) => {
     if (!user) {
       // console.log("no u")
       return res.status(400).json({
-        error: "no user found",
+        error: " You have no account please check your email",
       });
     }
     // check password
@@ -460,10 +460,12 @@ exports.resetPassword = async (req, res) => {
 };
 const normalizePhone = (phone) => {
   return phone.replace(/\D/g, '');
+  console.log(phone)
 };
 
 exports.generateOtpPhone = async (req, res) => {
   const { phone } = req.body;
+  console.log(phone);
   const normalizedPhone = normalizePhone(phone);
   const ipAddress = req.ip;
   logger.info(`OTP generation requested by ${normalizedPhone} from IP ${ipAddress}`);
