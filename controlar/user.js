@@ -144,7 +144,7 @@ exports.bookPropertyPayment=async (req, res) => {
       tran_id:transactionId,
       total_amount: booking.price,
       currency: 'BDT',
-      success_url : `http://145.223.22.239:5001/api/success-payment/${transactionId}/`,
+      success_url : `https://backend.bedbd.com/api/success-payment/${transactionId}/`,
       fail_url: 'http://localhost:3000/fail',
       cancel_url: 'http://localhost:3000/cancel',
       ipn_url: 'http://localhost:3000/ipn',

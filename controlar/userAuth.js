@@ -6,9 +6,9 @@ const { generateOTP, sendOTP } = require("../helper/otp");
 const logger = require("../utils/logger");
 const sendOTPEmail = require("../helper/email");
 const crypto = require('crypto');
-const {sendVerificationEmail} =require("../helper/sendVerificationEmail")
+const { sendVerificationEmail } = require("../helper/sendVerificationEmail")
 const sendOtpSms = require('../helper/sendOtpSms'); // Adjust path as needed
-
+const RequestDataModel = require("../models/RequestDataModel")
 exports.register = async (req, res) => {
   // console.log("register")
   const { name, password, email, birth } = req.body;
@@ -54,7 +54,7 @@ exports.signup = async (req, res) => {
     const users = await User.findOne({ email });
     // console.log(user);
     if (users) {
-      return res.status(400).json({ error: "User already  is exist in there " });
+      return res.status(400).json({ error: "User already  is exist in there please re set your password " });
     }
     //  console.log(users);
 
@@ -62,19 +62,19 @@ exports.signup = async (req, res) => {
     // Create new user
     const otp = generateOTP();
     // user.otp = otp;
-     const otpExpirescreate = Date.now() + 10 * 60 * 1000; 
+    const otpExpirescreate = Date.now() + 10 * 60 * 1000;
     const user = new User({
       password: hashedPassword,
       email: email,
-      otp : otp,
-      otpExpires:otpExpirescreate,
+      otp: otp,
+      otpExpires: otpExpirescreate,
     });
-    await sendOTPEmail(email, otp); 
+    await sendOTPEmail(email, otp);
 
     // Save user
     await user.save();
-      // Send OTP to user email
-      console.log(otp)
+    // Send OTP to user email
+    console.log(otp)
     user.password = undefined;
 
     res.json({
@@ -109,7 +109,7 @@ exports.generateOtp = async (req, res) => {
     const otp = generateOTP();
     user.otp = otp;
     user.otpExpires = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
-  
+
     // Save the OTP and expiry time to the user record
     await user.save();
 
@@ -137,19 +137,19 @@ exports.generateOtp = async (req, res) => {
 //     logger.warn(`OTP verification failed: Invalid or expired OTP for email ${email}`);
 //     return res.status(400).json({ error: "Invalid or expired OTP" });
 //   }
- 
+
 
 
 //   user.otp = undefined;
 //   user.isEmailVerified = true; 
 //   user.isOtpVerified = true;
 //   user.otpExpires = undefined;
-  
+
 //   user.markModified('otp');
 //   user.markModified('isEmailVerified');
 //   user.markModified('isOtpVerified');
 //   user.markModified('otpExpires');
-  
+
 //   console.log("User object before save:", user);
 //   await user.save();
 //   console.log("User object after save:", user);
@@ -175,13 +175,13 @@ exports.verifyOtp = async (req, res) => {
   }
 
   // Validate OTP and check expiry
-  if (user.otp !== otp ) {
+  if (user.otp !== otp) {
     return res.status(400).json({ error: "Invalid or expired OTP" });
   }
 
   // Update the necessary fields
   user.otp = undefined;
-  user.isEmailVerified = true; 
+  user.isEmailVerified = true;
   user.isOtpVerified = true;
   user.otpExpires = undefined;
 
@@ -208,7 +208,7 @@ exports.login = async (req, res) => {
     if (!user) {
       // console.log("no u")
       return res.status(400).json({
-        error: "no user found",
+        error: " You have no account please check your email",
       });
     }
     // check password
@@ -247,7 +247,7 @@ exports.editProfile = async (req, res) => {
   try {
     const { phone, email, fname, lname, name,
       varificationImage, varificationId, varificationIdType,
-       about, fatherName, motherName, presentAddress, parmanentAddress, birth, profilePic, cover ,age} = req.body;
+      about, fatherName, motherName, presentAddress, parmanentAddress, birth, profilePic, cover, age } = req.body;
     const userId = req.auth._id;
 
     // Find the user by ID
@@ -290,7 +290,7 @@ exports.editProfile = async (req, res) => {
     if (varificationImage) user.varificationImage = varificationImage;
     if (varificationId) user.varificationId = varificationId;
     if (varificationIdType) user.varificationIdType = varificationIdType;
-     if(age)user.age=age;
+    if (age) user.age = age;
     // Save the updated user data
     await user.save();
 
@@ -345,13 +345,13 @@ exports.userRoleUser = async (req, res) => {
 };
 exports.googleFacebookLogin = async (req, res) => {
   try {
-    const { name, email} = req.body;
+    const { name, email } = req.body;
     // console.log(req.body)
     let user = await User.findOne({ email });
     if (!user) {
       logger.info(`User not found. Creating new user with email ${email}`);
       user = new User({
-        isEmailVerified:true,
+        isEmailVerified: true,
         email,
         name,
         isOtpVerified: true,
@@ -360,7 +360,7 @@ exports.googleFacebookLogin = async (req, res) => {
       });
     }
     user.save();
-    
+
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "14d",
     });
@@ -369,8 +369,8 @@ exports.googleFacebookLogin = async (req, res) => {
       token,
       user,
     });
-    
-  } 
+
+  }
   catch (error) {
     return res.status(400).send("Error. Try again.");
   }
@@ -390,7 +390,7 @@ exports.forgotPassword = async (req, res) => {
     await user.save();
     await sendOTPEmail(email, otp);
 
-    res.json({ message: "OTP sent to your email" ,email});
+    res.json({ message: "OTP sent to your email", email });
   } catch (err) {
     console.error("Error in forgot password:", err);
     res.status(500).json({ error: "Internal Server Error" });
@@ -405,13 +405,13 @@ exports.verifyForgotPasswordOtp = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    if (user.otp !== otp ) {
+    if (user.otp !== otp) {
       return res.status(400).json({ error: "Invalid or expired OTP" });
     }
     user.otp = undefined;
     user.otpExpires = undefined;
     user.isOtpVerified = true;
-    user.isEmailVerified = true; 
+    user.isEmailVerified = true;
     await user.save();
     console.log("user")
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
@@ -434,7 +434,7 @@ exports.resetPassword = async (req, res) => {
   //  console.log("test id",userID,req.user);
 
   try {
-    const user = await User.findOne({email});
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -460,10 +460,12 @@ exports.resetPassword = async (req, res) => {
 };
 const normalizePhone = (phone) => {
   return phone.replace(/\D/g, '');
+  console.log(phone)
 };
 
 exports.generateOtpPhone = async (req, res) => {
   const { phone } = req.body;
+  console.log(phone);
   const normalizedPhone = normalizePhone(phone);
   const ipAddress = req.ip;
   logger.info(`OTP generation requested by ${normalizedPhone} from IP ${ipAddress}`);
@@ -480,7 +482,7 @@ exports.generateOtpPhone = async (req, res) => {
     user.otp = otp;
     user.otpExpires = Date.now() + 10 * 60 * 1000;
     await user.save();
-     console.log(otp)
+    console.log(otp)
     // logger.info(`OTP generated for ${normalizedPhone}: ${otp}`);
 
     // Send the OTP SMS
@@ -509,7 +511,7 @@ exports.verifyOtpPhone = async (req, res) => {
 
   try {
     const user = await User.findOne({ phone: normalizedPhone });
-    
+
     if (!user) {
       logger.warn(`OTP verification failed: User not found with phone ${normalizedPhone}`);
       return res.status(400).json({ error: "User not found with this phone" });
@@ -519,13 +521,13 @@ exports.verifyOtpPhone = async (req, res) => {
       logger.warn(`OTP verification failed: Invalid or expired OTP for phone ${normalizedPhone}`);
       return res.status(400).json({ error: "Invalid or expired OTP" });
     }
-// console.log(user);
+    // console.log(user);
 
     user.otp = undefined;
     user.isOtpVerified = true;
     user.status = "active";
     user.otpExpires = undefined;
-    user.isPhoneVerified=true
+    user.isPhoneVerified = true
     await user.save();
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
     res.json({ message: "OTP verified successfully", token, user });
@@ -538,7 +540,7 @@ exports.verifyOtpPhone = async (req, res) => {
 exports.resetPasswordPhone = async (req, res) => {
   const { phone, newPassword } = req.body;
 
-   const {userID}=req.user._id ;
+  const { userID } = req.user._id;
 
   try {
     const user = await User.findOne({ phone });
@@ -564,7 +566,7 @@ exports.resetPasswordPhone = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-exports.loginByphone= async (req, res) => {
+exports.loginByphone = async (req, res) => {
   try {
     const { phone, password } = req.body;
     const user = await User.findOne({ phone });
@@ -598,7 +600,7 @@ exports.loginByphone= async (req, res) => {
   }
 };
 
-exports.verifyRequest=async (req, res) => {
+exports.verifyRequest = async (req, res) => {
   const { name,
     fatherName,
     motherName,
@@ -607,13 +609,13 @@ exports.verifyRequest=async (req, res) => {
     presentAddress,
     parmanentAddress } = req.body;
 
-    const userID = req.user._id; // Fix this to use _id from req.user
+  const userID = req.user._id; // Fix this to use _id from req.user
 
-   console.log("test id",req.user);
-   console.log("Test ID:", req.user._id);
+  console.log("test id", req.user);
+  console.log("Test ID:", req.user._id);
 
   try {
-    const user = await User.findOne({ _id: userID});
+    const user = await User.findOne({ _id: userID });
 
     // await User.findOne({ phone });
     if (!user) {
@@ -627,20 +629,20 @@ exports.verifyRequest=async (req, res) => {
     // }
 
     // Hash the new password
-    
-    user.name=name,
-    user.fatherName=fatherName,
-    user.motherName=motherName,
-    user.idnumber=idnumber,
-    user.birth=birth,
-    user.presentAddress=presentAddress ,
-    user.parmanentAddress=parmanentAddress,
 
-    // Update user password
-    user.isOtpVerified = true; // Reset OTP verification status
+    user.name = name,
+      user.fatherName = fatherName,
+      user.motherName = motherName,
+      user.idnumber = idnumber,
+      user.birth = birth,
+      user.presentAddress = presentAddress,
+      user.parmanentAddress = parmanentAddress,
+
+      // Update user password
+      user.isOtpVerified = true; // Reset OTP verification status
     await user.save();
-    user.password=null 
-    res.json({ message: "Password updated successfully",user });
+    user.password = null
+    res.json({ message: "Password updated successfully", user });
   } catch (err) {
     console.error("Error in password reset:", err);
     res.status(500).json({ error: "Internal Server Error" });
@@ -658,7 +660,7 @@ exports.verifyEmail = async (req, res) => {
 
     // Generate a verification token (could be a simple token or OTP)
     const token = crypto.randomBytes(20).toString('hex');
-    
+
     // Set the token and expiration time (e.g., 1 hour)
     user.otp = token;
     user.otpExpires = Date.now() + 3600000; // 1 hour from now
@@ -669,7 +671,7 @@ exports.verifyEmail = async (req, res) => {
 
     // Send verification email with the link
     // await sendVerificationEmail(user.email, verificationUrl);
-      console.log(user.email,verificationUrl)
+    console.log(user.email, verificationUrl)
     return res.status(200).send("Verification email sent. Please check your inbox.");
   } catch (error) {
     return res.status(500).send("Error. Try again.");
@@ -697,6 +699,22 @@ exports.confirmEmailVerification = async (req, res) => {
     await user.save();
 
     return res.status(200).send("Email successfully verified.");
+  } catch (error) {
+    return res.status(500).send("Error verifying email. Try again.");
+  }
+};
+// /request-data
+exports.RequestDataUser = async (req, res) => {
+  try {
+    const id = req.auth._id;
+    const { email, resident } = req.body;
+    const RequestData = new RequestDataModel();
+    RequestData.email = email
+    RequestData.resident = resident
+    RequestData.BClientId = id
+    await RequestData.save();
+
+    return res.status(200).send("successfully request for data");
   } catch (error) {
     return res.status(500).send("Error verifying email. Try again.");
   }
