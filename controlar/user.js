@@ -7,6 +7,8 @@ const { initPayment } = require('../service/payment');
 const uuid = require('uuid'); // To generate unique transaction IDs
 const ServiceAndVat =require("../models/ServiceAndVat");
 const requestEmail=require("../helper/requestEmail");
+const rejectBooking=require("../models/rejectBooking")
+
 // const paymentEmail=require("../")
 exports.addFavoritelist = async (req, res) => {
   const id = req.params.id;
@@ -531,6 +533,105 @@ exports.bookingPaymentClaim = async (req, res) => {
     res.status(200).json({ message: "Booking approved successfully" });
   } catch (error) {
     console.error("Error approving booking:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+exports.rejectApprovedPending = async (req, res) => {
+  try {
+    const hostID = req.auth._id; 
+    // console.log("start");
+    
+    const bookingPending = await rejectBooking.find({ Host: hostID,})
+    .populate('property', 'propertyTitle').populate('BClientId', 'fname ');
+          
+    if (!bookingPending || bookingPending.length === 0) {
+      return res.status(200).json({ message: "No pending bookings" });
+    }
+       // console.log(bookingPending)
+    res.status(200).json(bookingPending);
+  } catch (error) {
+    console.error("Error fetching pending bookings:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+// post methods 
+exports.rejectApproved = async (req, res) => {
+  try {
+    const hostID = req.auth._id; // Extract the host ID from auth
+    const id = req.params.id; // Extract the booking ID from params
+
+    // Find the booking by ID and verify it belongs to the host
+    const bookingPending = await Booking.findOne({ _id: id, Host: hostID });
+
+    if (!bookingPending) {
+      return res.status(400).json({ message: "Unauthorized or Booking not found" });
+    }
+
+    // Create a new rejected booking with the necessary fields
+    const rejectBooking = new RejectBooking({
+      property: bookingPending.property,
+      Host: bookingPending.Host,
+      guest: bookingPending.guest,
+      checkinDate: bookingPending.checkinDate,
+      checkoutDate: bookingPending.checkoutDate,
+      price: bookingPending.price,
+      basePrice: bookingPending.basePrice,
+      BClientId: bookingPending.BClientId,
+    });
+
+    // Save the rejected booking
+    await rejectBooking.save();
+
+    // Delete the booking from the Booking collection
+    await Booking.deleteOne({ _id: id });
+
+    // Respond to the client
+    res.status(200).json({ message: "Booking rejected successfully" });
+  } catch (error) {
+    console.error("Error rejecting booking:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+exports.bookingComplete = async (req, res) => {
+  try {
+    const hostID = req.auth._id; 
+    // console.log("start");
+    
+    const bookingPending = await Booking.find({ Host: hostID, status: "paymentsuccess" })
+    .populate('property', 'propertyTitle').populate('BClientId', 'fname ');
+          
+    if (!bookingPending || bookingPending.length === 0) {
+      return res.status(200).json({ message: "No pending bookings" });
+    }
+       // console.log(bookingPending)
+    res.status(200).json(bookingPending);
+  } catch (error) {
+    console.error("Error fetching pending bookings:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+exports.bookingUpcoming = async (req, res) => {
+  try {
+    const hostID = req.auth._id; // Get the authenticated host ID
+    const today = new Date(); // Get the current date
+    today.setHours(0, 0, 0, 0); // Set the time to midnight for accurate comparisons
+
+    // Fetch bookings with checkinDate >= today
+    const upcomingBookings = await Booking.find({
+      Host: hostID,
+      checkinDate: { $gte: today }, // Filter for future or today's bookings
+    })
+      .populate('property', 'propertyTitle') // Populate property details
+      .populate('BClientId', 'fname'); // Populate client details
+
+    if (!upcomingBookings || upcomingBookings.length === 0) {
+      return res.status(200).json({ message: "No upcoming bookings" });
+    }
+
+    // Respond with the filtered bookings
+    res.status(200).json(upcomingBookings);
+  } catch (error) {
+    console.error("Error fetching upcoming bookings:", error);
     res.status(500).json({ error: "Server error" });
   }
 };
