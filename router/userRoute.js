@@ -21,7 +21,11 @@ const {
     bookingApproved,
     allBookingListForHost,
     bookingPaymentClaim,
-    bookPropertyPayment
+    bookPropertyPayment,
+    rejectApprovedPending,
+    rejectApproved,
+    bookingComplete,
+    bookingUpcoming
 } = require("../controlar/user.js");
 
 router.put("/favoriteslist-list/:id",requireSignin,addFavoritelist)
@@ -45,8 +49,11 @@ router.get("/success-payment/:id", confirmSuccess);
 router.post("/success-payment/:id", confirmSuccess);
 router.put("/approved-booking/:id",requireSignin,bookingApproved)
 router.put("/claim-booking-payment/:id",requireSignin,bookingPaymentClaim)
+router.post("/reject-booking/:id",requireSignin,rejectApproved)
 
 router.get("/host-pending-booking-list",requireSignin,bookingApprovedPending);
 router.get("/host-all-booking-list",requireSignin,allBookingListForHost)
-
+router.get("/host-reject-booking-list",requireSignin,rejectApprovedPending);
+router.get("/host-booking-upcoming",requireSignin,bookingUpcoming)
+router.get("/host-booking-complete",requireSignin,bookingComplete)
 module.exports = router;
