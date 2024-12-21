@@ -568,7 +568,7 @@ exports.rejectApproved = async (req, res) => {
     }
 
     // Create a new rejected booking with the necessary fields
-    const rejectBooking = new RejectBooking({
+    const rejectBookings = new rejectBooking({
       property: bookingPending.property,
       Host: bookingPending.Host,
       guest: bookingPending.guest,
@@ -580,7 +580,7 @@ exports.rejectApproved = async (req, res) => {
     });
 
     // Save the rejected booking
-    await rejectBooking.save();
+    await rejectBookings.save();
 
     // Delete the booking from the Booking collection
     await Booking.deleteOne({ _id: id });
