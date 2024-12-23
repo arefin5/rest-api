@@ -48,6 +48,7 @@ app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 app.use('/api', require('./router/authRouter'));
 app.use('/api', require('./router/hostRoute'));
 app.use('/api', require('./router/adminRoute'));
+app.use("/api", require('./router/tourRoute'))
 
 app.use("/api", require('./router/userRoute'))
 app.use('/api', require('./router/getImage'));
