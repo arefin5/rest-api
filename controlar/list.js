@@ -202,9 +202,9 @@ exports.createList = async (req, res) => {
 
    let location = req.body.location || {};
 
-    // Add default location type and coordinates
-    location.type = location.type || "Point";
-    location.coordinates = location.coordinates || [90.388964, 23.764287];
+    // // Add default location type and coordinates
+    // location.type = location.type || "Point";
+    // location.coordinates = location.coordinates || [90.388964, 23.764287];
     const newList = new List({
       typeOfproperty,
       propertyCondition,
@@ -215,7 +215,7 @@ exports.createList = async (req, res) => {
       amenities:amenities,
       description,
       outdoorShower,
-      location,
+      location:location,
       price,
       gender,
       tax,

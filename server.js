@@ -20,12 +20,20 @@ const server = http.createServer(app);
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: '*' }));
+// app.use(cors({ origin: '*' },
+//   allowedHeaders: ['Content-Type']
+// ));
+app.use(cors({
+  origin: ['https://www.bedbd.com', 'http://localhost:3000','https://www.admin.bedbd.com'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+app.options('*', cors());
 app.use(helmet());
 app.use(Fingerprint({
   parameters: [Fingerprint.useragent, Fingerprint.acceptHeaders, Fingerprint.geoip],
 }));
-// SSLCOMMERZ credentials
+// SSLCOMMERZ credentia
 const store_id = process.env.StoreID
 const store_passwd = process.env.StorePassword
 const is_live = false; // Change to true for live environment
