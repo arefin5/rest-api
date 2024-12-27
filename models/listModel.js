@@ -1,17 +1,17 @@
 
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-const safetySchema=require("./safetySchema")
-const FavaritesSchema=require("./FavaritesSchema")
+// const safetySchema=require("./safetySchema")
+// const FavaritesSchema=require("./FavaritesSchema")
 const AmenitiesSchema=require("./AmenitiesSchema");
-const Booking=require("./bookingSchema")
-const propertyFeatureSchema=require("./propertyFeatureSchema")
+// const Booking=require("./bookingSchema")
+// const propertyFeatureSchema=require("./propertyFeatureSchema")
 const totalBedSchema=require("./totalBedSchema")
 const totalroomSchema=require("./totalroomSchema")
 const availableDateSchema=require("./availableDateSchema")
 const homeRuleSchema=require("./homeRuleSchema");
 const GuestSchema=require("./GuestSchema")
-const bookingtype=require("./bookingtypeSchema")
+// const bookingtype=require("./bookingtypeSchema")
 const listSchema = new Schema(
   {
    typeOfproperty: {
@@ -25,14 +25,39 @@ const listSchema = new Schema(
   ],
   default: 'House'
 },
-propertyFeature: {
-    type: propertyFeatureSchema,
-    required: true
+// propertyFeature: {
+//     type: propertyFeatureSchema,
+//     required: true
+//   },
+propertyFeature: [
+  {
+    _id: { type: String, required: true },
+    title: { type: String, required: true },
+    description: { type: String, required: true },
   },
+], 
+homeRule:[
+  {
+    _id: { type: String, required: true },
+    title: { type: String, required: true },
+    
+  },
+],
+bookingTypes:[
+  {
+    _id: { type: String, required: true },
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+  },
+],
 propertyCondition:{
   type:String,
   //  enum:["","semi-furnished","empty"],
    required:true
+},
+aprovingmethod:{
+  required:true,
+  type:String,
 },
 
 // booking type 
@@ -42,7 +67,7 @@ propertyCondition:{
       default: 'An Entire Place'
     },
 // 
-bookingtype:bookingtype,
+// bookingtype:bookingtype,
 propertyTitle:{
   type:String,
   required:true,
@@ -52,8 +77,8 @@ description:{
   type:String
 },
 
-    favorites:FavaritesSchema,
-     safety: safetySchema,
+    // favorites:FavaritesSchema,
+    //  safety: safetySchema,
     amenities:AmenitiesSchema,
     Guest:GuestSchema,
     bookings: [{
@@ -64,7 +89,7 @@ description:{
     totalroom:totalroomSchema,
     totalBed:totalBedSchema,
     availablecheck:availableDateSchema,
-    homerule:homeRuleSchema,
+    // homerule:homeRuleSchema,
     
 
     gender:{
@@ -172,7 +197,7 @@ checkInTime:{
       
     },
   },
- 
+
   { timestamps: true }
 );
 listSchema.index({ location: '2dsphere' });

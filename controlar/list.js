@@ -178,7 +178,7 @@ exports.createList = async (req, res) => {
       description,
       outdoorShower,
       propertyFeature,
-      location,
+      // location,
       price,
       tax,
       serviceFee,
@@ -187,43 +187,31 @@ exports.createList = async (req, res) => {
       gender,
       image,
       amenities,
-      bookingtype,
+      bookingTypes,
       Guest,
       totalroom,
       totalBed,
       availablecheck,
       checkInTime,
       checkOutTime,
-      homerule,
+      homeRule,
     } = req.body;
+    console.log("req.body,===>",req.body.bookingTypes);
 
-    if (!typeOfproperty || !propertyTitle || !price) {
-      console.log(req.body.availablecheck);
-      return res.status(400).json({ message: "Required fields are missing." });
-    }
+   
 
-    let status = aprovingmethod === "instant" ? "published" : "draft";
+   let location = req.body.location || {};
 
-    // Filter propertyFeature to include only true values
-    const filteredFeatures = {};
-    for (const key in propertyFeature) {
-      const feature = propertyFeature[key];
-      if (feature.value) {
-        filteredFeatures[key] = feature;
-      }
-    }
-    if(location?.coordinates){
-      location.coordinates=[90.388964,23.764287]
-    }
-// console.log(amenities);
-// console.log(location);
+    // Add default location type and coordinates
+    location.type = location.type || "Point";
+    location.coordinates = location.coordinates || [90.388964, 23.764287];
     const newList = new List({
       typeOfproperty,
       propertyCondition,
-      propertyFeature: { features: filteredFeatures },
-      homerule: { homesRoules: homerule },
+      propertyFeature: propertyFeature,
+      homeRule: homeRule,
       propertyTitle,
-      bookingtype: { bookingTypes: bookingtype },
+      bookingTypes:bookingTypes,
       amenities:amenities,
       description,
       outdoorShower,
@@ -240,13 +228,13 @@ exports.createList = async (req, res) => {
       availablecheck,
       checkInTime,
       checkOutTime,
-      status,
       Postedby: req.auth._id,
+      aprovingmethod:aprovingmethod,
     });
 
     // Save the list in the database
     const savedList = await newList.save();
-    // console.log(savedList);
+    console.log(savedList);
 
     // Send response
     res.status(201).json(savedList);
