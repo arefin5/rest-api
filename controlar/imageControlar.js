@@ -52,7 +52,7 @@ cloudinary.config({
 //   }
 // };
 exports.uploadImagesMultiple = async (req, res) => {
-  console.log("test start");
+  console.log("test start",req.files);
   try {
     // Ensure files were uploaded
     if (!req.files || Object.keys(req.files).length === 0) {
@@ -70,9 +70,9 @@ exports.uploadImagesMultiple = async (req, res) => {
     }
 
     // Validate if at least 5 files are uploaded
-    if (filesArray.length < 3) {
-      return res.status(400).json({ message: "A minimum of 5 files is required." });
-    }
+    // if (filesArray.length < 3) {
+    //   return res.status(400).json({ message: "A minimum of 5 files is required." });
+    // }
 
     // Upload each file to Cloudinary with size reduction and PNG conversion
     const uploadPromises = filesArray.map((file) =>
