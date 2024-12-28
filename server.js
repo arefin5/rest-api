@@ -24,7 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 //   allowedHeaders: ['Content-Type']
 // ));
 app.use(cors({
-  origin: ['https://bedbd.com/', 'http://localhost:3000','https://admin.bedbd.com'],
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
