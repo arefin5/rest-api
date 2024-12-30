@@ -20,11 +20,11 @@ const server = http.createServer(app);
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// app.use(cors({ origin: '*' },
-//   allowedHeaders: ['Content-Type']
-// ));
+
 app.use(cors({
-  origin: '*',
+  // origin: '*',
+  origin:["https://bedbd.com",'http://localhost:3000',"http://localhost:3001","http://localhost:5001","https://admin.bedbd.com"],
+
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
@@ -38,7 +38,10 @@ const store_id = process.env.StoreID
 const store_passwd = process.env.StorePassword
 const is_live = false; // Change to true for live environment
 
-
+app.use((req, res, next) => {
+    console.log(`Incoming request: ${req.method} ${req.url}`);
+    next();
+});
 
 // Initialize Passport
 
@@ -62,7 +65,8 @@ app.use("/api", require('./router/userRoute'))
 app.use('/api', require('./router/getImage'));
 const imageRouter = require('./router/imageRouter');
 
-app.use('/api/images', formidableMiddleware({ encoding: 'utf-8', multiples: true }), imageRouter);
+// app.use('/api/images', formidableMiddleware({ encoding: 'utf-8', multiples: true }), imageRouter);
+app.use('/api/images', cors(), formidableMiddleware({ encoding: 'utf-8',multiples: true, maxFileSize: 200 * 1024 * 1024, }), imageRouter);
 
 // Example routes
 app.get('/fingerprint', (req, res) => {

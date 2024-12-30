@@ -151,18 +151,18 @@ images: [
       },
       country:{
         type:String,
-        required:true
+        // required:true
       },
       floor:{
         type:String,
       },
       streetAddress:{
         type:String,
-        required:true
+        // required:true
       },
       address:{
         type:String,
-        required:true
+        // required:true
       },
       addresstwo:{
         type:String,
@@ -173,15 +173,15 @@ images: [
       },
       district:{
         type:String,
-        required:true
+        // required:true
       },
       postcode:{
         type:String,
-        required:true
+        // required:true
       },
       googlemap:{
         type:String,
-        required:true
+        // required:true
       },
     },
 checkInTime:{
