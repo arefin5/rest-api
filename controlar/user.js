@@ -635,3 +635,18 @@ exports.bookingUpcoming = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+exports.inactiveBookingList=(req,res)=>{
+  try {
+    const hostID = req.auth._id; 
+    const bookingPending =  Booking.find({ Host: hostID, status: "draft" })
+    .populate('property', 'propertyTitle').populate('BClientId', 'fname ');
+    if (!bookingPending || bookingPending.length === 0) {
+      return res.status(200).json({ message: "No pending bookings" });
+    }
+    res.status(200).json(bookingPending);
+  } catch (error) {
+    console.error("Error fetching pending bookings:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+}

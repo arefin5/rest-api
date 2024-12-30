@@ -25,7 +25,8 @@ const {
     rejectApprovedPending,
     rejectApproved,
     bookingComplete,
-    bookingUpcoming
+    bookingUpcoming,
+    inactiveBookingList
 } = require("../controlar/user.js");
 
 router.put("/favoriteslist-list/:id",requireSignin,addFavoritelist)
@@ -55,5 +56,6 @@ router.get("/host-pending-booking-list",requireSignin,bookingApprovedPending);
 router.get("/host-all-booking-list",requireSignin,allBookingListForHost)
 router.get("/host-reject-booking-list",requireSignin,rejectApprovedPending);
 router.get("/host-booking-upcoming",requireSignin,bookingUpcoming)
-router.get("/host-booking-complete",requireSignin,bookingComplete)
+router.get("/host-booking-complete",requireSignin,bookingComplete);
+router.get("/host-inactive-booking-list",requireSignin,inactiveBookingList);
 module.exports = router;
