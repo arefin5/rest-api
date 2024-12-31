@@ -50,7 +50,7 @@ exports.favoritelist=async(req,res)=>{
 
   try {
     const user = await User.findById(userId)
-    .sort({ createdAt: -1 }).populate("favoritelist","images checkInStart GroundPrice location price serviceFee createdAt tex  avgRating reviews")   
+    .sort({ createdAt: -1 }).populate("favoritelist","propertyTitle images checkInStart availablecheck GroundPrice location price serviceFee createdAt tex  avgRating reviews")   
     if (!user) {
       return res.status(400).json({ message: 'This user not found' });
     }
