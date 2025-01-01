@@ -638,12 +638,14 @@ exports.bookingUpcoming = async (req, res) => {
 
 exports.inactiveBookingList=(req,res)=>{
   try {
+    console.log("Test start")
     const hostID = req.auth._id; 
-    const bookingPending =  Booking.find({ Host: hostID, status: "draft" })
+    const bookingPending =  Booking.find({ Host: hostID, status: "pending" })
     .populate('property', 'propertyTitle').populate('BClientId', 'fname ');
     if (!bookingPending || bookingPending.length === 0) {
       return res.status(200).json({ message: "No pending bookings" });
-    }
+    };
+    
     res.status(200).json(bookingPending);
   } catch (error) {
     console.error("Error fetching pending bookings:", error);
